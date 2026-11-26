@@ -20,4 +20,4 @@ select = ["E", "F", "I", "B", "UP", "SIM", "S"]
 "evals/**" = ["S603", "S101"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["helpers", "figures", "deck", "questions", "check", "render"]
+known-first-party = ["answer", "helpers", "figures", "deck", "questions", "check", "render"]

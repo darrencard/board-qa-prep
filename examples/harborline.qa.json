@@ -164,9 +164,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "headline",
+      "priority": 4,
       "question": "What backs the headline: \"Retention is on plan, expansion is behind, and we need one decision on model spend.\"?",
       "status": "answered",
       "answer": "ARR $41.2M (Verified; 30 Sep 2026; source: Stripe, Finance close) [L01]. 23.1K no-touch loads per week (Verified; Last 4 weeks of Q3; source: Warehouse query ns_weekly) [L02].",
+      "stated_by": null,
       "gap": null
     },
     {
@@ -174,9 +176,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "plan",
+      "priority": 6,
       "question": "What closes the gap to plan, who owns it and by when?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row answers it.",
         "owner": "the CPTO",
@@ -188,9 +192,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "ai-margin",
+      "priority": 3,
       "question": "Does the AI feature pay for itself: what does it earn against what it costs to run?",
       "status": "answered",
-      "answer": "Cost per successful task $0.33 (Derived; Sep 2026; source: Billing divided by successful traces) [L07].",
+      "answer": "AI gross margin 52% (Verified; Q3 FY26; source: Finance) [L11].",
+      "stated_by": null,
       "gap": null
     },
     {
@@ -198,9 +204,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "revenue",
+      "priority": 4,
       "question": "Does this figure match Finance's close for the same date?",
       "status": "answered",
       "answer": "ARR $41.2M (Verified; 30 Sep 2026; source: Stripe, Finance close) [L01]. Expansion ARR $1.9M (Verified; Q3 FY26; source: CRM, Finance) [L04].",
+      "stated_by": null,
       "gap": null
     },
     {
@@ -208,9 +216,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "people",
+      "priority": 2,
       "question": "Which open role is the constraint, and when will it be filled?",
       "status": "answered",
       "answer": "Headcount 60 of 64 (Verified; 30 Sep 2026; source: HR system) [L13].",
+      "stated_by": null,
       "gap": null
     },
     {
@@ -218,9 +228,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 7% come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "7% is printed on slide 01 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -232,9 +244,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 22K come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "22K is printed on slide 01 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -246,9 +260,11 @@
       "slide": "01",
       "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does $0.41 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "$0.41 is printed on slide 01 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -257,14 +273,16 @@
     },
     {
       "id": "Q09",
-      "slide": "05",
-      "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
-      "rule": "headline",
-      "question": "What backs the headline: \"We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.\"?",
+      "slide": "01",
+      "slide_title": "Retention is on plan, expansion is behind, and we need one decision on model spend.",
+      "rule": "unsourced-more",
+      "priority": 3,
+      "question": "Where do the other figures on slide 01 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
-        "what": "No ledger row holds the headline's figures.",
+        "what": "12 more figures on slide 01 have no ledger row: $2.4M, 44%, 12, $1.6M, 10, 41%, 50%, 3.4%, 55%, 4 points, 15%, 22%.",
         "owner": "the CPTO",
         "due": "before the meeting"
       }
@@ -273,10 +291,28 @@
       "id": "Q10",
       "slide": "05",
       "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
+      "rule": "headline",
+      "priority": 6,
+      "question": "What backs the headline: \"We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.\"?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "No ledger row holds the headline's figures.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q11",
+      "slide": "05",
+      "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
       "rule": "data-needed",
+      "priority": 5,
       "question": "When will we see this: Cash, net burn and runway in months. This example covers product and engineering spend only, so it has no company cash...",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "Cash, net burn and runway in months. This example covers product and engineering spend only, so it has no company cash position. A board cut needs all three.",
         "owner": "the CFO",
@@ -284,39 +320,29 @@
       }
     },
     {
-      "id": "Q11",
-      "slide": "05",
-      "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
-      "rule": "unit-cost",
-      "question": "What does each unit of work cost now, and what is the ceiling?",
-      "status": "answered",
-      "answer": "Cost per successful task $0.33 (Derived; Sep 2026; source: Billing divided by successful traces) [L07]. AI tools $685 per engineer per month (Derived; Q3 FY26; source: Vendor invoices over 72 engineers) [L12].",
-      "gap": null
-    },
-    {
       "id": "Q12",
       "slide": "05",
       "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
-      "rule": "unsourced-figure",
-      "question": "Where does 28% come from?",
-      "status": "gap",
-      "answer": null,
-      "gap": {
-        "what": "28% is printed on slide 05 but no ledger row holds it.",
-        "owner": "the CPTO",
-        "due": "before the meeting"
-      }
+      "rule": "unit-cost",
+      "priority": 3,
+      "question": "What does each unit of work cost now, and what is the ceiling?",
+      "status": "answered",
+      "answer": "Cost per successful task $0.33 (Derived; Sep 2026; source: Billing divided by successful traces) [L07]. AI tools $685 per engineer per month (Derived; Q3 FY26; source: Vendor invoices over 72 engineers) [L12].",
+      "stated_by": null,
+      "gap": null
     },
     {
       "id": "Q13",
       "slide": "05",
       "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
-      "rule": "unsourced-figure",
-      "question": "Where does 17% come from?",
+      "rule": "assumption",
+      "priority": 5,
+      "question": "What has to stay true for this to hold, and what early signal would tell you it is not?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
-        "what": "17% is printed on slide 05 but no ledger row holds it.",
+        "what": "No ledger row answers it.",
         "owner": "the CPTO",
         "due": "before the meeting"
       }
@@ -326,9 +352,43 @@
       "slide": "05",
       "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
       "rule": "unsourced-figure",
+      "priority": 6,
+      "question": "Where does 28% come from?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "28% is printed on slide 05 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q15",
+      "slide": "05",
+      "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
+      "rule": "unsourced-figure",
+      "priority": 3,
+      "question": "Where does 17% come from?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "17% is printed on slide 05 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q16",
+      "slide": "05",
+      "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
+      "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does $3.75M come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "$3.75M is printed on slide 05 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -336,35 +396,17 @@
       }
     },
     {
-      "id": "Q15",
-      "slide": "09b",
-      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
-      "rule": "headline",
-      "question": "What backs the headline: \"We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.\"?",
-      "status": "answered",
-      "answer": "9 of 11 commitments shipped (Verified; Q3 FY26; source: Linear projects) [L03].",
-      "gap": null
-    },
-    {
-      "id": "Q16",
-      "slide": "09b",
-      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
-      "rule": "quality",
-      "question": "Speed is up. What did quality do over the same window?",
-      "status": "answered",
-      "answer": "Eval pass rate 91.3% (Verified; Run of 28 Sep 2026; source: Eval harness v14, 376 of 412) [L08]. Review time 13h, cycle time down 18% (Derived; Q3 FY26 against Q3 FY25; source: GitHub) [L09].",
-      "gap": null
-    },
-    {
       "id": "Q17",
-      "slide": "09b",
-      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
-      "rule": "impact",
-      "question": "Of what shipped, which moved the outcome it was meant to move?",
+      "slide": "05",
+      "slide_title": "We planned 15% on keeping the lights on and spent 22%. Inference ran 28% over plan.",
+      "rule": "unsourced-more",
+      "priority": 3,
+      "question": "Where do the other figures on slide 05 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
-        "what": "No ledger row answers it.",
+        "what": "10 more figures on slide 05 have no ledger row: $3.7M, $480K, $95K, $90K, $400K, $410K, 26%, 20%, 45%, 36%.",
         "owner": "the CPTO",
         "due": "before the meeting"
       }
@@ -373,10 +415,64 @@
       "id": "Q18",
       "slide": "09b",
       "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
+      "rule": "headline",
+      "priority": 4,
+      "question": "What backs the headline: \"We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.\"?",
+      "status": "answered",
+      "answer": "9 of 11 commitments shipped (Verified; Q3 FY26; source: Linear projects) [L03].",
+      "stated_by": null,
+      "gap": null
+    },
+    {
+      "id": "Q19",
+      "slide": "09b",
+      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
+      "rule": "quality",
+      "priority": 3,
+      "question": "Speed is up. What did quality do over the same window?",
+      "status": "answered",
+      "answer": "Eval pass rate 91.3% (Verified; Run of 28 Sep 2026; source: Eval harness v14, 376 of 412) [L08]. Review time 13h, cycle time down 18% (Derived; Q3 FY26 against Q3 FY25; source: GitHub) [L09].",
+      "stated_by": null,
+      "gap": null
+    },
+    {
+      "id": "Q20",
+      "slide": "09b",
+      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
+      "rule": "impact",
+      "priority": 5,
+      "question": "Of what shipped, which moved the outcome it was meant to move?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "No ledger row answers it.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q21",
+      "slide": "09b",
+      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
+      "rule": "value",
+      "priority": 3,
+      "question": "Which customers would notice if this stopped tomorrow, and how do you know?",
+      "status": "answered",
+      "answer": "23.1K no-touch loads per week (Verified; Last 4 weeks of Q3; source: Warehouse query ns_weekly) [L02].",
+      "stated_by": null,
+      "gap": null
+    },
+    {
+      "id": "Q22",
+      "slide": "09b",
+      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 34 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "34 is printed on slide 09b but no ledger row holds it.",
         "owner": "the CPTO",
@@ -384,13 +480,15 @@
       }
     },
     {
-      "id": "Q19",
+      "id": "Q23",
       "slide": "09b",
       "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 41 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "41 is printed on slide 09b but no ledger row holds it.",
         "owner": "the CPTO",
@@ -398,13 +496,15 @@
       }
     },
     {
-      "id": "Q20",
+      "id": "Q24",
       "slide": "09b",
       "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 52 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "52 is printed on slide 09b but no ledger row holds it.",
         "owner": "the CPTO",
@@ -412,23 +512,43 @@
       }
     },
     {
-      "id": "Q21",
+      "id": "Q25",
+      "slide": "09b",
+      "slide_title": "We shipped 9 of 11 commitments and faster than last quarter. Review time is the cost.",
+      "rule": "unsourced-more",
+      "priority": 3,
+      "question": "Where do the other figures on slide 09b come from?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "4 more figures on slide 09b have no ledger row: 38, 3.1%, 30, 88%.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q26",
       "slide": "11",
       "slide_title": "The North Star beat target. Activation and expansion did not.",
       "rule": "headline",
+      "priority": 4,
       "question": "What backs the headline: \"The North Star beat target. Activation and expansion did not.\"?",
       "status": "answered",
       "answer": "23.1K no-touch loads per week (Verified; Last 4 weeks of Q3; source: Warehouse query ns_weekly) [L02]. Expansion ARR $1.9M (Verified; Q3 FY26; source: CRM, Finance) [L04].",
+      "stated_by": null,
       "gap": null
     },
     {
-      "id": "Q22",
+      "id": "Q27",
       "slide": "11",
       "slide_title": "The North Star beat target. Activation and expansion did not.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 18.4K come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "18.4K is printed on slide 11 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -436,13 +556,15 @@
       }
     },
     {
-      "id": "Q23",
+      "id": "Q28",
       "slide": "11",
       "slide_title": "The North Star beat target. Activation and expansion did not.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 14 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "14 is printed on slide 11 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -450,13 +572,15 @@
       }
     },
     {
-      "id": "Q24",
+      "id": "Q29",
       "slide": "11",
       "slide_title": "The North Star beat target. Activation and expansion did not.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 39% come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "39% is printed on slide 11 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -464,13 +588,31 @@
       }
     },
     {
-      "id": "Q25",
+      "id": "Q30",
+      "slide": "11",
+      "slide_title": "The North Star beat target. Activation and expansion did not.",
+      "rule": "unsourced-more",
+      "priority": 3,
+      "question": "Where do the other figures on slide 11 come from?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "13 more figures on slide 11 have no ledger row: 5,890, 6,120, 6,000, 117%, 118%, 120%, 102%, 110%, 93%, 92%, $2.1M, 62%, 38%.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q31",
       "slide": "12",
       "slide_title": "The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.",
       "rule": "headline",
+      "priority": 6,
       "question": "What backs the headline: \"The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.\"?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row holds the headline's figures.",
         "owner": "the CPTO",
@@ -478,13 +620,15 @@
       }
     },
     {
-      "id": "Q26",
+      "id": "Q32",
       "slide": "12",
       "slide_title": "The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.",
       "rule": "data-needed",
+      "priority": 5,
       "question": "When will we see this: Inference cost by customer segment. We don't measure it yet, so we can't say which accounts run below margin.",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "Inference cost by customer segment. We don't measure it yet, so we can't say which accounts run below margin.",
         "owner": "the Platform team",
@@ -492,13 +636,31 @@
       }
     },
     {
-      "id": "Q27",
+      "id": "Q33",
       "slide": "12",
       "slide_title": "The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.",
       "rule": "unsourced-figure",
+      "priority": 3,
+      "question": "Where does 36 of 412 come from?",
+      "status": "gap",
+      "answer": null,
+      "stated_by": null,
+      "gap": {
+        "what": "36 of 412 is printed on slide 12 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "before the meeting"
+      }
+    },
+    {
+      "id": "Q34",
+      "slide": "12",
+      "slide_title": "The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.",
+      "rule": "unsourced-figure",
+      "priority": 6,
       "question": "Where does 3 points come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "3 points is printed on slide 12 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -506,13 +668,15 @@
       }
     },
     {
-      "id": "Q28",
+      "id": "Q35",
       "slide": "12",
       "slide_title": "The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 90% come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "90% is printed on slide 12 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -520,27 +684,31 @@
       }
     },
     {
-      "id": "Q29",
+      "id": "Q36",
       "slide": "12",
       "slide_title": "The agent passes its quality bar and costs 20% less per task. Margin is 3 points short.",
-      "rule": "unsourced-figure",
-      "question": "Where does 86% come from?",
+      "rule": "unsourced-more",
+      "priority": 3,
+      "question": "Where do the other figures on slide 12 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
-        "what": "86% is printed on slide 12 but no ledger row holds it.",
+        "what": "9 more figures on slide 12 have no ledger row: 86%, 7.1%, 9.2%, 53%, 81%, 48%, 56%, 60%, 71%.",
         "owner": "the CPTO",
         "due": "before the meeting"
       }
     },
     {
-      "id": "Q30",
+      "id": "Q37",
       "slide": "14",
       "slide_title": "Our largest risk is inference cost tied to one provider. Routing is the fix.",
       "rule": "headline",
+      "priority": 6,
       "question": "What backs the headline: \"Our largest risk is inference cost tied to one provider. Routing is the fix.\"?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row is cited on this slide.",
         "owner": "the CPTO",
@@ -548,13 +716,15 @@
       }
     },
     {
-      "id": "Q31",
+      "id": "Q38",
       "slide": "14",
       "slide_title": "Our largest risk is inference cost tied to one provider. Routing is the fix.",
       "rule": "risk",
+      "priority": 5,
       "question": "What is the mitigation, who owns it, and when does the exposure fall?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "Ledger row L14 is Unknown.",
         "owner": "the CPTO",
@@ -562,13 +732,15 @@
       }
     },
     {
-      "id": "Q32",
+      "id": "Q39",
       "slide": "14",
       "slide_title": "Our largest risk is inference cost tied to one provider. Routing is the fix.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 16 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "16 is printed on slide 14 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -576,13 +748,15 @@
       }
     },
     {
-      "id": "Q33",
+      "id": "Q40",
       "slide": "16",
       "slide_title": "Five bets for Q4. Three are promises, one is an experiment and one is a probe.",
       "rule": "headline",
+      "priority": 6,
       "question": "What backs the headline: \"Five bets for Q4. Three are promises, one is an experiment and one is a probe.\"?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row holds the headline's figures.",
         "owner": "the CPTO",
@@ -590,13 +764,15 @@
       }
     },
     {
-      "id": "Q34",
+      "id": "Q41",
       "slide": "16",
       "slide_title": "Five bets for Q4. Three are promises, one is an experiment and one is a probe.",
       "rule": "stop-rule",
+      "priority": 4,
       "question": "What is the stop rule for each bet, and who calls it?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row answers it.",
         "owner": "the CPTO",
@@ -604,13 +780,15 @@
       }
     },
     {
-      "id": "Q35",
+      "id": "Q42",
       "slide": "16",
       "slide_title": "Five bets for Q4. Three are promises, one is an experiment and one is a probe.",
       "rule": "unsourced-figure",
+      "priority": 6,
       "question": "Where does 5 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "5 is printed on slide 16 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -618,13 +796,15 @@
       }
     },
     {
-      "id": "Q36",
+      "id": "Q43",
       "slide": "16",
       "slide_title": "Five bets for Q4. Three are promises, one is an experiment and one is a probe.",
       "rule": "unsourced-figure",
+      "priority": 3,
       "question": "Where does 2 points come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "2 points is printed on slide 16 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -632,13 +812,15 @@
       }
     },
     {
-      "id": "Q37",
+      "id": "Q44",
       "slide": "16",
       "slide_title": "Five bets for Q4. Three are promises, one is an experiment and one is a probe.",
       "rule": "unsourced-figure",
+      "priority": 6,
       "question": "Where does 3 come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "3 is printed on slide 16 but no ledger row holds it.",
         "owner": "the CPTO",
@@ -646,13 +828,15 @@
       }
     },
     {
-      "id": "Q38",
+      "id": "Q45",
       "slide": "18",
       "slide_title": "We need two decisions today and one introduction.",
       "rule": "headline",
+      "priority": 6,
       "question": "What backs the headline: \"We need two decisions today and one introduction.\"?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row holds the headline's figures.",
         "owner": "the CPTO",
@@ -660,13 +844,15 @@
       }
     },
     {
-      "id": "Q39",
+      "id": "Q46",
       "slide": "18",
       "slide_title": "We need two decisions today and one introduction.",
       "rule": "decision",
+      "priority": 7,
       "question": "What exactly is the board asked to decide, by when, and what happens if it does not?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "No ledger row answers it.",
         "owner": "the CPTO",
@@ -674,13 +860,15 @@
       }
     },
     {
-      "id": "Q40",
+      "id": "Q47",
       "slide": "18",
       "slide_title": "We need two decisions today and one introduction.",
       "rule": "unsourced-figure",
+      "priority": 6,
       "question": "Where does two come from?",
       "status": "gap",
       "answer": null,
+      "stated_by": null,
       "gap": {
         "what": "two is printed on slide 18 but no ledger row holds it.",
         "owner": "the CPTO",

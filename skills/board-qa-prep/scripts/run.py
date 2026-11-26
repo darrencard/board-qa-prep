@@ -1,7 +1,7 @@
 """One command: read the deck, draft questions and answers, check, render.
 
 Usage:
-  python3 scripts/run.py DECK --gap-owner "<name or role>" [--gap-due DATE] [--cut B|L|S|all] [--out-dir prep]
+  python3 scripts/run.py DECK --gap-owner "<name or role>" [--gap-due DATE] [--cut B|L|S|all] [--past-questions FILE] [--out-dir prep]
 
 Writes <out-dir>/qa.json and, when the check passes, <out-dir>/prep.md.
 """
@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import deck as deck_mod  # noqa: E402
 from check import check, summary  # noqa: E402
-from questions import generate  # noqa: E402
+from questions import generate, load_past  # noqa: E402
 from render import render  # noqa: E402
 
 
@@ -27,6 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--gap-owner", required=True)
     p.add_argument("--gap-due")
     p.add_argument("--cut", default="B")
+    p.add_argument("--past-questions", help="Questions the board asked last time: one per line, or a CSV with a 'question' column.")
     p.add_argument("--out-dir", default="prep")
     args = p.parse_args(argv)
     try:
@@ -36,7 +37,12 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    qa = generate(deck, args.gap_owner, args.gap_due)
+    try:
+        past = load_past(args.past_questions) if args.past_questions else None
+    except OSError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    qa = generate(deck, args.gap_owner, args.gap_due, past)
     (out / "qa.json").write_text(json.dumps(qa, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     problems = check(qa)
     print(summary(qa, problems))

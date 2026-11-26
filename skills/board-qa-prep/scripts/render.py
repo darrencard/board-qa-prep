@@ -1,6 +1,7 @@
 """Render the prep pack as Markdown. Refuses while check.py reports any error.
 
-The pack has three parts: the questions by slide with their answers, the gaps
+The pack has four parts: the five questions to prepare first (by priority, gaps
+weighted up), the questions by slide with their answers, the gaps
 with owners and due dates, and the ledger rows the answers cite. Every piece of
 text from the deck is escaped, so a slide cannot add HTML or break a table.
 
@@ -18,6 +19,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check import CITE_RE, check, summary  # noqa: E402
+
+TOP_N = 5
 
 
 def esc(text) -> str:
@@ -42,9 +45,15 @@ def render(qa: dict) -> str:
         "",
         "Every figure in an answer comes from the ledger row it cites. A question without a sourced answer is a gap, not a guess.",
         "",
-        "## Questions by slide",
-        "",
     ]
+    top = sorted(qs, key=lambda q: (-int(q.get("priority") or 0), str(q.get("id"))))[:TOP_N]
+    if top:
+        out += ["## Prepare these first", ""]
+        for q in top:
+            state = "gap" if q.get("status") == "gap" else "answered"
+            out.append(f"- **{esc(q.get('id'))}** (slide {esc(q.get('slide'))}, {state}): {esc(q.get('question'))}")
+        out.append("")
+    out += ["## Questions by slide", ""]
     current = None
     for q in qs:
         if q.get("slide") != current:
@@ -55,7 +64,12 @@ def render(qa: dict) -> str:
         if q.get("status") == "gap":
             gap = q.get("gap") or {}
             due = f", due {esc(gap.get('due'))}" if gap.get("due") else ""
-            out.append(f"Gap. {esc(gap.get('what'))} Owner: {esc(gap.get('owner'))}{due}.")
+            what = esc(gap.get("what")).rstrip()
+            if what and what[-1] not in ".?!":
+                what += "."
+            out.append(f"Gap. {what} Owner: {esc(gap.get('owner'))}{due}.")
+        elif q.get("stated_by"):
+            out.append(f"{esc(q.get('answer'))} Stated by {esc(q.get('stated_by'))}.")
         else:
             out.append(esc(q.get("answer")))
         out.append("")

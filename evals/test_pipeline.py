@@ -8,7 +8,7 @@ from pathlib import Path
 import helpers
 from check import check
 from deck import DeckError, load
-from questions import generate
+from questions import generate, load_past
 from render import render
 
 
@@ -64,7 +64,7 @@ class HarborlineTest(unittest.TestCase):
         self.assertIn("Where does $3.75M come from?", asked)
 
     def test_topic_questions_are_asked_once(self):
-        rules = [q["rule"] for q in self.qa["questions"] if q["rule"] not in {"headline", "data-needed", "unsourced-figure"}]
+        rules = [q["rule"] for q in self.qa["questions"] if q["rule"] not in {"headline", "data-needed", "unsourced-figure", "unsourced-more"}]
         self.assertEqual(len(rules), len(set(rules)))
 
     def test_deterministic(self):
@@ -76,6 +76,21 @@ class HarborlineTest(unittest.TestCase):
         self.assertEqual(len(load(helpers.HARBORLINE, "all")["slides"]), 19)
         with self.assertRaises(DeckError):
             load(helpers.HARBORLINE, "X")
+
+    def test_x_of_y_is_one_question(self):
+        asked = [q["question"] for q in self.qa["questions"] if q["rule"] == "unsourced-figure"]
+        self.assertIn("Where does 36 of 412 come from?", asked)
+        self.assertNotIn("Where does 36 come from?", asked)
+
+    def test_overflow_figures_are_listed_not_hidden(self):
+        more = [q for q in self.qa["questions"] if q["rule"] == "unsourced-more"]
+        self.assertTrue(more)
+        self.assertRegex(more[0]["gap"]["what"], r"^\d+ more figures on slide")
+
+    def test_priority_puts_the_decision_first(self):
+        top = sorted(self.qa["questions"], key=lambda q: (-q["priority"], q["id"]))[0]
+        self.assertEqual(top["rule"], "decision")
+        self.assertIn("## Prepare these first", render(self.qa))
 
 
 class AcmeMarkdownTest(unittest.TestCase):
@@ -139,6 +154,45 @@ class AcmeMarkdownTest(unittest.TestCase):
             path.write_text("## A\nx\n\n| ID | Claim |\n|---|---|\n| L01 | a 1% |\n| L01 | b 2% |\n", encoding="utf-8")
             with self.assertRaisesRegex(DeckError, "repeat"):
                 load(path)
+
+
+class PastQuestionsTest(unittest.TestCase):
+    """Questions the board asked last time. Acme and its figures are illustrative."""
+
+    @classmethod
+    def setUpClass(cls):
+        past = load_past(helpers.FIXTURES / "acme-past-questions.md")
+        cls.past = past
+        cls.qa = generate(load(helpers.ACME), "the CPTO", "20 Dec 2026", past)
+
+    def carried(self):
+        return [q for q in self.qa["questions"] if q["rule"] == "carried-over"]
+
+    def test_reads_a_markdown_list(self):
+        self.assertEqual(len(self.past), 3)
+        self.assertFalse(any(q.startswith("-") for q in self.past))
+
+    def test_every_past_question_is_carried_and_ranked_high(self):
+        self.assertEqual(len(self.carried()), 3)
+        self.assertTrue(all(q["priority"] >= 5 for q in self.carried()))
+
+    def test_lands_on_the_slide_it_fits(self):
+        q = next(q for q in self.carried() if "drafted quotes" in q["question"])
+        self.assertEqual(q["slide"], "2")
+        self.assertIn("[L03]", q["answer"])
+
+    def test_matches_a_declared_gap_and_keeps_its_owner(self):
+        q = next(q for q in self.carried() if "gross margin" in q["question"])
+        self.assertEqual((q["status"], q["gap"]["owner"], q["gap"]["due"]), ("gap", "the CFO", "15 Dec 2026"))
+
+    def test_still_passes_the_check(self):
+        self.assertEqual(check(self.qa), [])
+
+    def test_csv_with_a_question_column(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "past.csv"
+            path.write_text("meeting,question\nQ2,What is the plan if the provider raises prices?\n", encoding="utf-8")
+            self.assertEqual(load_past(path), ["What is the plan if the provider raises prices?"])
 
 
 class RenderTest(unittest.TestCase):

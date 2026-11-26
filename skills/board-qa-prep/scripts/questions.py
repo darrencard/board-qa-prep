@@ -17,6 +17,7 @@ Output: qa.json
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 import sys
@@ -25,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import deck as deck_mod  # noqa: E402
-from figures import Figure, figures, value_figures  # noqa: E402
+from figures import Figure, figures, strip_labels, value_figures  # noqa: E402
 
 MAX_PER_SLIDE = 6
 MAX_UNSOURCED = 3
@@ -66,7 +67,7 @@ RULES = [
         "ai-margin",
         _rx(r"\b(AI|agent|agents|model|LLM|assistant|eval)\b"),
         "Does the AI feature pay for itself: what does it earn against what it costs to run?",
-        _rx(r"\b(margin|cost per|gross margin)\b"),
+        _rx(r"\bmargin\b"),
     ),
     (
         "revenue",
@@ -98,7 +99,43 @@ RULES = [
         "Of what shipped, which moved the outcome it was meant to move?",
         _rx(r"\b(moved|landed|outcome)\b"),
     ),
+    (
+        "assumption",
+        _rx(r"\b(next quarter|we expect|expected|forecast|will reach|by FY\d+|bets?|plan reaches)\b"),
+        "What has to stay true for this to hold, and what early signal would tell you it is not?",
+        _rx(r"\b(assumption|leading indicator|early signal)\b"),
+    ),
+    (
+        "value",
+        _rx(r"\b(launched|shipped|feature|assistant|agent|capability)\b"),
+        "Which customers would notice if this stopped tomorrow, and how do you know?",
+        _rx(r"\b(retention|usage|active|adoption|accepted|no-touch)\b"),
+    ),
 ]
+
+# How much a question matters when time to prepare is short. Gaps add 2.
+# These weights are a default judgment, not a measure: change them for a board
+# that weighs things differently, and say so in the prep.
+PRIORITY = {
+    "decision": 5,
+    "headline": 4,
+    "plan": 4,
+    "revenue": 4,
+    "data-needed": 3,
+    "ai-margin": 3,
+    "unit-cost": 3,
+    "quality": 3,
+    "risk": 3,
+    "impact": 3,
+    "value": 3,
+    "assumption": 3,
+    "carried-over": 5,
+    "stop-rule": 2,
+    "people": 2,
+    "unsourced-figure": 1,
+    "unsourced-more": 1,
+}
+OF_RE = re.compile(r"\b\d[\d,.]*\s+of\s+\d[\d,.]*\b")
 
 UNCITABLE = {"unknown"}
 
@@ -175,8 +212,88 @@ def _worth_asking(fig: Figure, in_title: bool) -> bool:
     return in_title or fig.kind != "num" or fig.value >= 10
 
 
-def generate(deck: dict, gap_owner: str, gap_due: str | None = None) -> dict:
+# Words of 4 letters or more that carry no topic. Shorter words are never compared.
+STOPWORDS = frozenset(
+    {
+        "what",
+        "which",
+        "when",
+        "where",
+        "whom",
+        "whose",
+        "does",
+        "were",
+        "will",
+        "would",
+        "could",
+        "should",
+        "with",
+        "from",
+        "this",
+        "that",
+        "these",
+        "those",
+        "your",
+        "they",
+        "their",
+        "been",
+        "being",
+        "have",
+        "last",
+        "next",
+        "than",
+        "then",
+        "there",
+        "here",
+        "about",
+        "into",
+        "over",
+        "under",
+        "more",
+        "less",
+        "most",
+        "least",
+        "each",
+        "every",
+        "some",
+    }
+)
+BULLET_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+")
+
+
+def load_past(path: str | Path) -> list[str]:
+    """Questions the board asked before: one per line (Markdown list or plain), or a CSV with a 'question' column."""
+    text = Path(path).read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if lines and "question" in [c.strip().lower() for c in lines[0].split(",")]:
+        rows = csv.DictReader(lines)
+        key = next(k for k in rows.fieldnames or [] if k.strip().lower() == "question")
+        out = [str(r.get(key) or "").strip() for r in rows]
+    else:
+        out = [BULLET_RE.sub("", line).strip() for line in lines if not line.lstrip().startswith("#")]
+    return [q for q in out if q]
+
+
+def _words(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z][a-z-]{3,}", text.lower()) if w not in STOPWORDS}
+
+
+def _past_home(question: str, slides: list[dict]) -> dict:
+    """The slide that shares the most words with a past question; the first slide when none share two."""
+    words = _words(question)
+    best, best_score = slides[0], 1
+    for slide in slides:
+        score = len(words & _words(" ".join([slide["text"], *(n["text"] for n in slide["data_needed"])])))
+        if score > best_score:
+            best, best_score = slide, score
+    return best
+
+
+def generate(deck: dict, gap_owner: str, gap_due: str | None = None, past: list[str] | None = None) -> dict:
     ledger = {r["id"]: r for r in deck["ledger"]}
+    carried: dict[str, list[str]] = {}
+    for past_q in past or []:
+        carried.setdefault(_past_home(past_q, deck["slides"])["id"], []).append(past_q)
     all_ledger_figs = [f for r in deck["ledger"] for f in row_figures(r)]
     homes: dict[str, list[tuple]] = {}
     for rule in RULES:
@@ -186,15 +303,18 @@ def generate(deck: dict, gap_owner: str, gap_due: str | None = None) -> dict:
     asked: list[Figure] = []
     questions: list[dict] = []
 
-    def add(slide: dict, rule: str, question: str, rows: list[dict], gap: dict | None, store: list[dict]) -> None:
+    def add(slide: dict, rule: str, question: str, rows: list[dict], gap: dict | None, store: list[dict], weight: int | None = None) -> None:
+        priority = (PRIORITY.get(rule, 1) if weight is None else weight) + (2 if gap else 0)
         store.append(
             {
                 "slide": slide["id"],
                 "slide_title": slide["title"],
                 "rule": rule,
+                "priority": priority,
                 "question": question,
                 "status": "gap" if gap else "answered",
                 "answer": None if gap else draft_answer(rows),
+                "stated_by": None,
                 "gap": gap,
             }
         )
@@ -226,7 +346,27 @@ def generate(deck: dict, gap_owner: str, gap_due: str | None = None) -> dict:
                 found,
             )
 
-        # 3. Topic rules, each asked once in the deck, on its home slide.
+        # 3. Questions the board asked last time, carried forward to the slide they fit best.
+        for past_q in carried.get(slide["id"], []):
+            words = _words(past_q)
+            on_slide = [ledger[r] for r in slide["ledger_refs"] if r in ledger]
+            rows = [r for r in on_slide if len(words & _words(r["claim"])) >= 2 and str(r.get("confidence")).lower() not in UNCITABLE][:MAX_ROWS]
+            text = past_q if past_q.endswith("?") else past_q + "?"
+            need = next((n for n in slide["data_needed"] if len(words & _words(n["text"])) >= 3), None)
+            if rows:
+                add(slide, "carried-over", f"Asked last time: {text}", rows, None, found)
+            elif need:
+                gap = {
+                    "what": f"Asked at the last meeting, and still a declared gap: {need['text']}",
+                    "owner": need.get("owner") or gap_owner,
+                    "due": need.get("due") or due,
+                }
+                add(slide, "carried-over", f"Asked last time: {text}", [], gap, found)
+            else:
+                gap = {"what": "Asked at the last meeting. No ledger row on this slide answers it.", "owner": gap_owner, "due": due}
+                add(slide, "carried-over", f"Asked last time: {text}", [], gap, found)
+
+        # 4. Topic rules, each asked once in the deck, on its home slide.
         for rule, _trigger, question, topic in homes.get(slide["id"], []):
             rows, unknown = _pick_rows(slide, ledger, topic)
             if rows:
@@ -234,20 +374,49 @@ def generate(deck: dict, gap_owner: str, gap_due: str | None = None) -> dict:
             else:
                 add(slide, rule, question, [], {"what": unknown_or(unknown, "No ledger row answers it."), "owner": gap_owner, "due": due}, found)
 
-        # 4. Figures printed on the slide that no ledger row holds, each asked once in the deck.
+        # 5. Figures printed on the slide that no ledger row holds, each asked once in the deck.
+        #    "9 of 11" is one figure to a reader, so it is asked about as one.
         title_figs = figures(slide["title"])
-        unsourced: list[dict] = []
-        for fig in figures(slide["text"]):
-            in_title = any(fig.matches(t) for t in title_figs)
-            if not _worth_asking(fig, in_title) or any(fig.matches(a) for a in all_ledger_figs + asked):
-                continue
-            asked.append(fig)
-            if len(unsourced) < MAX_UNSOURCED:
-                what = f"{fig.text} is printed on slide {slide['id']} but no ledger row holds it."
-                add(slide, "unsourced-figure", f"Where does {fig.text} come from?", [], {"what": what, "owner": gap_owner, "due": due}, unsourced)
+        items: list[tuple[str, list[Figure]]] = []
+        loose = figures(slide["text"])
+        for phrase in OF_RE.findall(strip_labels(slide["text"])):
+            parts = figures(phrase)
+            items.append((phrase, parts))
+            for part in parts:
+                hit = next((f for f in loose if f.kind == part.kind and f.matches(part)), None)
+                if hit is not None:
+                    loose.remove(hit)
+        items.extend((f.text, [f]) for f in loose)
 
-        fixed = [q for q in found if q["rule"] in {"headline", "data-needed"}]
-        topical = [q for q in found if q["rule"] not in {"headline", "data-needed"}]
+        unsourced: list[dict] = []
+        overflow: list[str] = []
+        for text, parts in items:
+            in_title = any(p.matches(t) for p in parts for t in title_figs)
+            if not any(_worth_asking(p, in_title) for p in parts):
+                continue
+            if all(any(p.matches(a) for a in all_ledger_figs + asked) for p in parts):
+                continue
+            asked.extend(parts)
+            if len(unsourced) < MAX_UNSOURCED:
+                what = f"{text} is printed on slide {slide['id']} but no ledger row holds it."
+                weight = 4 if in_title else 1
+                add(slide, "unsourced-figure", f"Where does {text} come from?", [], {"what": what, "owner": gap_owner, "due": due}, unsourced, weight)
+            else:
+                overflow.append(text)
+        if overflow:
+            listed = ", ".join(overflow)
+            what = f"{len(overflow)} more figures on slide {slide['id']} have no ledger row: {listed}."
+            add(
+                slide,
+                "unsourced-more",
+                f"Where do the other figures on slide {slide['id']} come from?",
+                [],
+                {"what": what, "owner": gap_owner, "due": due},
+                unsourced,
+            )
+
+        fixed = [q for q in found if q["rule"] in {"headline", "data-needed", "carried-over"}]
+        topical = [q for q in found if q["rule"] not in {"headline", "data-needed", "carried-over"}]
         room = max(0, MAX_PER_SLIDE - len(fixed))
         questions.extend(fixed + topical[:room] + unsourced)
 
@@ -271,6 +440,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--cut", default="B", help="Deck JSON only: B (board, default), L, S or all.")
     p.add_argument("--gap-owner", required=True, help="Who owns a gap the deck does not assign. A named person or role.")
     p.add_argument("--gap-due", help="When gaps are due, if the deck does not say.")
+    p.add_argument("--past-questions", help="Questions the board asked last time: one per line, or a CSV with a 'question' column.")
     p.add_argument("--out", default="qa.json")
     args = p.parse_args(argv)
     try:
@@ -278,7 +448,8 @@ def main(argv: list[str] | None = None) -> int:
     except (deck_mod.DeckError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
-    qa = generate(deck, args.gap_owner, args.gap_due)
+    past = load_past(args.past_questions) if args.past_questions else None
+    qa = generate(deck, args.gap_owner, args.gap_due, past)
     Path(args.out).write_text(json.dumps(qa, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     answered = sum(q["status"] == "answered" for q in qa["questions"])
     total = len(qa["questions"])

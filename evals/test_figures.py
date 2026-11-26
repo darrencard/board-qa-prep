@@ -35,6 +35,8 @@ class FiguresTest(unittest.TestCase):
     def test_spelled_counts(self):
         self.assertEqual(kinds("three bets"), [("num", 3.0)])
         self.assertEqual(figures("one decision"), [])
+        self.assertEqual(kinds("forty engineers"), [("num", 40.0)])
+        self.assertEqual(kinds("revenue doubled"), [("num", 2.0)])
 
     def test_matching_needs_same_kind_and_value(self):
         self.assertTrue(Figure("money", 41_200_000, "").matches(Figure("money", 41.2e6, "")))

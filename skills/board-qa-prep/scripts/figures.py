@@ -65,9 +65,26 @@ _WORDS = {
     "ten": 10,
     "eleven": 11,
     "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
     "twenty": 20,
+    "thirty": 30,
+    "forty": 40,
+    "fifty": 50,
+    "sixty": 60,
+    "seventy": 70,
+    "eighty": 80,
+    "ninety": 90,
+    "hundred": 100,
     "half": 50,
     "dozen": 12,
+    "doubled": 2,
+    "tripled": 3,
 }
 _WORD_RE = re.compile(r"\b(" + "|".join(_WORDS) + r")\b", re.IGNORECASE)
 
@@ -111,6 +128,7 @@ def figures(text: str | None) -> list[Figure]:
     for m in _WORD_RE.finditer(clean):
         word = m.group(1).lower()
         kind = "pct" if word == "half" else "num"
+        # "Twenty-five" reads as 20 and 5, which no row holds: the check then asks for digits.
         found.append(Figure(kind, float(_WORDS[word]), m.group(1)))
     return found
 

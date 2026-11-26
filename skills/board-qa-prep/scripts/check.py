@@ -2,7 +2,9 @@
 
 Errors (any one blocks render.py):
   figure-not-in-ledger   a figure in an answer matches no figure in the rows it cites
-  cite-missing           an answered question cites no ledger row
+  cite-missing           an answered question cites no ledger row and is not a stated answer
+  stated-has-figure      a stated answer (stated_by a named person) contains a figure
+  stated-no-name         stated_by is a placeholder, not a named person or role
   cite-unknown-row       an answer cites an ID the ledger does not have
   cite-unknown-confidence an answer rests on a row whose confidence is Unknown
   confidence-label-missing an answer cites an Estimated row without saying "estimated"
@@ -71,8 +73,14 @@ def check(qa: dict) -> list[dict]:
             continue
 
         cites = CITE_RE.findall(answer)
-        if not cites:
-            err(q, "cite-missing", "An answer must cite at least one ledger row, as [L08]. With no row, make it a gap.")
+        stated_by = q.get("stated_by")
+        if stated_by is not None:
+            if str(stated_by).strip().lower() in PLACEHOLDER_OWNERS:
+                err(q, "stated-no-name", "stated_by must name the person or role who gave the answer.")
+            if not cites and figures(answer):
+                err(q, "stated-has-figure", "A stated answer cannot carry a figure. Cite the ledger row that holds it, or remove it.")
+        if not cites and (stated_by is None or not answer.strip()):
+            err(q, "cite-missing", "An answer must cite a ledger row, as [L08], or be a figure-free answer stated_by a named person. Otherwise make it a gap.")
             continue
         rows = []
         for cid in dict.fromkeys(cites):
@@ -88,7 +96,7 @@ def check(qa: dict) -> list[dict]:
             rows.append(row)
 
         allowed = [f for row in rows for f in row_figures(row)]
-        for fig in unmatched(answer, allowed):
+        for fig in unmatched(answer, allowed) if cites else []:  # a stated answer is checked above
             elsewhere = [rid for rid, row in ledger.items() if any(fig.matches(f) for f in row_figures(row))]
             hint = f" It matches {', '.join(elsewhere)}; cite that row." if elsewhere else " No ledger row holds it."
             err(q, "figure-not-in-ledger", f"{fig.text} is not in the rows cited ({', '.join(dict.fromkeys(cites))}).{hint}")

@@ -69,6 +69,26 @@ class CheckTest(unittest.TestCase):
         doc = qa("Probably about $2M.", status="gap", gap={"what": "No row", "owner": "the CFO"})
         self.assertEqual(codes(doc), ["gap-has-answer"])
 
+    def test_stated_answer_without_figures_passes(self):
+        doc = qa("The platform squad owns the routing work and reports back next meeting.")
+        doc["questions"][0]["stated_by"] = "the VP Engineering"
+        self.assertEqual(codes(doc), [])
+
+    def test_stated_answer_cannot_carry_a_figure(self):
+        doc = qa("Routing should save 20% of inference.")
+        doc["questions"][0]["stated_by"] = "the VP Engineering"
+        self.assertEqual(codes(doc), ["stated-has-figure"])
+
+    def test_stated_answer_needs_a_name(self):
+        doc = qa("The platform squad owns it.")
+        doc["questions"][0]["stated_by"] = "TBD"
+        self.assertEqual(codes(doc), ["stated-no-name"])
+
+    def test_stated_answer_still_cannot_claim_a_cause(self):
+        doc = qa("Routing work drove the improvement.")
+        doc["questions"][0]["stated_by"] = "the CPTO"
+        self.assertEqual(codes(doc), ["causal-claim"])
+
     def test_bad_status_and_duplicates(self):
         self.assertEqual(codes(qa("x", status="maybe")), ["bad-status"])
         doc = qa("ARR $28.4M [L01].")
