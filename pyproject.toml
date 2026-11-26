@@ -1,0 +1,23 @@
+[project]
+name = "board-qa-prep"
+version = "0.1.0"
+description = "A Claude skill that drafts the likely board questions per slide, with answers that cite only the deck's evidence ledger."
+requires-python = ">=3.9"
+# Standard library only, on purpose: the scripts run inside sandboxes that cannot install packages.
+dependencies = []
+
+[tool.ruff]
+line-length = 160
+target-version = "py39"
+
+[tool.ruff.lint]
+# E, F: errors and unused names. I: import order. B: likely bugs. UP: older syntax.
+# SIM: needless complexity. S: security (bandit).
+select = ["E", "F", "I", "B", "UP", "SIM", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests run the scripts with subprocess on fixed arguments.
+"evals/**" = ["S603", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["helpers", "figures", "deck", "questions", "check", "render"]

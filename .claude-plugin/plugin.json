@@ -1,0 +1,7 @@
+{
+  "name": "board-qa-prep",
+  "version": "0.1.0",
+  "description": "Board Q&A prep. Drafts the likely board questions for each slide of a deck, with answers that cite only the deck's evidence ledger. A question with no sourced answer becomes a gap with an owner, and code checks every figure in every answer.",
+  "author": { "name": "Dacard" },
+  "license": "MIT"
+}

@@ -1,0 +1,321 @@
+{
+  "deck": {
+    "company": "Acme",
+    "period": "Q3 FY26",
+    "as_of": null,
+    "cut": "all",
+    "illustrative": true
+  },
+  "ledger": [
+    {
+      "id": "L01",
+      "claim": "ARR $28.4M",
+      "value": null,
+      "unit": null,
+      "source": "Billing, Finance close",
+      "window": "30 Sep 2026",
+      "confidence": "Verified",
+      "owner": null
+    },
+    {
+      "id": "L02",
+      "claim": "Net revenue retention 112%",
+      "value": null,
+      "unit": null,
+      "source": "Billing",
+      "window": "Q3 FY26",
+      "confidence": "Verified",
+      "owner": null
+    },
+    {
+      "id": "L03",
+      "claim": "41% of drafted quotes accepted without edits",
+      "value": null,
+      "unit": null,
+      "source": "Product analytics",
+      "window": "Q3 FY26",
+      "confidence": "Derived",
+      "owner": null
+    },
+    {
+      "id": "L04",
+      "claim": "Cost per drafted quote $0.18",
+      "value": null,
+      "unit": null,
+      "source": "Provider invoices divided by drafts",
+      "window": "Sep 2026",
+      "confidence": "Derived",
+      "owner": null
+    },
+    {
+      "id": "L05",
+      "claim": "Eval pass rate 88.5%",
+      "value": null,
+      "unit": null,
+      "source": "Eval harness, 354 of 400",
+      "window": "Run of 27 Sep 2026",
+      "confidence": "Verified",
+      "owner": null
+    },
+    {
+      "id": "L06",
+      "claim": "Deploys per week up 30% against Q2",
+      "value": null,
+      "unit": null,
+      "source": "GitHub deployments",
+      "window": "Q3 FY26",
+      "confidence": "Estimated",
+      "owner": null
+    },
+    {
+      "id": "L07",
+      "claim": "Inference cost by segment",
+      "value": null,
+      "unit": null,
+      "source": null,
+      "window": null,
+      "confidence": "Unknown",
+      "owner": null
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q01",
+      "slide": "1",
+      "slide_title": "ARR reached $28.4M. Expansion is behind plan.",
+      "rule": "headline",
+      "question": "What backs the headline: \"ARR reached $28.4M. Expansion is behind plan.\"?",
+      "status": "answered",
+      "answer": "ARR $28.4M (Verified; 30 Sep 2026; source: Billing, Finance close) [L01].",
+      "gap": null
+    },
+    {
+      "id": "Q02",
+      "slide": "1",
+      "slide_title": "ARR reached $28.4M. Expansion is behind plan.",
+      "rule": "plan",
+      "question": "What closes the gap to plan, who owns it and by when?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "No ledger row answers it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q03",
+      "slide": "1",
+      "slide_title": "ARR reached $28.4M. Expansion is behind plan.",
+      "rule": "revenue",
+      "question": "Does this figure match Finance's close for the same date?",
+      "status": "answered",
+      "answer": "ARR $28.4M (Verified; 30 Sep 2026; source: Billing, Finance close) [L01]. Net revenue retention 112% (Verified; Q3 FY26; source: Billing) [L02].",
+      "gap": null
+    },
+    {
+      "id": "Q04",
+      "slide": "1",
+      "slide_title": "ARR reached $28.4M. Expansion is behind plan.",
+      "rule": "unsourced-figure",
+      "question": "Where does $1.1M come from?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "$1.1M is printed on slide 1 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q05",
+      "slide": "1",
+      "slide_title": "ARR reached $28.4M. Expansion is behind plan.",
+      "rule": "unsourced-figure",
+      "question": "Where does $1.6M come from?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "$1.6M is printed on slide 1 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q06",
+      "slide": "2",
+      "slide_title": "The quote assistant drafts 64% of quotes. Each costs $0.18 to draft.",
+      "rule": "headline",
+      "question": "What backs the headline: \"The quote assistant drafts 64% of quotes. Each costs $0.18 to draft.\"?",
+      "status": "answered",
+      "answer": "Cost per drafted quote $0.18 (Derived; Sep 2026; source: Provider invoices divided by drafts) [L04].",
+      "gap": null
+    },
+    {
+      "id": "Q07",
+      "slide": "2",
+      "slide_title": "The quote assistant drafts 64% of quotes. Each costs $0.18 to draft.",
+      "rule": "data-needed",
+      "question": "When will we see this: gross margin on the assistant, by plan tier",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "gross margin on the assistant, by plan tier",
+        "owner": "the CFO",
+        "due": "15 Dec 2026"
+      }
+    },
+    {
+      "id": "Q08",
+      "slide": "2",
+      "slide_title": "The quote assistant drafts 64% of quotes. Each costs $0.18 to draft.",
+      "rule": "unit-cost",
+      "question": "What does each unit of work cost now, and what is the ceiling?",
+      "status": "answered",
+      "answer": "Cost per drafted quote $0.18 (Derived; Sep 2026; source: Provider invoices divided by drafts) [L04].",
+      "gap": null
+    },
+    {
+      "id": "Q09",
+      "slide": "2",
+      "slide_title": "The quote assistant drafts 64% of quotes. Each costs $0.18 to draft.",
+      "rule": "ai-margin",
+      "question": "Does the AI feature pay for itself: what does it earn against what it costs to run?",
+      "status": "answered",
+      "answer": "Cost per drafted quote $0.18 (Derived; Sep 2026; source: Provider invoices divided by drafts) [L04].",
+      "gap": null
+    },
+    {
+      "id": "Q10",
+      "slide": "2",
+      "slide_title": "The quote assistant drafts 64% of quotes. Each costs $0.18 to draft.",
+      "rule": "unsourced-figure",
+      "question": "Where does 64% come from?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "64% is printed on slide 2 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q11",
+      "slide": "3",
+      "slide_title": "We shipped 7 of 9 commitments and deploys are 30% faster.",
+      "rule": "headline",
+      "question": "What backs the headline: \"We shipped 7 of 9 commitments and deploys are 30% faster.\"?",
+      "status": "answered",
+      "answer": "Estimated: Deploys per week up 30% against Q2 (Estimated; Q3 FY26; source: GitHub deployments) [L06].",
+      "gap": null
+    },
+    {
+      "id": "Q12",
+      "slide": "3",
+      "slide_title": "We shipped 7 of 9 commitments and deploys are 30% faster.",
+      "rule": "quality",
+      "question": "Speed is up. What did quality do over the same window?",
+      "status": "answered",
+      "answer": "Eval pass rate 88.5% (Verified; Run of 27 Sep 2026; source: Eval harness, 354 of 400) [L05].",
+      "gap": null
+    },
+    {
+      "id": "Q13",
+      "slide": "3",
+      "slide_title": "We shipped 7 of 9 commitments and deploys are 30% faster.",
+      "rule": "impact",
+      "question": "Of what shipped, which moved the outcome it was meant to move?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "No ledger row answers it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q14",
+      "slide": "3",
+      "slide_title": "We shipped 7 of 9 commitments and deploys are 30% faster.",
+      "rule": "unsourced-figure",
+      "question": "Where does 7 come from?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "7 is printed on slide 3 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q15",
+      "slide": "3",
+      "slide_title": "We shipped 7 of 9 commitments and deploys are 30% faster.",
+      "rule": "unsourced-figure",
+      "question": "Where does 9 come from?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "9 is printed on slide 3 but no ledger row holds it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q16",
+      "slide": "4",
+      "slide_title": "Our largest risk is one model provider for invoice chasing.",
+      "rule": "headline",
+      "question": "What backs the headline: \"Our largest risk is one model provider for invoice chasing.\"?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "Ledger row L07 is Unknown.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q17",
+      "slide": "4",
+      "slide_title": "Our largest risk is one model provider for invoice chasing.",
+      "rule": "risk",
+      "question": "What is the mitigation, who owns it, and when does the exposure fall?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "Ledger row L07 is Unknown.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q18",
+      "slide": "5",
+      "slide_title": "We need one decision: fund the second provider in Q4.",
+      "rule": "headline",
+      "question": "What backs the headline: \"We need one decision: fund the second provider in Q4.\"?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "No ledger row is cited on this slide.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    },
+    {
+      "id": "Q19",
+      "slide": "5",
+      "slide_title": "We need one decision: fund the second provider in Q4.",
+      "rule": "decision",
+      "question": "What exactly is the board asked to decide, by when, and what happens if it does not?",
+      "status": "gap",
+      "answer": null,
+      "gap": {
+        "what": "No ledger row answers it.",
+        "owner": "the CPTO",
+        "due": "20 Dec 2026"
+      }
+    }
+  ]
+}
