@@ -184,7 +184,8 @@ class TheAcmeRead(unittest.TestCase):
         ev = upstream()["evals"]
         q = self.by_topic["quality"][0]
         self.assertEqual(q["check"], "answered")
-        self.assertEqual(ev["status"], "not confirmed: inside noise")
+        # eval-kit 0.3.5 writes "too close to call"; an older record says "inside noise". Both print the same.
+        self.assertIn(ev["status"], ("not confirmed: too close to call", "not confirmed: inside noise"))
         lo, hi = ev["figures"][f"pass_rate@{ev['version']}"]["interval_95"]
         self.assertIn(f"(95% interval {lo}% to {hi}%)", q["answer"])
         # One check word per skill: the older record's "inside noise" prints as eval-kit's "too close to call".
