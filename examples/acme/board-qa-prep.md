@@ -140,28 +140,28 @@ Skill: `board-qa-prep` 0.3.3.
 | F07 | 5.05 sd | computed from Illustrative product analytics export, quote_drafts_weekly.csv | 2026-07-27 to 2026-11-09 | 2026-11-26 |
 | F08 | 31 | Illustrative CRM export, quotes_won_weekly.csv | 2026-08-31 | 2026-11-26 |
 | F09 | 36 | Illustrative CRM export, quotes_won_weekly.csv | 2026-08-31 to 2026-11-23 | 2026-11-26 |
-| F10 | 5 decisions | decision-record 0.3.3: counted from decisions.md (sha256 096127d5d48d) | 2026-07-13 to 2026-11-26 | 2026-11-26 |
+| F10 | 5 decisions | decision-record 0.3.4: counted from decisions.md (sha256 096127d5d48d) | 2026-07-13 to 2026-11-26 | 2026-11-26 |
 | F11 | 80% | quote-drafting.csv (sha256 ee43a12a2395) | 2026-11-15 | 2026-11-15 |
 | F12 | 71.5% | quote-drafting.csv (sha256 ee43a12a2395) | 2026-11-15 | 2026-11-15 |
-| F13 | 30 held-out cases | eval-kit 0.3.5: evals.rows, v1.4, cases | 2026-11-15 | 2026-11-15 |
+| F13 | 30 held-out cases | eval-kit 0.3.6: evals.rows, v1.4, cases | 2026-11-15 | 2026-11-15 |
 | F14 | 70% | quote-drafting.csv (sha256 ee43a12a2395) | 2026-10-15 | 2026-11-15 |
-| F15 | $0.0338 per task | cost-budget-check 0.3.3: priced cost / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
+| F15 | $0.0338 per task | cost-budget-check 0.3.4: priced cost / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
 | F16 | $0.027 per task | landing brief quote-drafting.md (tokens per task x price per token) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
-| F17 | 25% over budget | cost-budget-check 0.3.3: actual / budget - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
-| F18 | 10,300 tokens per task | cost-budget-check 0.3.3: tokens / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
+| F17 | 25% over budget | cost-budget-check 0.3.4: actual / budget - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
+| F18 | 10,300 tokens per task | cost-budget-check 0.3.4: tokens / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
 | F19 | 9,000 tokens per task | landing brief quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
-| F20 | $0.00000328 per token | cost-budget-check 0.3.3: priced cost / tokens; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
+| F20 | $0.00000328 per token | cost-budget-check 0.3.4: priced cost / tokens; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15) | 2026-11-01 to 2026-11-14 | 2026-11-15 |
 | F21 | $0.000003 per token | landing brief quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
-| F22 | $0.963 | cost-budget-check 0.3.3: model cost - model token share x budgeted cost; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
-| F23 | $1.89 | cost-budget-check 0.3.3: priced cost - tasks x budgeted cost per task; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
-| F24 | 6 checks ready to ship | release-readiness 0.3.2: count of the checks above; examples/acme/inputs/release.json | 2026-09-05 | 2026-09-05 |
-| F25 | 7 checks | release-readiness 0.3.2: count of the checks above; examples/acme/inputs/release.json | 2026-09-05 | 2026-09-05 |
-| F26 | 21 signals | customer-signal-digest 0.3.2: signals in the window after duplicates were merged; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
-| F27 | 16 accounts | customer-signal-digest 0.3.2: distinct accounts named on those signals; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
-| F28 | 7 signals | customer-signal-digest 0.3.2: signals in themes on the problem side; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
-| F29 | 7 accounts | customer-signal-digest 0.3.2: distinct accounts on the problem side; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
+| F22 | $0.963 | cost-budget-check 0.3.4: model cost - model token share x budgeted cost; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
+| F23 | $1.89 | cost-budget-check 0.3.4: priced cost - tasks x budgeted cost per task; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md | 2026-11-01 to 2026-11-14 | 2026-11-15 |
+| F24 | 6 checks ready to ship | release-readiness 0.3.3: count of the checks above; examples/acme/inputs/release.json | 2026-09-05 | 2026-09-05 |
+| F25 | 7 checks | release-readiness 0.3.3: count of the checks above; examples/acme/inputs/release.json | 2026-09-05 | 2026-09-05 |
+| F26 | 21 signals | customer-signal-digest 0.3.3: signals in the window after duplicates were merged; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
+| F27 | 16 accounts | customer-signal-digest 0.3.3: distinct accounts named on those signals; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
+| F28 | 7 signals | customer-signal-digest 0.3.3: signals in themes on the problem side; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
+| F29 | 7 accounts | customer-signal-digest 0.3.3: distinct accounts on the problem side; Zendesk: zendesk-page-1.json, zendesk-page-2.json; Intercom: intercom-conversations.json; CSV (calls): calls.csv; CSV (nps): nps.csv (illustrative) | 2026-09-07 to 2026-11-24 | 2026-11-26 |
 | F30 | 2 incidents | PagerDuty (acme): PagerDuty incidents, created_at to resolved_at, services Quote drafting (pagerduty-incidents.json, retrieved 2026-11-26); incidents started in the window | 2026-09-07 to 2026-11-26 | 2026-11-26 |
-| F31 | 4 fixes | review.json, checked by postmortem 0.3.2 | 2026-09-07 to 2026-11-26 | 2026-11-26 |
+| F31 | 4 fixes | review.json, checked by postmortem 0.3.3 | 2026-09-07 to 2026-11-26 | 2026-11-26 |
 | F32 | 4 rank of 8 bets, 1 needs work first | bets.csv | 2026-07-27 | 2026-07-27 |
 | F33 | 14 points of 14 | briefs/quote-drafting.md | 2026-07-27 | 2026-07-27 |
 
