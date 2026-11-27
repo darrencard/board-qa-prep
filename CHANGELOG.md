@@ -2,6 +2,7 @@
 
 ## 0.3.2, 2026-11-27
 
+- Scorecard fix round: the frame shows the share bar and the 2 open questions; the 13 answered fold into a `<details>` inside the frame, whose rows keep the frame's columns. The share ("13 of 15 answered") and the owners' team ("Quoting squad", with the person mark) print once in the frame head, and each open row prints the owner's role only, with no wrap. A row with no picture gives its name the picture column too. The figure column prints in one case, numerals and capitals, as /update. Tests for each.
 - The picture is scorecard rows in the grammar of the outcome scorecard on dacard.ai/update (svgkit 1.2.0, landing-loop 78784ef): a share bar first ("13 of 15" answered, "2 open"), then one row per likely question, open first with its due date, OPEN in ink and its owner in brass, then the answered ones by topic with the steps of the project file each reads and ANSWERED muted. Geist Mono 12px for labels and figures, Geist 14px for names, no text inside a picture, no box inside the frame. The tiles, their panel and the boxed check chips are gone; check words print as text.
 - Cited check words in their skill's words: eval-kit's "not confirmed: too close to call" (an older project file's "inside noise" prints as it), and did-it-land's noise flag as "inside normal ups and downs".
 - README and SKILL.md in plain words: project, target, the project file, the landing brief defined as a one-page plan. Keys, file names and flags are unchanged. SKILL.md uses the user's own word if they say bet.

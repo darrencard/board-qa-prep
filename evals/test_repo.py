@@ -77,7 +77,7 @@ class Sample(unittest.TestCase):
         key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
         opens = [q for q in key["questions"] if q["check"] == "open"]
         frame = svgkit.frames_in(body)[0]
-        self.assertEqual(re.findall(r'<span class="sc-o">.*?</svg>([^<]+)</span>', frame), [q["owner"] for q in opens])
+        self.assertEqual(re.findall(r'<span class="sc-o">.*?</svg>([^<]+)</span>', frame), [q["owner"].removesuffix(", Quoting squad") for q in opens])
 
     def test_selection_and_focus_print_in_ink_not_green(self):
         css = re.search(r"<style>(.*?)</style>", (ACME / "board-qa-prep.html").read_text(encoding="utf-8"), re.S).group(1)
@@ -201,6 +201,32 @@ class Visual(unittest.TestCase):
             self.assertIn('class="sc-o"', w)
         for w in words[1 + len(opens) :]:
             self.assertEqual(w, '<span class="sc-w">answered</span>')
+
+    def test_the_share_and_the_team_print_once_in_the_frame_head(self):
+        frame = svgkit.frames_in(self.page)[0]
+        head, body = frame.split('<div class="sc-b">', 1)
+        self.assertIn("<span>Likely board questions</span><span>13 of 15 answered</span>", head)
+        self.assertIn("</svg>Quoting squad</span>", head)
+        self.assertNotIn("Quoting squad", body.split('<span class="sc-c">', 1)[0], "each row prints the role only")
+        self.assertIn('<svg class="sc-sh"', body.split('<div class="sc-r">')[1], "the share bar stays the first row")
+        self.assertEqual(render_html.team_of(["Lead, Quoting squad", "Head of Product, Quoting squad"]), "Quoting squad")
+        self.assertEqual(render_html.team_of(["Lead, Quoting squad", "CFO"]), "")
+
+    def test_the_answered_fold_into_details_and_the_open_stay_shown(self):
+        frame = svgkit.frames_in(self.page)[0]
+        shown, folded = frame.split('<details class="sc-d">', 1)
+        opens = [q for q in self.key["questions"] if q["check"] == "open"]
+        done = [q for q in self.key["questions"] if q["check"] != "open"]
+        self.assertEqual(shown.count('<div class="sc-r">'), 1 + len(opens), "the share row and the open questions")
+        self.assertIn('<summary class="sc-x">The 13 answered, with the steps each answer reads</summary>', folded)
+        self.assertEqual(folded.split("</details>", 1)[0].count('<div class="sc-r">'), len(done))
+        self.assertNotIn("answered</span></span></div>", shown)
+
+    def test_a_row_without_a_picture_gives_its_name_the_picture_column_and_figures_print_in_one_case(self):
+        css = self.css()
+        self.assertIn("@container sc (min-width:800px){.scg .sc-r:has(>.sc-p:empty)>.sc-n{grid-column:1/3}.scg .sc-r:has(>.sc-p:empty)>.sc-p{display:none}}", css)
+        self.assertIn(".scg .sc-l{text-transform:uppercase;letter-spacing:.06em}", css)
+        self.assertIn(".scg .sc-d,.scg .sc-d::details-content{grid-column:1/-1;display:grid;grid-template-columns:subgrid}", css)
 
     def test_cited_check_words_are_the_contract_words(self):
         quality = next(q for q in self.key["questions"] if q["topic"] == "quality")

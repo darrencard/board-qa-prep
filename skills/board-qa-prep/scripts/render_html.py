@@ -44,6 +44,9 @@ STYLE = re.compile(r"<style>(.*?)</style>", re.S)
 CITE = re.compile(r"\s*\[(F\d{1,3})\]")
 
 # Layout for this page only. Everything else comes from the template's stylesheet and svgkit.CSS.
+# In the scorecard, a row with no picture gives its name the picture column too, so names stay on one line; the
+# figure column prints in one case, numerals and capitals, as /update does; and the answered questions fold into a
+# <details> whose rows keep the frame's columns (subgrid through ::details-content).
 PAGE_CSS = """
 main.solo{margin-left:0}
 .solo .slide{min-height:0}
@@ -94,6 +97,11 @@ main.solo{margin-left:0}
 .stack table,.stack tbody,.stack tr,.stack td{display:block}.stack tr:first-child{display:none}.stack tr{padding:10px 16px;border-bottom:1px solid var(--line)}
 .stack td{border:0;padding:3px 0;display:grid;grid-template-columns:96px 1fr;gap:12px}.stack td.num{text-align:left;white-space:normal}
 .stack td::before{content:attr(data-l);font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
+.scg .sc-l{text-transform:uppercase;letter-spacing:.06em}
+@container sc (min-width:800px){.scg .sc-r:has(>.sc-p:empty)>.sc-n{grid-column:1/3}.scg .sc-r:has(>.sc-p:empty)>.sc-p{display:none}}
+.scg .sc-d,.scg .sc-d::details-content{grid-column:1/-1;display:grid;grid-template-columns:subgrid}
+.scg .sc-d{margin:0;padding:0;border:0}.scg .sc-d>summary{margin:0;cursor:pointer}.scg .sc-d>summary:hover{color:var(--t1)}
+@container sc (max-width:799.98px){.scg .sc-d,.scg .sc-d::details-content{display:block}}
 """
 
 WRITER_LABEL = {
@@ -278,6 +286,19 @@ def source_line(q: dict[str, Any]) -> str:
     return " · ".join(SOURCE.get(x, x) for x in q.get("from_keys") or []).upper() or "THE PROJECT FILE"
 
 
+def team_of(owners: list[str]) -> str:
+    """The team every owner shares ("Lead, Quoting squad" and "Head of Product, Quoting squad" share "Quoting squad"),
+    or "" when they do not all name the same one. The frame prints it once in its head; each row prints the role."""
+    teams = {o.rpartition(", ")[2] for o in owners if ", " in o}
+    if len(owners) < 2 or len(teams) != 1 or any(", " not in o for o in owners):
+        return ""
+    return teams.pop()
+
+
+def role_of(owner: str, team: str) -> str:
+    return owner[: -len(", " + team)] if team and owner.endswith(", " + team) else owner
+
+
 def rows(k: dict[str, Any]) -> str:
     """A share bar first (answered of all), then one row per question, open first: the question, its due date and
     its owner in brass; then the answered ones by topic, with the steps they read from. Check words are text, never
@@ -293,23 +314,32 @@ def rows(k: dict[str, Any]) -> str:
     ]
     opens = [q for q in k["questions"] if q["check"] == "open"]
     done = [q for q in k["questions"] if q["check"] != "open"]
+    team = team_of([q["owner"] for q in opens])
     for q in opens:
         out.append(
             sk.sc_row(
                 f"{q['id']}. {plain(q['question'])}",
                 figure=sk.figure_line(str(q["due"]).upper()),
-                word=sk.check_word("open", ink=True) + sk.person_call(q["owner"]),
+                word=sk.check_word("open", ink=True) + sk.person_call(role_of(q["owner"], team)),
             )
         )
-    for q in done:
-        out.append(sk.sc_row(f"{q['id']}. {TOPIC.get(q['topic'], q['topic'])}", figure=sk.figure_line(source_line(q)), word=sk.check_word("answered")))
+    answered = [sk.sc_row(f"{q['id']}. {TOPIC.get(q['topic'], q['topic'])}", figure=sk.figure_line(source_line(q)), word=sk.check_word("answered")) for q in done]
+    if answered:
+        out.append(f'<details class="sc-d"><summary class="sc-x">The {len(done)} answered, with the steps each answer reads</summary>{"".join(answered)}</details>')
+    legend = f"<span>{n['answered']} of {n['questions']} answered</span>"
+    if team:
+        legend += f'<span class="sc-k">{sk.person_mark()}{e(team)}</span>'
     return sk.sc_frame(
         out,
         label=answer_line(k),
         title="Likely board questions",
         head=["Question", "", "Due · read from", "Check"],
-        legend=sk.legend("actual", "answered"),
-        caption=(f"One row per likely question, {n['questions']} in all: open first, each owner in brass; then answered, by topic, with the steps each answer reads."),
+        legend=legend,
+        caption=(
+            f"One row per likely question, {n['questions']} in all: open first, each owner's role in brass"
+            + (f" (every owner is in {team}, named once in the head)" if team else "")
+            + "; then answered, folded, by topic, with the steps each answer reads."
+        ),
         illustrative=bool(k.get("illustrative")),
     )
 
