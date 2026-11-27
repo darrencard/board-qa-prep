@@ -180,6 +180,16 @@ class TheAcmeRead(unittest.TestCase):
         else:
             self.assertNotIn("decision-open", self.by_topic)
 
+    def test_evals_print_the_build_word_with_its_interval(self):
+        ev = upstream()["evals"]
+        q = self.by_topic["quality"][0]
+        self.assertEqual(q["check"], "answered")
+        self.assertEqual(ev["status"], "not confirmed: inside noise")
+        lo, hi = ev["figures"][f"pass_rate@{ev['version']}"]["interval_95"]
+        self.assertIn(f"(95% interval {lo}% to {hi}%)", q["answer"])
+        self.assertIn("eval-kit's build check: not confirmed: inside noise.", q["answer"])
+        self.assertNotIn("meets target", q["answer"])
+
     def test_release_reads_readiness_waivers_and_spec_holds(self):
         shipped, waived = self.by_topic["release"]
         self.assertEqual(shipped["check"], "answered")
@@ -289,33 +299,23 @@ if __name__ == "__main__":
     unittest.main()
 
 
-def decided_upstream() -> dict:
-    """The upstream record with D-0004 and D-0005 decided, as decision-record writes a call once it is made."""
-    rec = upstream()
-    dec = rec["decisions"]
-    for row in dec["rows"]:
-        dec["decided"].append(
-            {"id": row["id"], "title": row["ask"], "chosen": row["options"].split(" or ")[0], "decided_by": row["owner"], "date": "2026-08-03", "owner": row["owner"]}
-        )
-        dec["figures"].pop(f"days_waiting@{row['id']}", None)
-    dec["rows"] = []
-    dec["figures"]["open"]["value"] = 0
-    dec["figures"]["decided"]["value"] = len(dec["decided"])
-    for gone in ("past_due", "waiting_long", "oldest_open"):
-        dec["figures"].pop(gone, None)
-    return rec
-
-
 class DecisionsMade(unittest.TestCase):
-    """decision-record may close the open rows (D-0004, D-0005); the reader handles a record with none open."""
+    """decision-record's record as of 2026-11-26: 5 decided, 0 open. The reader leaves no decision question open that it answers."""
 
     def setUp(self):
-        self.w = Work(decided_upstream())
+        self.up = upstream()
+        self.w = Work(self.up)
 
     def tearDown(self):
         self.w.close()
 
     def test_no_open_rows_reads_cleanly_and_leads_with_the_latest_calls(self):
+        dec = self.up["decisions"]
+        self.assertEqual(dec["rows"], [])
+        self.assertEqual((dec["figures"]["open"]["value"], dec["figures"]["decided"]["value"]), (0, 5))
+        self.assertEqual(dec["figures"]["waiting_long"]["value"], 0)
+        self.assertIn("usual_days_to_decide", dec["figures"])
+        self.assertIn("days_to_decide@D-0004", dec["figures"])
         html, md = self.w.dir / "p.html", self.w.dir / "p.md"
         self.assertEqual(self.w.prep("--past", str(PAST), "--html", str(html), "--md", str(md)), 0)
         rec = self.w.record()
@@ -323,16 +323,26 @@ class DecisionsMade(unittest.TestCase):
         self.assertEqual(check.check(rec), [])
         topics = {q["topic"]: q for q in key["questions"]}
         self.assertNotIn("decision-open", topics)
-        made = topics["decision-made"]["answer"]
-        self.assertIn("5 decided", made)
-        self.assertTrue(made.split(": ", 1)[1].startswith("5 decided"), made)
-        self.assertIn("Set the rollback trigger for quote drafting (Lead, Quoting squad, 2026-08-03)", made)
-        self.assertIn("Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-03)", made)
-        # The calls still predate did-it-land's read, so the scale call stays open with the brief's decider.
-        self.assertEqual(topics["decision"]["check"], "open")
-        self.assertEqual(topics["decision"]["owner"], "Head of Product, Quoting squad")
-        self.assertIn(topics["decision-made"]["id"], html.read_text(encoding="utf-8"))
+        self.assertNotIn("decision", topics)  # the record is as of did-it-land's read, so it answers the scale call
+        made = topics["decision-made"]
+        self.assertEqual(made["check"], "answered")
+        self.assertTrue(made["answer"].split(": ", 1)[1].startswith("5 decided"), made["answer"])
+        self.assertIn("Set the rollback trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10)", made["answer"])
+        self.assertIn("Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-10)", made["answer"])
+        self.assertIn(made["id"], html.read_text(encoding="utf-8"))
         self.assertIn("Set the rollback trigger", md.read_text(encoding="utf-8"))
+
+    def test_a_record_older_than_the_read_keeps_the_scale_call_open(self):
+        rec = copy.deepcopy(self.up)
+        rec["decisions"]["as_of"] = "2026-08-10"
+        w = Work(rec)
+        try:
+            self.assertEqual(w.prep(), 0)
+            topics = {q["topic"]: q for q in w.record()["board_qa"]["questions"]}
+            self.assertEqual(topics["decision"]["check"], "open")
+            self.assertEqual(topics["decision"]["owner"], "Head of Product, Quoting squad")
+        finally:
+            w.close()
 
 
 class FailureSafe(unittest.TestCase):

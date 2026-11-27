@@ -345,6 +345,9 @@ def q_quality(d: Draft) -> None:
     status = r["evals"].get("status")
     if status in ("meets target", "below target"):
         parts.append(f"eval-kit's build check: {status}.")
+    elif status == "not confirmed: inside noise":
+        # eval-kit's word when the point estimate meets the target but the 95% interval's low end does not clear it.
+        parts.append(f"eval-kit's build check: {status}. The point estimate meets the target, but the low end of the 95% interval does not clear it.")
     d.answered("quality", question, " ".join(parts), ["evals"])
 
     prom = r["evals"].get("promotion")

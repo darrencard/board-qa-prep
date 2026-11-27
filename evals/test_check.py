@@ -4,6 +4,7 @@ import contextlib
 import copy
 import io
 import json
+import re
 import unittest
 
 from _path import ACME
@@ -103,7 +104,8 @@ class EditAndClose(unittest.TestCase):
 
     def test_a_reword_that_keeps_the_figures_is_saved(self):
         qid = self.ids("cost")
-        text = "Each quote costs $0.0338 [F17], against a budget of $0.027 [F18]: over budget."
+        cost, budget = re.findall(r"\[F\d+\]", q(self.w.record(), "cost")["answer"])[:2]
+        text = f"Each quote costs $0.0338 {cost}, against a budget of $0.027 {budget}: over budget."
         self.assertEqual(self.run_cmd("edit", qid, "--answer", text), 0)
         self.assertEqual(q(self.w.record(), "cost")["answer"], text)
 
@@ -114,12 +116,13 @@ class EditAndClose(unittest.TestCase):
 
     def test_close_records_a_stated_answer_and_recounts(self):
         qid = self.ids("past")
+        was_open = self.w.record()["board_qa"]["counts"]["open"]["value"]
         self.assertEqual(self.run_cmd("close", qid, "--text", "No. Quote text goes to the provider with names removed.", "--by", "the CTO"), 0)
         rec = self.w.record()
         x = q(rec, "past")
         self.assertEqual((x["check"], x["stated_by"]), ("answered", "the CTO"))
         self.assertNotIn("owner", x)
-        self.assertEqual(rec["board_qa"]["counts"]["open"]["value"], 3)
+        self.assertEqual(rec["board_qa"]["counts"]["open"]["value"], was_open - 1)
         self.assertEqual(check.check(rec), [])
 
     def test_close_refuses_a_figure_and_a_placeholder_name(self):

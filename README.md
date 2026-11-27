@@ -28,7 +28,7 @@ It rewrites [examples/acme/board-qa-prep.html](examples/acme/board-qa-prep.html)
 did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a bar of 40% [F03] by 2026-11-15. At the date it read 41% [F04].
 ```
 
-The sample reads the full record, every key from portfolio to postmortem, and marks each question answered from the record or open with an owner. Decisions come from decision-record's open rows and decided list, the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
+The sample reads the full record, every key from portfolio to postmortem, and marks each question answered from the record or open with an owner. Decisions come from decision-record's open rows and decided list (the sample's record has 5 decided and none open, so no decision question is left open), quality from eval-kit's build word (here not confirmed: inside noise, printed with its 95% interval), the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
 
 ```bash
 python3 examples/acme/sample.py --upstream ../landing-loop/examples/acme/landing/quote-drafting.json
@@ -66,15 +66,17 @@ python3 skills/board-qa-prep/scripts/board_qa.py prep landing/<bet>.json --past 
   "as_of": "2026-11-26",
   "read": ["portfolio", "decisions", "spec", "release", "cost", "evals", "landed", "signals", "postmortem"],
   "not_in_record": [],
-  "first": ["Q17", "Q02", "Q05", "Q07", "Q10"],
+  "first": ["Q15", "Q02", "Q08", "Q11", "Q03"],
   "questions": [
-    {"id": "Q07", "topic": "decision-open", "question": "Which decisions are still open, and who makes them?", "check": "open",
-     "missing": "From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. ...",
+    {"id": "Q05", "topic": "decision-made", "question": "What did we decide, and who decided?", "check": "answered",
+     "answer": "From decision-record, as of 2026-11-26: 5 decided [F10]. Set the rollback trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10); ..."},
+    {"id": "Q11", "topic": "release", "question": "Was the waived check closed before its waiver ran out?", "check": "open",
+     "missing": "Open bugs within the severity limits: waived by Head of Product, Quoting squad until 2026-09-19. No later release check in the record says it closed.",
      "owner": "Lead, Quoting squad", "due": "before the board meeting"}
   ],
   "figures": {
-    "F11": {"value": 2, "unit": "decisions", "source": "decision-record 0.3.0: counted from decisions.md (sha256 42c46365e3dc)",
-            "window": {"from": "2026-07-13", "to": "2026-07-27"}, "as_of": "2026-07-27", "from": "decisions/figures/open"}
+    "F10": {"value": 5, "unit": "decisions", "source": "decision-record 0.3.0: counted from decisions.md (sha256 096127d5d48d)",
+            "window": {"from": "2026-07-13", "to": "2026-11-26"}, "as_of": "2026-11-26", "from": "decisions/figures/decided"}
   }
 }
 ```
