@@ -54,7 +54,7 @@ PAGE_CSS = """
 main.solo{margin-left:0}
 .solo .slide{min-height:0}
 .solo .slide.cover{min-height:0;padding-top:40px;padding-bottom:48px;justify-content:flex-start}
-.solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;max-width:22ch;margin-bottom:20px}
+.solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;text-wrap:balance;margin-bottom:20px}
 .solo .lede{margin-bottom:24px}
 .solo .lede b{color:var(--t1);font-weight:500}
 .marks{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;margin:0 0 20px;font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
@@ -70,7 +70,7 @@ main.solo{margin-left:0}
 .qa>div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 16px;border-top:1px solid var(--line);padding:14px 0}
 .qa .id{font:400 11px/22px var(--mono);letter-spacing:.1em;color:var(--t3)}
 .qa .q{display:block;color:var(--t1);font-size:15px;line-height:1.45}
-.qa .a{display:block;color:var(--t2);font-size:13.5px;line-height:1.55;margin-top:6px;max-width:72ch}
+.qa .a{display:block;color:var(--t2);font-size:13.5px;line-height:1.55;margin-top:6px}
 .qa .k{display:block;font:400 11px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:8px}
 .qa details{margin-top:6px}
 .qa details>summary{cursor:pointer;font:400 11px/18px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
@@ -90,7 +90,7 @@ main.solo{margin-left:0}
 .more>summary{cursor:pointer;font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
 .more>summary:hover{color:var(--t1)}
 .more[open]>summary{margin-bottom:8px}
-.more p{font-size:13px;color:var(--t2);max-width:80ch}
+.more p{font-size:13px;color:var(--t2)}
 .tablewrap td,.tablewrap th{overflow-wrap:anywhere}
 ::selection{background:var(--t1);color:var(--bg)}
 :focus-visible{outline-color:var(--t1)}
@@ -108,6 +108,9 @@ main.solo{margin-left:0}
 @container sc (max-width:799.98px){.scg .sc-d{display:block}}
 @supports selector(::details-content){.scg .sc-d::details-content{grid-column:1/-1;display:grid;grid-template-columns:subgrid}@container sc (max-width:799.98px){.scg .sc-d::details-content{display:block}}}
 @supports not selector(::details-content){.scg .sc-d .sc-r{grid-template-columns:minmax(0,1fr) max-content;grid-template-areas:'n s' 'l l';column-gap:16px;row-gap:6px}.scg .sc-d .sc-r>.sc-n,:is(.scg) .sc-d .sc-r:has(>.sc-p:empty)>.sc-n{grid-area:n}.scg .sc-d .sc-s{grid-area:s;align-self:start}.scg .sc-d .sc-l{grid-area:l;text-align:left;white-space:normal}.scg .sc-d .sc-p{display:none}}
+/* Full column (site rule since 2026-11-25): every title and text block runs the content column, the scorecard frame's width. */
+.solo h1,.solo h2,.solo h3,.solo .lede,.solo .next,.solo p,.solo li,.solo .sk figcaption{max-width:none}
+.solo h1{text-wrap:balance}.solo .lede,.solo p,.solo li,.solo .sk figcaption{text-wrap:pretty}
 """
 
 WRITER_LABEL = {

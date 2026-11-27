@@ -4,7 +4,7 @@ description: Prepares a product or technology leader for the questions a board w
 license: MIT. See LICENSE in the repository root.
 metadata:
   author: Dacard
-  version: "0.3.2"
+  version: "0.3.3"
 ---
 
 # Board Q&A prep

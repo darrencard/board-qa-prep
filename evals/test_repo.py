@@ -305,12 +305,12 @@ class Visual(unittest.TestCase):
         self.assertIn("<span>Board Q&amp;A prep</span>", header)
         self.assertNotIn("board-qa-prep", header)
         self.assertIn("<code>board-qa-prep</code>", self.page.split("For your engineers", 1)[1])
-        self.assertIn("\nBoard Q&A prep v0.3.2.", self.md)
+        self.assertIn("\nBoard Q&A prep v0.3.3.", self.md)
 
     def test_the_standard_gap_under_the_heading(self):
         self.assertIn("Nothing in the project file answers it", self.page)
         # The heading's gap is the family's: the same rules as did-it-land and eval-kit.
-        self.assertIn(".solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;max-width:22ch;margin-bottom:20px}", self.page)
+        self.assertIn(".solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;text-wrap:balance;margin-bottom:20px}", self.page)
         self.assertIn(".solo .lede{margin-bottom:24px}", self.page)
 
     def test_the_page_follows_the_sample_anatomy(self):
@@ -320,7 +320,7 @@ class Visual(unittest.TestCase):
         self.assertEqual(at, sorted(at))
         self.assertEqual(body.count('<div class="next">'), 1, "one next step leads the page")
         self.assertIn('<span class="o">Head of Product, Quoting squad</span><span class="d">before the board meeting</span>', body)
-        self.assertIn("<span>Board Q&amp;A prep</span><span>As of 2026-11-26</span><span>v0.3.2</span>", body)
+        self.assertIn("<span>Board Q&amp;A prep</span><span>As of 2026-11-26</span><span>v0.3.3</span>", body)
         self.assertNotIn("Book a call", body, "a sample is the skill's own output: no call to action")
 
 
@@ -334,12 +334,12 @@ class Floor(unittest.TestCase):
 
 
 class Versions(unittest.TestCase):
-    def test_every_version_field_is_0_3_2(self):
+    def test_every_version_field_agrees(self):
         plugin = json.loads((ROOT / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
         skill = re.search(r'version: "([^"]+)"', (SKILL / "SKILL.md").read_text(encoding="utf-8")).group(1)
         log = re.search(r"^## (\S+), (\d{4}-\d{2}-\d{2})", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"), re.M)
-        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.2"})
+        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.3"})
         self.assertEqual(log.group(2), "2026-11-27")
 
 

@@ -44,7 +44,7 @@ import loop  # noqa: E402
 import render_html  # noqa: E402
 from display import num, sig  # noqa: E402
 
-VERSION = "0.3.2"
+VERSION = "0.3.3"
 TOOL = f"board-qa-prep {VERSION}"
 DEFAULT_DUE = "before the board meeting"
 MAX_PAST_BYTES = 200_000

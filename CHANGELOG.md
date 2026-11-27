@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3, 2026-11-27
+
+- Full column: the heading, the intro, the next step, section text and captions run the full width of the content column, the same width as the scorecard frame (the site's rule since 2026-11-25). The page's own CSS drops its caps on text (the heading's 22ch, the answers' 72ch and the folds' 80ch) and overrides the vendored template's 62ch intro and svgkit's 76ch caption after their rules, so neither hash-pinned file changes. The heading balances its lines; text breaks with `text-wrap: pretty`. A test checks the page CSS caps no text and the sample carries the override.
+
 ## 0.3.2, 2026-11-27
 
 - Scorecard fix round: the frame shows the share bar and the 2 open questions; the 13 answered fold into a `<details>` inside the frame, whose rows keep the frame's columns (subgrid through `::details-content`, only inside `@supports selector(::details-content)`; elsewhere each folded row stacks, name and word on one line, the figure under it). The figure and word columns are fixed to the widest text in the frame, folded rows included, so opening the fold moves nothing. The share ("13 of 15 answered") and the owners' team ("Quoting squad", with the person mark) print once in the frame head, and each open row prints the owner's role only, with no wrap. A row with no picture gives its name the picture column too. The figure column prints in one case, numerals and capitals, as /update. Tests for each.

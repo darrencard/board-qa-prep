@@ -1,6 +1,6 @@
 [project]
 name = "board-qa-prep"
-version = "0.3.2"
+version = "0.3.3"
 description = "A Claude skill that drafts the questions a board will likely ask about a bet, answered from the Landing Loop record or open with an owner."
 requires-python = ">=3.11"
 # Standard library only, on purpose: the scripts run inside sandboxes that cannot install packages.
