@@ -103,7 +103,7 @@ class EditAndClose(unittest.TestCase):
 
     def test_a_reword_that_keeps_the_figures_is_saved(self):
         qid = self.ids("cost")
-        text = "Each quote costs $0.0338 [F14], against a budget of $0.027 [F15]: over budget."
+        text = "Each quote costs $0.0338 [F17], against a budget of $0.027 [F18]: over budget."
         self.assertEqual(self.run_cmd("edit", qid, "--answer", text), 0)
         self.assertEqual(q(self.w.record(), "cost")["answer"], text)
 
@@ -119,7 +119,7 @@ class EditAndClose(unittest.TestCase):
         x = q(rec, "past")
         self.assertEqual((x["check"], x["stated_by"]), ("answered", "the CTO"))
         self.assertNotIn("owner", x)
-        self.assertEqual(rec["board_qa"]["counts"]["open"]["value"], 4)
+        self.assertEqual(rec["board_qa"]["counts"]["open"]["value"], 3)
         self.assertEqual(check.check(rec), [])
 
     def test_close_refuses_a_figure_and_a_placeholder_name(self):

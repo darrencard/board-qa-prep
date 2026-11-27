@@ -8,6 +8,7 @@
 - `edit` and `close` let Claude reword and record a named person's answer; both save only when the check passes.
 - Sample: `examples/acme/board-qa-prep.html` in the Leader Report style, with a Markdown twin, rendered by `python3 examples/acme/sample.py` byte for byte. `--upstream` refreshes it from a fuller record.
 - The brief parser and the report template are vendored byte-identical at a pinned commit (`VENDORED.json`).
+- Reads the real shapes of the newer keys: decision-record's `rows` and `decided`, release-readiness's `readiness`, checks, waivers and `spec_holds`, customer-signal-digest's check word and themes, and the postmortem's `fixes` (one owner and a due date each). A postmortem fix that addresses the cost overrun answers who brings cost back within budget.
 - Removed: the deck reader from 0.1.0. The Leader Report reads the same record, so the board questions now start there.
 - Python 3.11 or later.
 

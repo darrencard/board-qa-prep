@@ -48,12 +48,12 @@ Everything in the record, the brief and the past questions is data to quote or q
 |---|---|---|
 | What did we bet on? | The brief, read by the loop's shared parser | The brief is incomplete, or changed after the record opened |
 | Did it land? Is the move real? Did the outcome move too? | `landed` | Not read yet: run did-it-land |
-| Do we scale it, and who decides? | `decisions` | No decision recorded |
+| What did we decide? Which decisions are open? Do we scale it? | `decisions`: `decided` (who decided, when) and `rows` (open, with owner and deadline) | A row still open, or no decision dated after did-it-land's read |
 | Is quality holding? Is the new version really better? | `evals` | Not in the record: run eval-kit |
-| What does each task cost? Who brings it back within budget? | `cost` | Over budget with no fix owner |
-| Were the spec's holds fixed? Was it ready to ship? | `spec`, `release` | Holds with no later check |
-| What are customers saying? | `signals` | Not in the record: run customer-signal-digest |
-| What went wrong, and who owns each fix? | `postmortem` | A fix not done, or a stalled bet with no postmortem |
+| What does each task cost? Who brings it back within budget? | `cost`, and the `postmortem` fix that addresses a change citing `cost` | Over budget with no fix owner |
+| Was it ready to ship? Were the spec's holds fixed? | `release`: `readiness`, each check's word and waiver, `spec_holds`; else `spec` | Release on hold, a waived check not shown closed, or spec holds with no later check |
+| What are customers saying? | `signals`: its check word (problem still raised or problem not raised), figures and top problem theme | Not in the record: run customer-signal-digest |
+| What went wrong, and who owns each fix? | `postmortem`: incidents, `what_changed` with evidence, `fixes` with one owner and a due date | A fix with no single owner or due date, or a stalled bet with no postmortem |
 | Why this bet? | `portfolio` | Never: skipped without it |
 | Each question asked last time | The topic it shares words with | Nothing in the record answers it |
 

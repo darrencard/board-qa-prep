@@ -133,22 +133,59 @@ class TheAcmeRead(unittest.TestCase):
         self.assertEqual(q["check"], "answered")
         self.assertIn("did-it-land says landed", q["answer"])
 
-    def test_open_questions_name_the_brief_owner_by_default(self):
-        opens = [q for q in self.key["questions"] if q["check"] == "open"]
-        self.assertTrue(opens)
-        for q in opens:
-            self.assertEqual(q["owner"], "Head of Product, Quoting squad")
+    def test_open_questions_name_the_owner_the_record_gives(self):
+        opens = {q["topic"]: q for q in self.key["questions"] if q["check"] == "open"}
+        self.assertEqual(sorted(opens), ["decision", "decision-open", "past", "release"])
+        self.assertEqual(opens["decision"]["owner"], "Head of Product, Quoting squad")
+        self.assertEqual(opens["past"]["owner"], "Head of Product, Quoting squad")
+        self.assertEqual(opens["decision-open"]["owner"], "Quoting squad lead")
+        self.assertEqual(opens["release"]["owner"], "Quoting squad lead")
+        for q in opens.values():
             self.assertEqual(q["due"], "before the board meeting")
 
-    def test_cost_over_budget_opens_a_question_for_an_owner(self):
+    def test_cost_over_budget_is_answered_by_the_postmortem_fix(self):
         self.assertEqual(self.by_topic["cost"][0]["check"], "answered")
         self.assertIn("over budget", self.by_topic["cost"][0]["answer"])
-        self.assertEqual(self.by_topic["cost-owner"][0]["check"], "open")
+        owner = self.by_topic["cost-owner"][0]
+        self.assertEqual(owner["check"], "answered")
+        self.assertIn("Owner: Quoting squad lead, due 2026-12-10.", owner["answer"])
+        self.assertEqual(owner["from_keys"], ["cost", "postmortem"])
 
-    def test_missing_keys_say_which_skill_to_run(self):
-        self.assertEqual(self.key["not_in_record"], ["decisions", "release", "signals", "postmortem"])
+    def test_every_key_before_board_qa_is_read(self):
+        self.assertEqual(self.key["read"], list(loop.READS))
+        self.assertEqual(self.key["not_in_record"], [])
+
+    def test_decisions_are_read_from_rows_and_decided(self):
+        made = self.by_topic["decision-made"][0]
+        self.assertEqual(made["check"], "answered")
+        self.assertIn("3 decided", made["answer"])
+        self.assertIn("Prices come from the price book, never the model (Quoting squad tech lead, 2026-07-27)", made["answer"])
+        still = self.by_topic["decision-open"][0]
+        self.assertIn("2 open", still["missing"])
+        self.assertIn("Set the rollback trigger for quote drafting (Quoting squad lead, due 2026-08-03)", still["missing"])
+        # The decision record predates did-it-land's read, so the scale call is still open.
         self.assertIn("run decision-record", self.by_topic["decision"][0]["missing"])
-        self.assertIn("run customer-signal-digest", self.by_topic["signals"][0]["missing"])
+
+    def test_release_reads_readiness_waivers_and_spec_holds(self):
+        shipped, waived = self.by_topic["release"]
+        self.assertEqual(shipped["check"], "answered")
+        self.assertIn("release-readiness said ready to ship for Acme quote drafting v1.0 on 2026-09-05", shipped["answer"])
+        self.assertIn("read hold under a waiver from Head of Product, Quoting squad until 2026-09-19", shipped["answer"])
+        self.assertIn("Every spec-auditor hold was closed before release (rollback, eval-plan).", shipped["answer"])
+        self.assertEqual(waived["check"], "open")
+        self.assertNotIn("spec", self.by_topic)
+
+    def test_signals_print_the_digest_check_word(self):
+        q = self.by_topic["signals"][0]
+        self.assertEqual(q["check"], "answered")
+        self.assertTrue(q["answer"].startswith("customer-signal-digest says problem still raised."))
+        self.assertIn("The top problem theme: Quote drafts miss line items.", q["answer"])
+
+    def test_postmortem_names_one_owner_and_due_date_per_fix(self):
+        q = self.by_topic["postmortem"][0]
+        self.assertEqual(q["check"], "answered")
+        for owner in ("Quoting squad lead, due 2026-12-10", "Platform on-call lead, due 2026-12-17", "Quoting squad tech lead, due 2027-01-08", "Price book squad lead, due 2026-12-17"):
+            self.assertIn(owner, q["answer"])
 
     def test_past_questions_land_on_their_topic_or_open(self):
         asked = [q for q in self.key["questions"] if q.get("asked_last_time")]
@@ -180,39 +217,41 @@ class AnyRecordInTheContract(unittest.TestCase):
         self.assertEqual(key["questions"][0]["check"], "answered")
         self.assertEqual(next(q for q in key["questions"] if q["topic"] == "landed")["check"], "open")
 
-    def test_full_record_with_the_new_keys(self):
-        r = upstream()
-        r["decisions"] = {
-            "tool": "decision-record 0.3.0",
-            "as_of": "2026-11-20",
-            "decisions": [{"title": "Scale quote drafting to all plans", "owner": "Head of Product", "status": "open", "due": "2026-12-10"}],
-        }
-        r["release"] = {"tool": "release-readiness 0.3.0", "as_of": "2026-09-05", "verdict": "ready to ship"}
-        r["signals"] = {
-            "tool": "customer-signal-digest 0.3.0",
-            "as_of": "2026-11-25",
-            "figures": {"mentions": loop.figure(42, "mentions", "Illustrative support export", "2026-11-01", "2026-11-24", "2026-11-25")},
-        }
-        r["postmortem"] = {
-            "tool": "postmortem 0.3.0",
-            "as_of": "2026-11-22",
-            "fixes": [{"fix": "Cap the xl model to long quotes", "owner": "Quoting squad lead", "status": "open"}],
-        }
-        rec = self.run_with({k: r[k] for k in ("schema", "bet", "brief", *loop.READS) if k in r})
-        key = rec["board_qa"]
-        self.assertEqual(key["not_in_record"], [])
+    def test_record_before_the_new_keys_says_which_skill_to_run(self):
+        r = {k: v for k, v in upstream().items() if k not in ("decisions", "release", "signals", "postmortem")}
+        key = self.run_with(r)["board_qa"]
+        self.assertEqual(key["not_in_record"], ["decisions", "release", "signals", "postmortem"])
         topics = {q["topic"]: q for q in key["questions"]}
-        self.assertEqual(topics["decision"]["check"], "open")
-        self.assertEqual(topics["decision"]["owner"], "Head of Product")
-        self.assertIn("ready to ship", topics["release"]["answer"])
-        self.assertIn("42", topics["signals"]["answer"])
-        self.assertEqual(topics["postmortem"]["owner"], "Quoting squad lead")
+        self.assertIn("No decision is recorded yet: run decision-record.", topics["decision"]["missing"])
+        self.assertIn("run release-readiness", topics["spec"]["missing"])
+        self.assertIn("run customer-signal-digest", topics["signals"]["missing"])
+        self.assertEqual(topics["cost-owner"]["check"], "open")
+
+    def test_held_release_quiet_problem_and_unowned_fix(self):
+        r = copy.deepcopy(upstream())
+        r["release"]["readiness"] = "hold"
+        r["release"]["checks"][0]["readiness"] = "hold"
+        r["signals"]["check"] = "problem not raised"
+        r["postmortem"]["fixes"][1]["owner"] = "TBD"
+        rec = self.run_with(r)
+        key = rec["board_qa"]
+        topics: dict = {}
+        for q in key["questions"]:
+            topics.setdefault(q["topic"], []).append(q)
+        holding = next(q for q in topics["release"] if q["question"].startswith("What is holding"))
+        self.assertEqual((holding["check"], holding["owner"]), ("open", "Quoting squad tech lead"))
+        self.assertIn("CI passes on the release commit", holding["missing"])
+        self.assertTrue(topics["signals"][0]["answer"].startswith("customer-signal-digest says problem not raised."))
+        self.assertNotIn("say the problem is still there", topics["signals"][0]["answer"])
+        self.assertEqual(topics["postmortem"][0]["check"], "open")
+        self.assertIn("No single owner and due date for: Give every routing change", topics["postmortem"][0]["missing"])
         self.assertEqual(check.check(rec), [])
 
     def test_stalled_bet_asks_for_a_postmortem(self):
         r = upstream()
         r["landed"] = copy.deepcopy(r["landed"])
         r["landed"]["status"] = "stalled"
+        del r["postmortem"]
         key = self.run_with(r)["board_qa"]
         self.assertIn("run postmortem", next(q for q in key["questions"] if q["topic"] == "postmortem")["missing"])
 

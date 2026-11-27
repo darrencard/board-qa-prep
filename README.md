@@ -27,12 +27,16 @@ It rewrites [examples/acme/board-qa-prep.html](examples/acme/board-qa-prep.html)
 
 did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a bar of 40% [F03] by 2026-11-15. At the date it read 41% [F04].
 
-**Q09. Who brings cost back within budget, and by when?** (open)
+**Q11. Who brings cost back within budget, and by when?** (answered)
 
-The record names the model behind most of it, vendor-a/xl: $0.963 [F21] of $1.89 [F22] over budget. It holds no plan and no owner for the fix. Owner: Head of Product, Quoting squad. Due: before the board meeting.
+The record names the model behind most of it, vendor-a/xl: $0.963 [F24] of $1.89 [F25] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Quoting squad lead, due 2026-12-10.
+
+**Q07. Which decisions are still open, and who makes them?** (open)
+
+From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the rollback trigger for quote drafting (Quoting squad lead, due 2026-08-03); Choose the model tier for quote drafts (Quoting squad tech lead, due 2026-08-03). No later decision record says they closed. Owner: Quoting squad lead. Due: before the board meeting.
 ```
 
-The sample reads the record as it stands today (portfolio, spec, cost, evals, landed), so decisions, release, signals and postmortem show as open, each naming the skill to run. When the full record exists, one command refreshes the input and the sample:
+The sample reads the full record, every key from portfolio to postmortem: 17 questions, 13 answered from the record and 4 open. Decisions come from decision-record's open rows and decided list, the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
 
 ```bash
 python3 examples/acme/sample.py --upstream ../landing-loop/examples/acme/landing/quote-drafting.json
@@ -68,17 +72,17 @@ python3 skills/board-qa-prep/scripts/board_qa.py prep landing/<bet>.json --past 
 "board_qa": {
   "tool": "board-qa-prep 0.3.0",
   "as_of": "2026-11-26",
-  "read": ["portfolio", "spec", "cost", "evals", "landed"],
-  "not_in_record": ["decisions", "release", "signals", "postmortem"],
-  "first": ["Q13", "Q02", "Q05", "Q08", "Q09"],
+  "read": ["portfolio", "decisions", "spec", "release", "cost", "evals", "landed", "signals", "postmortem"],
+  "not_in_record": [],
+  "first": ["Q17", "Q02", "Q05", "Q07", "Q10"],
   "questions": [
-    {"id": "Q09", "topic": "cost-owner", "question": "Who brings cost back within budget, and by when?", "check": "open",
-     "missing": "The record names the model behind most of it, vendor-a/xl: $0.963 [F21] of $1.89 [F22] over budget. ...",
-     "owner": "Head of Product, Quoting squad", "due": "before the board meeting"}
+    {"id": "Q07", "topic": "decision-open", "question": "Which decisions are still open, and who makes them?", "check": "open",
+     "missing": "From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. ...",
+     "owner": "Quoting squad lead", "due": "before the board meeting"}
   ],
   "figures": {
-    "F21": {"value": 0.96264, "unit": "USD", "source": "cost-budget-check 0.3.0: model cost - model token share x budgeted cost; ...",
-            "window": {"from": "2026-11-01", "to": "2026-11-14"}, "as_of": "2026-11-15", "from": "cost/driver/over_budget"}
+    "F11": {"value": 2, "unit": "decisions", "source": "decision-record 0.3.0: counted from decisions.md (sha256 42c46365e3dc)",
+            "window": {"from": "2026-07-13", "to": "2026-07-27"}, "as_of": "2026-07-27", "from": "decisions/figures/open"}
   }
 }
 ```
@@ -96,4 +100,4 @@ Each figure is copied from the record with the path it came from, so any answer 
 
 MIT. Made by [Dacard](https://www.dacard.ai). Python 3.11 or later, standard library only, no network calls. Tests: `python3 -m unittest discover -s evals`.
 
-Claude is a trademark of Anthropic, PBC. This is an independent skill, not made or endorsed by Anthropic.
+Claude and Claude Code are trademarks of Anthropic, PBC. These skills are independent and not affiliated with or endorsed by Anthropic.

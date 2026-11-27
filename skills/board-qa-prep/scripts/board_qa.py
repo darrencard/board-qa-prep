@@ -52,6 +52,8 @@ MAX_PAST_BYTES = 200_000
 WEIGHT = {
     "landed": 3,
     "decision": 3,
+    "decision-open": 3,
+    "decision-made": 1,
     "cost": 2,
     "cost-owner": 2,
     "quality": 2,
@@ -185,8 +187,8 @@ class Draft:
         self.questions.append(q)
         return q
 
-    def open(self, topic: str, question: str, missing: str, keys: list[str], owner: str | None = None) -> dict[str, Any]:
-        q = {"id": "", "topic": topic, "question": question, "check": "open", "missing": missing, "owner": owner or self.owner, "due": self.due, "from_keys": keys}
+    def open(self, topic: str, question: str, missing: str, keys: list[str], owner: str | None = None, due: str | None = None) -> dict[str, Any]:
+        q = {"id": "", "topic": topic, "question": question, "check": "open", "missing": missing, "owner": owner or self.owner, "due": due or self.due, "from_keys": keys}
         self.questions.append(q)
         return q
 
@@ -254,45 +256,54 @@ def q_landed(d: Draft) -> None:
         )
 
 
-def find_decisions(obj: Any) -> list[dict[str, Any]]:
-    """Decision entries in a decisions key: dicts with a text field and an owner. Tolerant of the shape, since the key is new."""
-    found: list[dict[str, Any]] = []
-    if isinstance(obj, dict):
-        text = next((obj[k] for k in ("decision", "title", "question", "summary", "text") if isinstance(obj.get(k), str)), None)
-        owner = next((obj[k] for k in ("owner", "decides", "decider", "decided_by") if isinstance(obj.get(k), str)), None)
-        if text and owner:
-            state = str(obj.get("status") or obj.get("state") or "").lower()
-            found.append({"text": text, "owner": owner, "open": state not in ("decided", "made", "closed", "done", "agreed"), "due": obj.get("due") or obj.get("by")})
-            return found
-        for v in obj.values():
-            found += find_decisions(v)
-    elif isinstance(obj, list):
-        for v in obj:
-            found += find_decisions(v)
-    return found
+def dicts(obj: Any) -> list[dict[str, Any]]:
+    return [x for x in obj if isinstance(x, dict)] if isinstance(obj, list) else []
 
 
 def q_decision(d: Draft) -> None:
+    """decision-record's key: `rows` are the open decisions (the Leader Report's decision format), `decided` the calls made."""
     r = d.record
     question = "Do we scale it, and who decides?"
-    if has(r, "decisions"):
-        items = find_decisions(r["decisions"])
-        still = [i for i in items if i["open"]]
-        if still:
-            first = still[0]
-            names = "; ".join(i["text"] for i in still[:3])
-            missing = f"{len(still)} decisions open in the decision record: {names}." if len(still) > 1 else f"Open in the decision record: {names}."
-            d.open("decision", "Which decisions are still open, and who makes them?", check.strip_figures(missing), ["decisions"], owner=first["owner"])
-        elif items:
-            made = "; ".join(f"{i['text']} ({i['owner']})" for i in items[:3])
-            d.answered("decision", "What did we decide, and who decided?", check.strip_figures(f"From the decision record: {made}."), ["decisions"])
-        else:
-            d.open("decision", question, "The decisions key holds no decision with an owner.", ["decisions"])
-        return
     next_step = loop.get(r, "landed/next_step")
     owner = loop.get(r, "landed/decides") or d.owner
     lead = f"did-it-land's next step: {next_step} " if isinstance(next_step, str) else ""
-    d.open("decision", question, check.strip_figures(lead) + "No decision is recorded yet: run decision-record.", ["landed", "decisions"], owner=owner)
+    if not has(r, "decisions"):
+        d.open("decision", question, check.strip_figures(lead) + "No decision is recorded yet: run decision-record.", ["landed", "decisions"], owner=owner)
+        return
+    dec = r["decisions"]
+    as_of = str(dec.get("as_of") or "")
+    rows, decided = dicts(dec.get("rows")), dicts(dec.get("decided"))
+    landed_as_of = str(loop.get(r, "landed/as_of") or "")[:10]
+    latest = max([as_of, *(str(x.get("date") or "") for x in decided)])
+    if lead and landed_as_of and latest < landed_as_of:
+        d.open(
+            "decision",
+            question,
+            check.strip_figures(lead) + f"The decision record was last updated {latest}, before did-it-land's read, so it holds no call on this yet: run decision-record.",
+            ["landed", "decisions"],
+            owner=owner,
+        )
+    if decided:
+        n = d.ledger.cite("decisions/figures/decided")
+        made = "; ".join(f"{check.strip_figures(str(x.get('title') or x.get('chosen')))} ({x.get('decided_by')}, {x.get('date')})" for x in decided[:3])
+        count = f"{n[0]} decided {n[1]}" if n else "Decided"
+        d.answered("decision-made", "What did we decide, and who decided?", f"From decision-record, as of {as_of}: {count}. {made}.", ["decisions"])
+    if rows:
+        n, late = d.ledger.cite("decisions/figures/open"), d.ledger.cite("decisions/figures/past_due")
+        count = f"{n[0]} open {n[1]}" if n else "Open"
+        if late:
+            count += f", {late[0]} past due {late[1]}"
+        items = "; ".join(f"{check.strip_figures(str(x.get('ask')))} ({x.get('owner')}, due {x.get('deadline')})" for x in rows[:3])
+        first = rows[0]
+        d.open(
+            "decision-open",
+            "Which decisions are still open, and who makes them?",
+            f"From decision-record, as of {as_of}: {count}. {items}. No later decision record says they closed.",
+            ["decisions"],
+            owner=first.get("owner") if not check.placeholder(first.get("owner")) else None,
+        )
+    if not rows and not decided:
+        d.open("decision", question, "The decisions key holds no open or decided decision.", ["decisions"], owner=owner)
 
 
 def latest_eval_version(r: dict[str, Any]) -> str | None:
@@ -382,20 +393,57 @@ def q_cost(d: Draft) -> None:
         model = loop.get(r, "cost/driver/model")
         drv, tot = d.ledger.cite("cost/driver/over_budget"), d.ledger.cite("cost/over_budget")
         detail = f"The record names the model behind most of it, {model}: {drv[0]} {drv[1]} of {tot[0]} {tot[1]} over budget. " if model and drv and tot else ""
-        d.open("cost-owner", "Who brings cost back within budget, and by when?", detail + "It holds no plan and no owner for the fix.", ["cost"])
+        fix = cost_fix(r)
+        if fix:
+            plan = f"The postmortem names the fix: {check.strip_figures(str(fix['fix']))} Owner: {fix.get('owner')}, due {fix.get('due')}."
+            d.answered("cost-owner", "Who brings cost back within budget, and by when?", detail + plan, ["cost", "postmortem"])
+        else:
+            d.open("cost-owner", "Who brings cost back within budget, and by when?", detail + "It holds no plan and no owner for the fix.", ["cost"])
 
 
 def q_spec_release(d: Draft) -> None:
+    """release-readiness's key: `readiness` (ready to ship or hold), `checks` (each with its own word, owner and any waiver)
+    and `spec_holds` (spec-auditor's holds, each closed or not)."""
     r = d.record
+    question = "Was it ready to ship when it shipped?"
     if has(r, "release"):
-        word = next((v for _, v in walk_strings(r["release"]) if v in ("ready to ship", "hold")), None)
-        if word:
-            as_of = r["release"].get("as_of", "")
-            d.answered("release", "Was it ready to ship when it shipped?", f"release-readiness says {word}{' as of ' + as_of if as_of else ''}.", ["release"])
-            if word == "hold":
-                d.open("release", "What is holding the release, and who clears it?", "release-readiness says hold.", ["release"])
+        rel = r["release"]
+        word = rel.get("readiness")
+        if word not in ("ready to ship", "hold"):
+            d.open("release", question, "The release key holds no ready to ship or hold word.", ["release"])
             return
-        d.open("release", "Was it ready to ship when it shipped?", "The release key holds no ready to ship or hold word.", ["release"])
+        checks = dicts(rel.get("checks"))
+        ready, total = d.ledger.cite("release/counts/ready"), d.ledger.cite("release/counts/total")
+        parts = [f"release-readiness said {word} for {rel.get('release') or 'the release'} on {rel.get('as_of')}"]
+        if ready and total:
+            parts[0] += f": {ready[0]} {ready[1]} of {total[0]} {total[1]} checks ready to ship"
+        parts[0] += "."
+        waived = [c for c in checks if isinstance(c.get("waiver"), dict)]
+        for c in waived:
+            w = c["waiver"]
+            parts.append(f"{c.get('label')} read hold under a waiver from {w.get('approved_by')} until {w.get('expires')}.")
+        holds = dicts(rel.get("spec_holds"))
+        shut = [h for h in holds if h.get("closed") is True]
+        if holds and len(shut) == len(holds):
+            parts.append("Every spec-auditor hold was closed before release (" + ", ".join(str(h.get("finding")) for h in holds) + ").")
+        d.answered("release", question, " ".join(parts), ["release", "spec"] if holds else ["release"])
+        held = [c for c in checks if c.get("readiness") == "hold" and not isinstance(c.get("waiver"), dict)]
+        if word == "hold":
+            what = "; ".join(f"{c.get('label')} ({c.get('owner')})" for c in held[:3]) or "release-readiness says hold"
+            d.open("release", "What is holding the release, and who clears it?", f"On hold: {what}.", ["release"], owner=held[0].get("owner") if held else None)
+        for c in waived:
+            w = c["waiver"]
+            d.open(
+                "release",
+                "Was the waived check closed before its waiver ran out?",
+                f"{c.get('label')}: waived by {w.get('approved_by')} until {w.get('expires')}. No later release check in the record says it closed.",
+                ["release"],
+                owner=c.get("owner") if not check.placeholder(c.get("owner")) else None,
+            )
+        still = [h for h in holds if h.get("closed") is not True]
+        if still:
+            what = " ".join(check.strip_figures(str(h.get("message"))) for h in still[:3])
+            d.open("spec", "Were the spec's holds fixed before it shipped?", f"release-readiness found spec holds still open: {what}", ["release", "spec"])
         return
     if has(r, "spec"):
         verdict = r["spec"].get("verdict")
@@ -414,25 +462,7 @@ def q_spec_release(d: Draft) -> None:
         if verdict == "pass":
             d.answered("spec", "Did the spec pass review before build?", f"spec-auditor says pass, as of {r['spec'].get('as_of')}.", ["spec"])
             return
-    d.open("release", "Was it ready to ship when it shipped?", run_line("release"), ["release"])
-
-
-def walk_strings(obj: Any, prefix: str = "") -> list[tuple[str, str]]:
-    out: list[tuple[str, str]] = []
-    if isinstance(obj, str):
-        return [(prefix, obj)]
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            out += walk_strings(v, f"{prefix}.{k}" if prefix else k)
-    elif isinstance(obj, list):
-        for i, v in enumerate(obj):
-            out += walk_strings(v, f"{prefix}[{i}]")
-    return out
-
-
-def humanise(name: str) -> str:
-    last = name.split("/")[-1]
-    return last.replace("_", " ").replace("@", " for ")
+    d.open("release", question, run_line("release"), ["release"])
 
 
 def q_portfolio(d: Draft) -> None:
@@ -450,57 +480,73 @@ def q_portfolio(d: Draft) -> None:
 
 
 def q_signals(d: Draft) -> None:
+    """customer-signal-digest's key: `check` (problem still raised or problem not raised), its figures and ranked `themes`."""
     r = d.record
     question = "What are customers saying about it?"
     if not has(r, "signals"):
         d.open("signals", question, run_line("signals"), ["signals"])
         return
-    figs = loop.figures_in(r["signals"])
-    numeric = [(n, f) for n, f in figs if isinstance(f.get("value"), int | float) and not isinstance(f.get("value"), bool)][:3]
-    if not numeric:
-        d.open("signals", question, "The signals key holds no figure with a source.", ["signals"])
+    sg = r["signals"]
+    word = sg.get("check")
+    if word not in ("problem still raised", "problem not raised"):
+        d.open("signals", question, "The signals key holds no problem still raised or problem not raised word.", ["signals"])
         return
-    bits = []
-    for name, _ in numeric:
-        c = d.ledger.cite(f"signals/{name}")
-        if c:
-            bits.append(f"{humanise(name)} {c[0]} {c[1]}")
-    d.answered("signals", question, "From customer-signal-digest: " + "; ".join(bits) + ".", ["signals"])
-
-
-def find_fixes(obj: Any) -> list[dict[str, Any]]:
-    found: list[dict[str, Any]] = []
-    if isinstance(obj, dict):
-        text = next((obj[k] for k in ("fix", "action", "title", "what") if isinstance(obj.get(k), str)), None)
-        owner = obj.get("owner") if isinstance(obj.get("owner"), str) else None
-        if text and owner:
-            state = str(obj.get("status") or obj.get("state") or "").lower()
-            return [{"text": text, "owner": owner, "done": state in ("done", "fixed", "closed", "shipped")}]
-        for v in obj.values():
-            found += find_fixes(v)
-    elif isinstance(obj, list):
-        for v in obj:
-            found += find_fixes(v)
-    return found
+    win = sg.get("window") or {}
+    span = f"from {win.get('from')} to {win.get('to')}" if win.get("from") and win.get("to") else ""
+    parts = [f"customer-signal-digest says {word}."]
+    every, accts = d.ledger.cite("signals/figures/signals"), d.ledger.cite("signals/figures/accounts")
+    if every and accts:
+        parts.append(f"It read {every[0]} signals {every[1]} from {accts[0]} accounts {accts[1]} {span}.".replace("  ", " ").replace(" .", "."))
+    ps, pa = d.ledger.cite("signals/figures/problem_signals"), d.ledger.cite("signals/figures/problem_accounts")
+    if word == "problem still raised" and ps and pa:
+        parts.append(f"{ps[0]} signals {ps[1]} from {pa[0]} accounts {pa[1]} say the problem is still there.")
+    top = next((t for t in dicts(sg.get("themes")) if t.get("side") == "problem"), None)
+    if top and top.get("name"):
+        parts.append(f"The top problem theme: {check.strip_figures(str(top['name']))}.")
+    d.answered("signals", question, " ".join(parts), ["signals"])
 
 
 def q_postmortem(d: Draft) -> None:
+    """postmortem's key: `what_changed` (each with evidence) and `fixes` (each with one owner and a due date)."""
     r = d.record
     question = "What went wrong, and who owns each fix?"
     if not has(r, "postmortem"):
         if loop.get(r, "landed/status") == "stalled":
             d.open("postmortem", question, run_line("postmortem"), ["postmortem"])
         return
-    fixes = find_fixes(r["postmortem"])
-    left = [f for f in fixes if not f["done"]]
-    if left:
-        names = "; ".join(f"{f['text']} ({f['owner']})" for f in left[:3])
-        d.open("postmortem", question, check.strip_figures(f"Fixes not yet done: {names}."), ["postmortem"], owner=left[0]["owner"])
-    elif fixes:
-        names = "; ".join(f"{f['text']} ({f['owner']})" for f in fixes[:3])
-        d.answered("postmortem", question, check.strip_figures(f"From the postmortem, every fix is done: {names}."), ["postmortem"])
-    else:
+    pm = r["postmortem"]
+    fixes = [f for f in dicts(pm.get("fixes")) if f.get("fix")]
+    changed = [c for c in dicts(pm.get("what_changed")) if c.get("change") and c.get("evidence")]
+    owned = [f for f in fixes if not check.placeholder(f.get("owner")) and f.get("due")]
+    if not fixes:
         d.open("postmortem", question, "The postmortem key holds no fix with an owner.", ["postmortem"])
+        return
+    inc, nfix = d.ledger.cite("postmortem/figures/incidents"), d.ledger.cite("postmortem/figures/fixes")
+    win = pm.get("window") or {}
+    lead = f"The {pm.get('review') or 'postmortem'} of {pm.get('as_of')}"
+    if inc:
+        lead += f" covers {inc[0]} incidents {inc[1]} from {win.get('from')} to {win.get('to')}"
+    parts = [lead + "."]
+    if changed and len(changed) == len(dicts(pm.get("what_changed"))):
+        parts.append("Each change it lists cites its evidence.")
+    fx = "; ".join(f"{check.strip_figures(str(f['fix']).rstrip('.'))} ({f.get('owner')}, due {f.get('due')})" for f in owned)
+    if len(owned) == len(fixes):
+        count = f"{nfix[0]} fixes {nfix[1]}" if nfix else "Every fix"
+        parts.append(f"{count}, each with one owner and a due date: {fx}.")
+        d.answered("postmortem", question, " ".join(parts), ["postmortem"])
+        return
+    missing = "; ".join(check.strip_figures(str(f["fix"]).rstrip(".")) for f in fixes if f not in owned)
+    d.open("postmortem", question, " ".join(parts) + f" No single owner and due date for: {missing}.", ["postmortem"])
+
+
+def cost_fix(r: dict[str, Any]) -> dict[str, Any] | None:
+    """The postmortem fix that addresses a change whose evidence is the cost key, if the record holds one."""
+    pm = r.get("postmortem") if isinstance(r.get("postmortem"), dict) else {}
+    on_cost = {c.get("id") for c in dicts(pm.get("what_changed")) if any(str(e).startswith("record:cost/") for e in c.get("evidence") or [])}
+    for f in dicts(pm.get("fixes")):
+        if on_cost & set(f.get("addresses") or []) and not check.placeholder(f.get("owner")) and f.get("due"):
+            return f
+    return None
 
 
 # --- questions asked last time -------------------------------------------------------------------
