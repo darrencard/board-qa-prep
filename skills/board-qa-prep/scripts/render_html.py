@@ -49,7 +49,8 @@ CITE = re.compile(r"\s*\[(F\d{1,3})\]")
 # <details> whose rows keep the frame's columns (subgrid through ::details-content, only inside @supports: a browser
 # that does not know the pseudo-element drops any selector list that names it, so those rules stand alone, and the
 # fallback stacks each folded row, name and word on one line, the figure under it). The figure and word columns are
-# fixed to the widest text in the frame, folded rows included (column_widths), so opening the fold moves nothing.
+# fixed to the widest text in the frame, folded rows included (column_widths), and every track is a minmax with fixed
+# bounds, so no folded row can widen a column: opening the fold moves nothing.
 PAGE_CSS = """
 main.solo{margin-left:0}
 .solo .slide{min-height:0}
@@ -102,7 +103,7 @@ main.solo{margin-left:0}
 .stack td::before{content:attr(data-l);font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
 .scg .sc-l{text-transform:uppercase;letter-spacing:.06em}
 @container sc (min-width:800px){.scg .sc-r:has(>.sc-p:empty)>.sc-n{grid-column:1/3}.scg .sc-r:has(>.sc-p:empty)>.sc-p{display:none}}
-.scg .sc-b{font-family:var(--mono);font-size:var(--sc-m);grid-template-columns:minmax(120px,.9fr) minmax(96px,1.3fr) var(--sc-fw,max-content) var(--sc-ww,fit-content(180px))}
+.scg .sc-b{font-family:var(--mono);font-size:var(--sc-m);grid-template-columns:minmax(120px,.9fr) minmax(96px,1.3fr) minmax(var(--sc-fw,max-content),var(--sc-fw,max-content)) minmax(var(--sc-ww,auto),var(--sc-ww,180px))}
 .scg .sc-d{grid-column:1/-1;display:grid;grid-template-columns:subgrid;margin:0;padding:0;border:0}
 .scg .sc-d>summary{margin:0;cursor:pointer}.scg .sc-d>summary:hover{color:var(--t1)}
 @container sc (max-width:799.98px){.scg .sc-d{display:block}}
@@ -126,13 +127,22 @@ WRITER_LABEL = {
 }
 # The smallest text the page prints, at every width. The vendored template and svgkit keep their own sizes on disk
 # (both are hash-pinned); the page raises any smaller size to this one as it inlines their rules.
-FONT_FLOOR = 11
+FONT_FLOOR = 12
 FONT_SIZE = re.compile(r"(font-size:\s*|font:[^;{}]*?)(\d+(?:\.\d+)?)px")
 
 
 def floor_fonts(css: str) -> str:
     """Every font size below FONT_FLOOR, raised to it: font-size and the size in a font shorthand."""
     return FONT_SIZE.sub(lambda m: m.group(1) + (str(FONT_FLOOR) if float(m.group(2)) < FONT_FLOOR else m.group(2)) + "px", css)
+
+
+ISO_DATE = re.compile(r"(?<![\w-])\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?Z?)?(?![\w-])")
+
+
+def keep_dates(page: str) -> str:
+    """Every ISO date in the page's text held on one line, so a heading never breaks one at a hyphen at any width."""
+    head, sep, body = page.partition("<body>")
+    return head + sep + re.sub(r">([^<]+)<", lambda m: ">" + ISO_DATE.sub(r'<span class="nw">\g<0></span>', m.group(1)) + "<", body)
 
 
 NUMBER_WORDS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
@@ -487,7 +497,7 @@ def page(record: dict[str, Any]) -> str:
         + fold("For your engineers", engineers)
         + "</section>"
     )
-    return (
+    return keep_dates(
         '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         f'<title>{e(title)}</title><style>{floor_fonts(stylesheet() + sk.CSS + sk.SCORECARD_CSS + PAGE_CSS)}</style></head><body><main class="solo">'
         f"{cover}{detail}{more}"

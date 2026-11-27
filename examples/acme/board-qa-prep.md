@@ -1,6 +1,6 @@
 # The project file answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.
 
-Board Q&A prep v0.3.3. As of 2026-11-26. Illustrative: every figure is invented.
+Board Q&A prep v0.3.4. As of 2026-11-26. Illustrative: every figure is invented.
 
 Quote drafting is a project you expect to move a number. Its landing brief, a one-page plan, sets what good looks like, by when and at what cost. As the project moves from plan to board, each step adds its page to the project file. These are the questions a board will likely ask, each answered from that file with its source, or left open with a named owner. Code checks every figure.
 
@@ -127,7 +127,7 @@ The portfolio review ranked it 4 of 8 projects, 1 needs work first [F32] on 2026
 <details>
 <summary>For your engineers</summary>
 
-Skill: `board-qa-prep` 0.3.3.
+Skill: `board-qa-prep` 0.3.4.
 
 | ID | Figure | Source | Window | As of |
 |---|---|---|---|---|

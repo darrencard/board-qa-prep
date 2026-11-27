@@ -261,7 +261,10 @@ class Visual(unittest.TestCase):
         widest = max(len(render_html.source_line(q)) for q in done)
         self.assertIn(f"--sc-fw:calc({widest}ch + ", style, "the figure column fits the widest folded figure")
         self.assertIn("--sc-ww:min(180px, max(", style)
-        self.assertIn("grid-template-columns:minmax(120px,.9fr) minmax(96px,1.3fr) var(--sc-fw,max-content) var(--sc-ww,fit-content(180px))", self.css())
+        tracks = "minmax(120px,.9fr) minmax(96px,1.3fr) minmax(var(--sc-fw,max-content),var(--sc-fw,max-content)) minmax(var(--sc-ww,auto),var(--sc-ww,180px))"
+        self.assertIn(f"grid-template-columns:{tracks}", self.css())
+        # Every track has fixed bounds: a minmax whose floor is a length, never auto or min-content set by a folded row.
+        self.assertEqual(len(re.findall(r"minmax\((?:\d+px|var\(--sc-[fw]w,[^)]*\)),", tracks)), 4)
         self.assertEqual(
             render_html.column_widths(["ab"], ["open"], ["Lead"]), "--sc-fw:calc(2ch + 0.12em + 2px);--sc-ww:min(180px, max(calc(4ch + 0.24em + 2px), calc(4ch + 16px)))"
         )
@@ -297,12 +300,12 @@ class Visual(unittest.TestCase):
                 self.assertIn(word, text)
         self.assertIn("<b>landing brief</b>, a one-page plan, sets what good looks like, by when and at what cost", self.page)
 
-    def test_no_text_smaller_than_11px_at_any_width(self):
+    def test_no_text_smaller_than_12px_at_any_width(self):
         css = " ".join(re.findall(r"<style>(.*?)</style>", self.page, re.S) + re.findall(r'style="([^"]*)"', self.page))
         sizes = [float(m) for m in re.findall(r"(?:font-size:\s*|font:[^;{}]*?)(\d+(?:\.\d+)?)px", css)]
         sizes += [float(m) for m in re.findall(r'font-size="(\d+(?:\.\d+)?)"', self.page)]
         self.assertTrue(sizes)
-        self.assertGreaterEqual(min(sizes), 11)
+        self.assertGreaterEqual(min(sizes), 12)
         # The vendored template is untouched on disk: the page raises its small sizes as it inlines them.
         self.assertIn("font:400 10px/16px", (SKILL / "assets" / "vendor" / "template.html").read_text(encoding="utf-8"))
 
@@ -311,7 +314,7 @@ class Visual(unittest.TestCase):
         self.assertIn("<span>Board Q&amp;A prep</span>", header)
         self.assertNotIn("board-qa-prep", header)
         self.assertIn("<code>board-qa-prep</code>", self.page.split("For your engineers", 1)[1])
-        self.assertIn("\nBoard Q&A prep v0.3.3.", self.md)
+        self.assertIn("\nBoard Q&A prep v0.3.4.", self.md)
 
     def test_the_standard_gap_under_the_heading(self):
         self.assertIn("Nothing in the project file answers it", self.page)
@@ -326,7 +329,7 @@ class Visual(unittest.TestCase):
         self.assertEqual(at, sorted(at))
         self.assertEqual(body.count('<div class="next">'), 1, "one next step leads the page")
         self.assertIn('<span class="o">Head of Product, Quoting squad</span><span class="d">before the board meeting</span>', body)
-        self.assertIn("<span>Board Q&amp;A prep</span><span>As of 2026-11-26</span><span>v0.3.3</span>", body)
+        self.assertIn('<span>Board Q&amp;A prep</span><span>As of <span class="nw">2026-11-26</span></span><span>v0.3.4</span>', body)
         self.assertNotIn("Book a call", body, "a sample is the skill's own output: no call to action")
 
 
@@ -345,7 +348,7 @@ class Versions(unittest.TestCase):
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
         skill = re.search(r'version: "([^"]+)"', (SKILL / "SKILL.md").read_text(encoding="utf-8")).group(1)
         log = re.search(r"^## (\S+), (\d{4}-\d{2}-\d{2})", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"), re.M)
-        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.3"})
+        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.4"})
         self.assertEqual(log.group(2), "2026-11-27")
 
 

@@ -6,6 +6,8 @@ Install the board-qa-prep skill from https://github.com/darrencard/board-qa-prep
 
 A free Claude skill that lists the questions a board will likely ask about one project: each answered from the Landing Loop project file with its source, or open with an owner.
 
+A bet is a project you expect to move a number; its bar is the target its landing brief sets.
+
 **Why it matters:** the hard board question is the one you cannot source. This finds those before the meeting and names who owes each answer.
 
 **Where it sits:** step 05 (Report) of the Landing Loop. It reads the project file, `landing/<bet>.json`, writes only its `board_qa` key, and renders one HTML page in the Leader Report style.

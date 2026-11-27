@@ -1,6 +1,6 @@
 {
   "name": "board-qa-prep",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Board Q&A prep, step 05 of the Landing Loop. Reads a bet's landing/<bet>.json record and drafts the questions a board will likely ask. Each is answered, quoting the record's figure and its source, or open, with an owner and a due date. Code computes every figure and checks every reworded answer. Writes only the board_qa key and one HTML page in the Leader Report style.",
   "author": {
     "name": "Dacard"
