@@ -138,8 +138,8 @@ class TheAcmeRead(unittest.TestCase):
         self.assertEqual(sorted(opens), ["decision", "decision-open", "past", "release"])
         self.assertEqual(opens["decision"]["owner"], "Head of Product, Quoting squad")
         self.assertEqual(opens["past"]["owner"], "Head of Product, Quoting squad")
-        self.assertEqual(opens["decision-open"]["owner"], "Quoting squad lead")
-        self.assertEqual(opens["release"]["owner"], "Quoting squad lead")
+        self.assertEqual(opens["decision-open"]["owner"], "Lead, Quoting squad")
+        self.assertEqual(opens["release"]["owner"], "Lead, Quoting squad")
         for q in opens.values():
             self.assertEqual(q["due"], "before the board meeting")
 
@@ -148,7 +148,7 @@ class TheAcmeRead(unittest.TestCase):
         self.assertIn("over budget", self.by_topic["cost"][0]["answer"])
         owner = self.by_topic["cost-owner"][0]
         self.assertEqual(owner["check"], "answered")
-        self.assertIn("Owner: Quoting squad lead, due 2026-12-10.", owner["answer"])
+        self.assertIn("Owner: Lead, Quoting squad, due 2026-12-10.", owner["answer"])
         self.assertEqual(owner["from_keys"], ["cost", "postmortem"])
 
     def test_every_key_before_board_qa_is_read(self):
@@ -159,10 +159,10 @@ class TheAcmeRead(unittest.TestCase):
         made = self.by_topic["decision-made"][0]
         self.assertEqual(made["check"], "answered")
         self.assertIn("3 decided", made["answer"])
-        self.assertIn("Prices come from the price book, never the model (Quoting squad tech lead, 2026-07-27)", made["answer"])
+        self.assertIn("Prices come from the price book, never the model (Tech lead, Quoting squad, 2026-07-27)", made["answer"])
         still = self.by_topic["decision-open"][0]
         self.assertIn("2 open", still["missing"])
-        self.assertIn("Set the rollback trigger for quote drafting (Quoting squad lead, due 2026-08-03)", still["missing"])
+        self.assertIn("Set the rollback trigger for quote drafting (Lead, Quoting squad, due 2026-08-03)", still["missing"])
         # The decision record predates did-it-land's read, so the scale call is still open.
         self.assertIn("run decision-record", self.by_topic["decision"][0]["missing"])
 
@@ -184,7 +184,7 @@ class TheAcmeRead(unittest.TestCase):
     def test_postmortem_names_one_owner_and_due_date_per_fix(self):
         q = self.by_topic["postmortem"][0]
         self.assertEqual(q["check"], "answered")
-        for owner in ("Quoting squad lead, due 2026-12-10", "Platform on-call lead, due 2026-12-17", "Quoting squad tech lead, due 2027-01-08", "Price book squad lead, due 2026-12-17"):
+        for owner in ("Lead, Quoting squad, due 2026-12-10", "Platform on-call lead, due 2026-12-17", "Tech lead, Quoting squad, due 2027-01-08", "Price book squad lead, due 2026-12-17"):
             self.assertIn(owner, q["answer"])
 
     def test_past_questions_land_on_their_topic_or_open(self):
@@ -239,7 +239,7 @@ class AnyRecordInTheContract(unittest.TestCase):
         for q in key["questions"]:
             topics.setdefault(q["topic"], []).append(q)
         holding = next(q for q in topics["release"] if q["question"].startswith("What is holding"))
-        self.assertEqual((holding["check"], holding["owner"]), ("open", "Quoting squad tech lead"))
+        self.assertEqual((holding["check"], holding["owner"]), ("open", "Tech lead, Quoting squad"))
         self.assertIn("CI passes on the release commit", holding["missing"])
         self.assertTrue(topics["signals"][0]["answer"].startswith("customer-signal-digest says problem not raised."))
         self.assertNotIn("say the problem is still there", topics["signals"][0]["answer"])

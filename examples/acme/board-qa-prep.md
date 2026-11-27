@@ -24,7 +24,7 @@ did-it-land's next step: Keep the metric on the scorecard, and decide whether to
 
 **Q07. Which decisions are still open, and who makes them?** (open)
 
-From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the rollback trigger for quote drafting (Quoting squad lead, due 2026-08-03); Choose the model tier for quote drafts (Quoting squad tech lead, due 2026-08-03). No later decision record says they closed. Owner: Quoting squad lead. Due: before the board meeting.
+From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the rollback trigger for quote drafting (Lead, Quoting squad, due 2026-08-03); Choose the model tier for quote drafts (Tech lead, Quoting squad, due 2026-08-03). No later decision record says they closed. Owner: Lead, Quoting squad. Due: before the board meeting.
 
 **Q10. What does each task cost, against the budget?** (answered)
 
@@ -36,7 +36,7 @@ $0.0338 per task [F17] from 2026-11-01 to 2026-11-14, against a budget of $0.027
 
 **Q13. Was the waived check closed before its waiver ran out?** (open)
 
-Open bugs within the severity limits: waived by Head of Product, Quoting squad until 2026-09-19. No later release check in the record says it closed. Owner: Quoting squad lead. Due: before the board meeting.
+Open bugs within the severity limits: waived by Head of Product, Quoting squad until 2026-09-19. No later release check in the record says it closed. Owner: Lead, Quoting squad. Due: before the board meeting.
 
 ## Answered from the record
 
@@ -54,7 +54,7 @@ The outcome series (Illustrative CRM export, quotes_won_weekly.csv) went from 31
 
 **Q06. What did we decide, and who decided?** (answered)
 
-From decision-record, as of 2026-07-27: 3 decided [F10]. Build quote drafting now, against its landing brief (Head of Product, Quoting squad, 2026-07-27); Quote drafts wait for the tradesperson's approval before they send (Head of Product, Quoting squad, 2026-07-27); Prices come from the price book, never the model (Quoting squad tech lead, 2026-07-27).
+From decision-record, as of 2026-07-27: 3 decided [F10]. Build quote drafting now, against its landing brief (Head of Product, Quoting squad, 2026-07-27); Quote drafts wait for the tradesperson's approval before they send (Head of Product, Quoting squad, 2026-07-27); Prices come from the price book, never the model (Tech lead, Quoting squad, 2026-07-27).
 
 **Q08. Is quality holding as more of the work runs without a person?** (answered)
 
@@ -66,7 +66,7 @@ Held-out pass rate went from 70% [F16] on v1.3 to 80% [F13] on v1.4, on the same
 
 **Q11. Who brings cost back within budget, and by when?** (answered)
 
-The record names the model behind most of it, vendor-a/xl: $0.963 [F24] of $1.89 [F25] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Quoting squad lead, due 2026-12-10.
+The record names the model behind most of it, vendor-a/xl: $0.963 [F24] of $1.89 [F25] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
 
 **Q12. Was it ready to ship when it shipped?** (answered)
 
@@ -78,7 +78,7 @@ customer-signal-digest says problem still raised. It read 21 signals [F28] from 
 
 **Q15. What went wrong, and who owns each fix?** (answered)
 
-The learning review of 2026-11-26 covers 2 incidents [F32] from 2026-09-07 to 2026-11-26. Each change it lists cites its evidence. 4 fixes [F33], each with one owner and a due date: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back (Quoting squad lead, due 2026-12-10); Give every routing change made during an incident an end date, and list the open ones in the weekly incident review (Platform on-call lead, due 2026-12-17); Put the cost-budget-check result beside the eval-kit result on every quote drafting release candidate (Quoting squad tech lead, due 2027-01-08); Show 'price updating' and retry when the price book sync lags, instead of price pending (Price book squad lead, due 2026-12-17).
+The learning review of 2026-11-26 covers 2 incidents [F32] from 2026-09-07 to 2026-11-26. Each change it lists cites its evidence. 4 fixes [F33], each with one owner and a due date: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back (Lead, Quoting squad, due 2026-12-10); Give every routing change made during an incident an end date, and list the open ones in the weekly incident review (Platform on-call lead, due 2026-12-17); Put the cost-budget-check result beside the eval-kit result on every quote drafting release candidate (Tech lead, Quoting squad, due 2027-01-08); Show 'price updating' and retry when the price book sync lags, instead of price pending (Price book squad lead, due 2026-12-17).
 
 **Q16. Why this bet, over the others?** (answered)
 
@@ -97,9 +97,9 @@ bet-portfolio-review ranked it 4 of 8 bets, 1 needs work first [F34] on 2026-07-
 | F07 | 25 sd | computed from Illustrative product analytics export, quote_drafts_weekly.csv | 2026-07-27 to 2026-11-09 | 2026-11-26 |
 | F08 | 31 | Illustrative CRM export, quotes_won_weekly.csv | 2026-08-31 | 2026-11-26 |
 | F09 | 36 | Illustrative CRM export, quotes_won_weekly.csv | 2026-08-31 to 2026-11-23 | 2026-11-26 |
-| F10 | 3 decisions | decision-record 0.3.0: counted from decisions.md (sha256 42c46365e3dc) | 2026-07-13 to 2026-07-27 | 2026-07-27 |
-| F11 | 2 decisions | decision-record 0.3.0: counted from decisions.md (sha256 42c46365e3dc) | 2026-07-13 to 2026-07-27 | 2026-07-27 |
-| F12 | 1 decisions | decision-record 0.3.0: counted from decisions.md (sha256 42c46365e3dc) | 2026-07-13 to 2026-07-27 | 2026-07-27 |
+| F10 | 3 decisions | decision-record 0.3.0: counted from decisions.md (sha256 a01557cce6fe) | 2026-07-13 to 2026-07-27 | 2026-07-27 |
+| F11 | 2 decisions | decision-record 0.3.0: counted from decisions.md (sha256 a01557cce6fe) | 2026-07-13 to 2026-07-27 | 2026-07-27 |
+| F12 | 1 decisions | decision-record 0.3.0: counted from decisions.md (sha256 a01557cce6fe) | 2026-07-13 to 2026-07-27 | 2026-07-27 |
 | F13 | 80% | quote-drafting.csv (sha256 ee43a12a2395) | 2026-11-15 | 2026-11-15 |
 | F14 | 71.5% | quote-drafting.csv (sha256 ee43a12a2395) | 2026-11-15 | 2026-11-15 |
 | F15 | 30 held-out cases | eval-kit 0.3.3: evals.rows, v1.4, cases | 2026-11-15 | 2026-11-15 |

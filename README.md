@@ -29,11 +29,11 @@ did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-
 
 **Q11. Who brings cost back within budget, and by when?** (answered)
 
-The record names the model behind most of it, vendor-a/xl: $0.963 [F24] of $1.89 [F25] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Quoting squad lead, due 2026-12-10.
+The record names the model behind most of it, vendor-a/xl: $0.963 [F24] of $1.89 [F25] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
 
 **Q07. Which decisions are still open, and who makes them?** (open)
 
-From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the rollback trigger for quote drafting (Quoting squad lead, due 2026-08-03); Choose the model tier for quote drafts (Quoting squad tech lead, due 2026-08-03). No later decision record says they closed. Owner: Quoting squad lead. Due: before the board meeting.
+From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the rollback trigger for quote drafting (Lead, Quoting squad, due 2026-08-03); Choose the model tier for quote drafts (Tech lead, Quoting squad, due 2026-08-03). No later decision record says they closed. Owner: Lead, Quoting squad. Due: before the board meeting.
 ```
 
 The sample reads the full record, every key from portfolio to postmortem: 17 questions, 13 answered from the record and 4 open. Decisions come from decision-record's open rows and decided list, the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
@@ -78,7 +78,7 @@ python3 skills/board-qa-prep/scripts/board_qa.py prep landing/<bet>.json --past 
   "questions": [
     {"id": "Q07", "topic": "decision-open", "question": "Which decisions are still open, and who makes them?", "check": "open",
      "missing": "From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. ...",
-     "owner": "Quoting squad lead", "due": "before the board meeting"}
+     "owner": "Lead, Quoting squad", "due": "before the board meeting"}
   ],
   "figures": {
     "F11": {"value": 2, "unit": "decisions", "source": "decision-record 0.3.0: counted from decisions.md (sha256 42c46365e3dc)",
