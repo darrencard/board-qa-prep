@@ -27,13 +27,14 @@ import argparse
 import csv
 import datetime
 import io
+import json
 import re
 import sys
 from pathlib import Path
 from typing import Any
 
-if sys.version_info < (3, 11):  # noqa: UP036  (the message is the point: macOS python3 is often 3.9)
-    sys.exit("board-qa-prep needs Python 3.11 or later. Run it with python3.11, python3.12 or newer.")
+if sys.version_info < (3, 11):  # noqa: UP036  (the floor, checked before anything is read or written; macOS python3 is often 3.9)
+    sys.exit("board-qa-prep needs Python 3.11 or later; try python3.12")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -285,7 +286,9 @@ def q_decision(d: Draft) -> None:
         )
     if decided:
         n = d.ledger.cite("decisions/figures/decided")
-        made = "; ".join(f"{check.strip_figures(str(x.get('title') or x.get('chosen')))} ({x.get('decided_by')}, {x.get('date')})" for x in decided[:3])
+        # The most recent calls first: a decision closed since the last record (an open row now decided) leads.
+        recent = sorted(decided, key=lambda x: str(x.get("date") or ""), reverse=True)[:3]
+        made = "; ".join(f"{check.strip_figures(str(x.get('title') or x.get('chosen')))} ({x.get('decided_by')}, {x.get('date')})" for x in recent)
         count = f"{n[0]} decided {n[1]}" if n else "Decided"
         d.answered("decision-made", "What did we decide, and who decided?", f"From decision-record, as of {as_of}: {count}. {made}.", ["decisions"])
     if rows:
@@ -649,13 +652,16 @@ def prep(
     }
 
 
-def write_pages(record: dict[str, Any], html_out: Path | None, md_out: Path | None) -> None:
-    if html_out:
-        html_out.parent.mkdir(parents=True, exist_ok=True)
-        html_out.write_text(render_html.page(record), encoding="utf-8")
-    if md_out:
-        md_out.parent.mkdir(parents=True, exist_ok=True)
-        md_out.write_text(render_html.markdown(record), encoding="utf-8")
+def render_pages(record: dict[str, Any], html_out: Path | None, md_out: Path | None) -> list[tuple[Path, str]]:
+    """The page and its twin, rendered in memory so nothing is written when rendering fails."""
+    pages = [(html_out, render_html.page), (md_out, render_html.markdown)]
+    return [(out, draw(record)) for out, draw in pages if out]
+
+
+def write_pages(pages: list[tuple[Path, str]]) -> None:
+    for out, text in pages:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text, encoding="utf-8")
 
 
 def guarded_save(path: Path, record: dict[str, Any], key: dict[str, Any]) -> list[dict[str, Any]]:
@@ -704,12 +710,14 @@ def main(argv: list[str] | None = None) -> int:
         record = loop.load(a.record)
         if a.cmd == "prep":
             key = prep(a.record, a.past, a.owner, a.due, a.as_of)
-            errors = guarded_save(a.record, record, key)
+            errors = check.check({**record, loop.KEY: key})
             if errors:
                 report(errors)
                 return 1
-            saved = loop.load(a.record)
-            write_pages(saved, a.html, a.md)
+            # Render from the record exactly as it will be saved, before saving, so a render failure writes nothing.
+            pages = render_pages(json.loads(loop.dumps({**record, loop.KEY: key})), a.html, a.md)
+            guarded_save(a.record, record, key)
+            write_pages(pages)
             n = key["counts"]
             print(f"board_qa: {n['questions']['value']} questions, {n['answered']['value']} answered, {n['open']['value']} open. Prepare first: {', '.join(key['first'])}.")
             print(f"Wrote the board_qa key of {a.record}" + "".join(f", {x}" for x in (a.html, a.md) if x) + ".")
@@ -727,7 +735,7 @@ def main(argv: list[str] | None = None) -> int:
             if errors:
                 report(errors)
                 return 1
-            write_pages(record, a.html, a.md)
+            write_pages(render_pages(record, a.html, a.md))
             return 0
         key = dict(record[loop.KEY])
         key["questions"] = [dict(q) for q in key["questions"]]

@@ -2,6 +2,14 @@
 
 As of 2026-11-26. board-qa-prep 0.3.0. Step 05 Report. Illustrative: every figure is invented.
 
+**13 of 17 likely questions are answered from the loop record; 4 need an answer from their owner before the meeting.**
+
+- Q17. Is any customer data sent to the model provider? (open, owner Head of Product, Quoting squad, due before the board meeting)
+- Q02. Did it land? (answered from the record)
+- Q05. Do we scale it, and who decides? (open, owner Head of Product, Quoting squad, due before the board meeting)
+- Q07. Which decisions are still open, and who makes them? (open, owner Lead, Quoting squad, due before the board meeting)
+- Q10. What does each task cost, against the budget? (answered from the record)
+
 17 questions: 13 answered from the record, 4 open with an owner. Bet status, from did-it-land: landed.
 
 ## Prepare these first
@@ -31,6 +39,9 @@ From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the 
 _Asked at the last meeting._
 
 $0.0338 per task [F17] from 2026-11-01 to 2026-11-14, against a budget of $0.027 [F18]: over budget by 25% [F19]. Tokens per task: 10,300 [F20] against 9,000 [F21]. Price per token: $0.00000328 [F22] against $0.000003 [F23]. cost-budget-check computes these; eval-kit cites the same cost per task.
+
+<details>
+<summary>The rest: open and answered questions, and every figure with its source</summary>
 
 ## Open, with an owner
 
@@ -125,3 +136,5 @@ bet-portfolio-review ranked it 4 of 8 bets, 1 needs work first [F34] on 2026-07-
 | F35 | 14 points of 14 | briefs/quote-drafting.md | 2026-07-27 | 2026-07-27 |
 
 Not in the record yet: nothing.
+
+</details>

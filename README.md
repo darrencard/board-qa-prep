@@ -20,23 +20,15 @@ Acme is invented: invoicing software for trades businesses. Every figure is illu
 python3 examples/acme/sample.py
 ```
 
-It rewrites [examples/acme/board-qa-prep.html](examples/acme/board-qa-prep.html), its Markdown twin and the `board_qa` key of [examples/acme/landing/quote-drafting.json](examples/acme/landing/quote-drafting.json), byte for byte as committed (a test checks this). The bet is quote drafting, bar "quote draft acceptance rate at 40% or higher by 2026-11-15". From the page:
+It rewrites [examples/acme/board-qa-prep.html](examples/acme/board-qa-prep.html), its Markdown twin and the `board_qa` key of [examples/acme/landing/quote-drafting.json](examples/acme/landing/quote-drafting.json), byte for byte as committed (a test checks this). The bet is quote drafting, bar "quote draft acceptance rate at 40% or higher by 2026-11-15". The page opens with a one-line answer and the five questions to prepare first, one line each; the rest is folded below. From the page:
 
 ```text
 **Q02. Did it land?** (answered)
 
 did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a bar of 40% [F03] by 2026-11-15. At the date it read 41% [F04].
-
-**Q11. Who brings cost back within budget, and by when?** (answered)
-
-The record names the model behind most of it, vendor-a/xl: $0.963 [F24] of $1.89 [F25] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
-
-**Q07. Which decisions are still open, and who makes them?** (open)
-
-From decision-record, as of 2026-07-27: 2 open [F11], 1 past due [F12]. Set the rollback trigger for quote drafting (Lead, Quoting squad, due 2026-08-03); Choose the model tier for quote drafts (Tech lead, Quoting squad, due 2026-08-03). No later decision record says they closed. Owner: Lead, Quoting squad. Due: before the board meeting.
 ```
 
-The sample reads the full record, every key from portfolio to postmortem: 17 questions, 13 answered from the record and 4 open. Decisions come from decision-record's open rows and decided list, the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
+The sample reads the full record, every key from portfolio to postmortem, and marks each question answered from the record or open with an owner. Decisions come from decision-record's open rows and decided list, the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
 
 ```bash
 python3 examples/acme/sample.py --upstream ../landing-loop/examples/acme/landing/quote-drafting.json
@@ -93,7 +85,7 @@ Each figure is copied from the record with the path it came from, so any answer 
 
 - It does not check that the record is right. A wrong upstream figure gives a wrong answer that passes.
 - Questions come from fixed rules over the record. A board's own concerns (people, security, the market) arrive only through last meeting's questions or you.
-- Past questions are placed on a topic by shared words, nothing cleverer. Check where each one landed.
+- Past questions are placed on a topic by shared words, nothing cleverer. Check the topic each one was given.
 - Not yet run on a real team's data.
 
 ## Licence

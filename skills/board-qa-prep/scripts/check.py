@@ -28,6 +28,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+if sys.version_info < (3, 11):  # noqa: UP036  (the floor, checked before anything is read or written)
+    sys.exit("board-qa-prep needs Python 3.11 or later; try python3.12")
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import loop  # noqa: E402

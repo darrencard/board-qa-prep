@@ -5,6 +5,8 @@ import hashlib
 import io
 import json
 import re
+import subprocess
+import sys
 import tempfile
 import tomllib
 import unittest
@@ -65,8 +67,32 @@ class Sample(unittest.TestCase):
         body = page.split("</style>", 1)[1]
         self.assertEqual(len(re.findall(r'class="st (landed|watch|stalled)"', body)), 1)
         self.assertNotIn("--landed", render_html.PAGE_CSS)
-        # Brass marks a person's call only: an open question's owner and its chip.
-        self.assertEqual(set(re.findall(r"([.\w-]+)\{[^}]*--brass", render_html.PAGE_CSS)), {".chip.open", ".own"})
+        # Brass marks a person's call only: an open question's owner and due date. Check chips are ink.
+        self.assertEqual(set(re.findall(r"([.\w-]+)\{[^}]*--brass", render_html.PAGE_CSS)), {".own"})
+
+    def test_selection_and_focus_print_in_ink_not_green(self):
+        css = re.search(r"<style>(.*?)</style>", (ACME / "board-qa-prep.html").read_text(encoding="utf-8"), re.S).group(1)
+        self.assertLess(css.index("::selection{background:var(--landed)"), css.index("::selection{background:var(--t1)"))
+        self.assertLess(css.index("outline:2px solid var(--landed)"), css.index(":focus-visible{outline-color:var(--t1)}"))
+
+    def test_a_leader_gets_the_point_in_thirty_seconds(self):
+        page = (ACME / "board-qa-prep.html").read_text(encoding="utf-8")
+        body = page.split("</style>", 1)[1]
+        key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
+        self.assertIn(f'<p class="answer">{render_html.e(render_html.answer_line(key))}</p>', body)
+        self.assertEqual(len(re.findall(r"<li><b>Q\d\d</b>", re.search(r'<ul class="sum">(.*?)</ul>', body).group(1))), 5)
+        visible = re.sub(r"<details.*?</details>", "", body, flags=re.S)
+        for qid in key["first"]:
+            self.assertIn(f'<div id="{qid}">', visible)
+        folded = "".join(re.findall(r"<details.*?</details>", body, flags=re.S))
+        rest = [q["id"] for q in key["questions"] if q["id"] not in key["first"]]
+        self.assertTrue(rest)
+        for qid in rest:
+            self.assertIn(f'<div id="{qid}">', folded)
+        self.assertLess(len(re.sub(r"<[^>]+>", " ", visible).split()), 600)
+        md = (ACME / "board-qa-prep.md").read_text(encoding="utf-8")
+        self.assertIn(f"**{render_html.answer_line(key)}**", md.split("## Prepare these first")[0])
+        self.assertIn("<details>", md)
 
     def test_the_readme_excerpt_is_real_output(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -74,6 +100,15 @@ class Sample(unittest.TestCase):
         md = (ACME / "board-qa-prep.md").read_text(encoding="utf-8")
         for para in [p for p in block.split("\n\n") if p.strip()]:
             self.assertIn(para.strip(), md)
+
+
+class Floor(unittest.TestCase):
+    def test_every_entry_script_stops_on_an_old_python_with_a_plain_message(self):
+        for path in (SCRIPTS / "board_qa.py", SCRIPTS / "check.py", ACME / "sample.py"):
+            code = f"import runpy, sys; sys.version_info = (3, 9, 6); runpy.run_path({str(path)!r}, run_name='__main__')"
+            done = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=30, check=False)  # noqa: S603
+            self.assertEqual(done.returncode, 1, path.name)
+            self.assertIn("board-qa-prep needs Python 3.11 or later; try python3.12", done.stderr, path.name)
 
 
 class Versions(unittest.TestCase):

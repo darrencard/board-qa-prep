@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from _path import ACME
 
@@ -134,14 +135,23 @@ class TheAcmeRead(unittest.TestCase):
         self.assertIn("did-it-land says landed", q["answer"])
 
     def test_open_questions_name_the_owner_the_record_gives(self):
+        up = upstream()
         opens = {q["topic"]: q for q in self.key["questions"] if q["check"] == "open"}
-        self.assertEqual(sorted(opens), ["decision", "decision-open", "past", "release"])
-        self.assertEqual(opens["decision"]["owner"], "Head of Product, Quoting squad")
+        expected = {"past", "release"} | ({"decision-open"} if up["decisions"].get("rows") else set())
+        self.assertLessEqual(expected, set(opens))
+        self.assertLessEqual(set(opens), expected | {"decision"})
         self.assertEqual(opens["past"]["owner"], "Head of Product, Quoting squad")
-        self.assertEqual(opens["decision-open"]["owner"], "Lead, Quoting squad")
+        if "decision" in opens:
+            self.assertEqual(opens["decision"]["owner"], "Head of Product, Quoting squad")
+        if "decision-open" in opens:
+            self.assertEqual(opens["decision-open"]["owner"], up["decisions"]["rows"][0]["owner"])
         self.assertEqual(opens["release"]["owner"], "Lead, Quoting squad")
         for q in opens.values():
             self.assertEqual(q["due"], "before the board meeting")
+
+    def test_every_owner_is_an_acme_org_chart_role(self):
+        roles = {"Head of Product, Quoting squad", "Lead, Quoting squad", "Tech lead, Quoting squad", "Product manager, Quoting squad"}
+        self.assertLessEqual({q["owner"] for q in self.key["questions"] if q["check"] == "open"}, roles)
 
     def test_cost_over_budget_is_answered_by_the_postmortem_fix(self):
         self.assertEqual(self.by_topic["cost"][0]["check"], "answered")
@@ -156,15 +166,19 @@ class TheAcmeRead(unittest.TestCase):
         self.assertEqual(self.key["not_in_record"], [])
 
     def test_decisions_are_read_from_rows_and_decided(self):
+        dec = upstream()["decisions"]
         made = self.by_topic["decision-made"][0]
         self.assertEqual(made["check"], "answered")
-        self.assertIn("3 decided", made["answer"])
-        self.assertIn("Prices come from the price book, never the model (Tech lead, Quoting squad, 2026-07-27)", made["answer"])
-        still = self.by_topic["decision-open"][0]
-        self.assertIn("2 open", still["missing"])
-        self.assertIn("Set the rollback trigger for quote drafting (Lead, Quoting squad, due 2026-08-03)", still["missing"])
-        # The decision record predates did-it-land's read, so the scale call is still open.
-        self.assertIn("run decision-record", self.by_topic["decision"][0]["missing"])
+        self.assertIn(f"{len(dec['decided'])} decided", made["answer"])
+        latest = sorted(dec["decided"], key=lambda x: x["date"], reverse=True)[0]
+        self.assertIn(f"{latest['title']} ({latest['decided_by']}, {latest['date']})", made["answer"])
+        if dec["rows"]:
+            still = self.by_topic["decision-open"][0]
+            self.assertIn(f"{len(dec['rows'])} open", still["missing"])
+            first = dec["rows"][0]
+            self.assertIn(f"{first['ask']} ({first['owner']}, due {first['deadline']})", still["missing"])
+        else:
+            self.assertNotIn("decision-open", self.by_topic)
 
     def test_release_reads_readiness_waivers_and_spec_holds(self):
         shipped, waived = self.by_topic["release"]
@@ -184,8 +198,8 @@ class TheAcmeRead(unittest.TestCase):
     def test_postmortem_names_one_owner_and_due_date_per_fix(self):
         q = self.by_topic["postmortem"][0]
         self.assertEqual(q["check"], "answered")
-        for owner in ("Lead, Quoting squad, due 2026-12-10", "Platform on-call lead, due 2026-12-17", "Tech lead, Quoting squad, due 2027-01-08", "Price book squad lead, due 2026-12-17"):
-            self.assertIn(owner, q["answer"])
+        for fix in upstream()["postmortem"]["fixes"]:
+            self.assertIn(f"{fix['owner']}, due {fix['due']}", q["answer"])
 
     def test_past_questions_land_on_their_topic_or_open(self):
         asked = [q for q in self.key["questions"] if q.get("asked_last_time")]
@@ -273,3 +287,62 @@ class AnyRecordInTheContract(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def decided_upstream() -> dict:
+    """The upstream record with D-0004 and D-0005 decided, as decision-record writes a call once it is made."""
+    rec = upstream()
+    dec = rec["decisions"]
+    for row in dec["rows"]:
+        dec["decided"].append(
+            {"id": row["id"], "title": row["ask"], "chosen": row["options"].split(" or ")[0], "decided_by": row["owner"], "date": "2026-08-03", "owner": row["owner"]}
+        )
+        dec["figures"].pop(f"days_waiting@{row['id']}", None)
+    dec["rows"] = []
+    dec["figures"]["open"]["value"] = 0
+    dec["figures"]["decided"]["value"] = len(dec["decided"])
+    for gone in ("past_due", "waiting_long", "oldest_open"):
+        dec["figures"].pop(gone, None)
+    return rec
+
+
+class DecisionsMade(unittest.TestCase):
+    """decision-record may close the open rows (D-0004, D-0005); the reader handles a record with none open."""
+
+    def setUp(self):
+        self.w = Work(decided_upstream())
+
+    def tearDown(self):
+        self.w.close()
+
+    def test_no_open_rows_reads_cleanly_and_leads_with_the_latest_calls(self):
+        html, md = self.w.dir / "p.html", self.w.dir / "p.md"
+        self.assertEqual(self.w.prep("--past", str(PAST), "--html", str(html), "--md", str(md)), 0)
+        rec = self.w.record()
+        key = rec["board_qa"]
+        self.assertEqual(check.check(rec), [])
+        topics = {q["topic"]: q for q in key["questions"]}
+        self.assertNotIn("decision-open", topics)
+        made = topics["decision-made"]["answer"]
+        self.assertIn("5 decided", made)
+        self.assertTrue(made.split(": ", 1)[1].startswith("5 decided"), made)
+        self.assertIn("Set the rollback trigger for quote drafting (Lead, Quoting squad, 2026-08-03)", made)
+        self.assertIn("Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-03)", made)
+        # The calls still predate did-it-land's read, so the scale call stays open with the brief's decider.
+        self.assertEqual(topics["decision"]["check"], "open")
+        self.assertEqual(topics["decision"]["owner"], "Head of Product, Quoting squad")
+        self.assertIn(topics["decision-made"]["id"], html.read_text(encoding="utf-8"))
+        self.assertIn("Set the rollback trigger", md.read_text(encoding="utf-8"))
+
+
+class FailureSafe(unittest.TestCase):
+    def test_a_render_failure_writes_nothing(self):
+        w = Work()
+        try:
+            before = w.path.read_bytes()
+            with mock.patch.object(board_qa.render_html, "page", side_effect=TypeError("boom")), self.assertRaises(TypeError):
+                w.prep("--html", str(w.dir / "p.html"))
+            self.assertEqual(w.path.read_bytes(), before)
+            self.assertFalse((w.dir / "p.html").exists())
+        finally:
+            w.close()

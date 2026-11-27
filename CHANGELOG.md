@@ -11,6 +11,10 @@
 - Reads the real shapes of the newer keys: decision-record's `rows` and `decided`, release-readiness's `readiness`, checks, waivers and `spec_holds`, customer-signal-digest's check word and themes, and the postmortem's `fixes` (one owner and a due date each). A postmortem fix that addresses the cost overrun answers who brings cost back within budget.
 - Removed: the deck reader from 0.1.0. The Leader Report reads the same record, so the board questions now start there.
 - Python 3.11 or later.
+- The page opens with a one-line answer and a five-line summary (the questions to prepare first, one line each), then those five in full; the other questions, the record's keys and the ledger fold under `<details>`. The Markdown twin follows the same order.
+- Check chips print in ink; brass is kept for an open question's owner and due date. Text selection and keyboard focus print in ink, not the template's green.
+- Decisions: the most recent calls lead the decided list, and a record with no open decision rows reads cleanly.
+- Every entry script stops on Python older than 3.11 before it reads or writes anything. The page renders before the record is written, and the sample builds in a scratch folder and moves its outputs into place only on success.
 
 ## 0.1.0, 2026-11-26
 

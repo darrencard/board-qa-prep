@@ -4,7 +4,7 @@ The page takes the report's whole stylesheet from its template (assets/vendor/te
 byte-identical at a pinned commit), so it is the same brand family as the deck. It follows the report's
 references/design.md: mono capitals for labels, sans for sentences, hairlines not boxes. Green, grey-white and
 red mean a bet's status only, and appear once, on the status did-it-land set. Brass marks a person's call: an
-open question's owner and due date. Answered is ink, never a status colour.
+open question's owner and due date. Check chips, answered and open alike, are ink, never a status colour.
 
 Nothing is loaded from the network, nothing depends on the clock or the machine, and every piece of text from
 the record is escaped.
@@ -26,6 +26,9 @@ STYLE = re.compile(r"<style>(.*?)</style>", re.S)
 CITE = re.compile(r"\s*\[(F\d{1,3})\]")
 
 PAGE_CSS = """
+/* The vendored template paints selection and focus green; green is kept for the bet status, so both print in ink here. */
+::selection{background:var(--t1);color:var(--bg)}
+:focus-visible{outline-color:var(--t1)}
 main.solo{margin-left:0}
 .solo .slide{min-height:0}
 .solo .slide.cover{padding-top:72px;padding-bottom:40px}
@@ -38,12 +41,20 @@ main.solo{margin-left:0}
 .qa .k{display:block;font:400 10px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:8px}
 .qa .w{text-align:right}
 .chip.answered{color:var(--t1);border-color:var(--line3)}
-.chip.open{color:var(--brass);border-color:var(--brass);border-style:dashed}
+.chip.open{color:var(--t1);border-color:var(--line3);border-style:dashed}
 .own{display:block;font:400 11.5px/18px var(--mono);color:var(--brass);margin-top:8px}
 .own i{font-style:normal;font-size:10px;letter-spacing:.1em;color:var(--t3);margin-right:6px}
 .own i+i{margin-left:18px}
 .facts span.st{display:inline-flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;line-height:30px}
 .keys td:first-child{font-family:var(--mono);font-size:11.5px}
+.answer{font-size:19px;line-height:1.4;color:var(--t1);margin:0 0 14px;max-width:64ch}
+.sum{list-style:none;margin:0 0 20px;padding:0;max-width:78ch}
+.sum li{border-top:1px solid var(--line);padding:7px 0;font-size:13.5px;color:var(--t2)}
+.sum li b{font:400 10px/18px var(--mono);letter-spacing:.1em;color:var(--t3);margin-right:10px}
+.more{border-top:1px solid var(--line);padding:14px 0}
+.more>summary{cursor:pointer;font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
+.more>summary:hover{color:var(--t1)}
+.more[open]>summary{margin-bottom:8px}
 .foot{max-width:1120px;margin:0 auto;padding:28px 40px 64px;color:var(--t3);font-size:12px}
 @media (max-width:980px){.qa>div{grid-template-columns:1fr;gap:4px}.qa .w{text-align:left}.foot{padding:24px 16px 48px}.solo .slide.cover{padding-top:48px}}
 """
@@ -98,6 +109,28 @@ def written_by(record: dict[str, Any], key: str) -> tuple[str, str]:
     return str(tool), str(k.get("as_of") or "")[:10]
 
 
+def answer_line(k: dict[str, Any]) -> str:
+    """The point in one line: how many of the likely questions the record answers, and how many need a person."""
+    n = {name: f["value"] for name, f in k["counts"].items()}
+    if not n["open"]:
+        return f"All {n['questions']} likely questions are answered from the loop record."
+    need = "needs an answer" if n["open"] == 1 else "need an answer"
+    return f"{n['answered']} of {n['questions']} likely questions are answered from the loop record; {n['open']} {need} from their owner before the meeting."
+
+
+def summary_lines(k: dict[str, Any]) -> list[tuple[str, str]]:
+    """One line per question to prepare first: (id, the question and where it stands)."""
+    qs = {q["id"]: q for q in k["questions"]}
+    out = []
+    for i in k["first"]:
+        q = qs[i]
+        where = f"open, owner {q['owner']}, due {q['due']}" if q["check"] == "open" else "answered from the record"
+        if q["check"] == "answered" and q.get("stated_by"):
+            where = f"answered, stated by {q['stated_by']}"
+        out.append((i, f"{q['question']} ({where})"))
+    return out
+
+
 def row(q: dict[str, Any]) -> str:
     body = q.get("answer") if q["check"] == "answered" else q.get("missing")
     extra = ""
@@ -132,8 +165,10 @@ def page(record: dict[str, Any]) -> str:
         f"<span><b>{n['open']}</b>Open</span><span>{status_html}Bet status, from did-it-land</span></div>"
     )
     first = "".join(row(qs[i]) for i in k["first"])
-    opens = "".join(row(q) for q in k["questions"] if q["check"] == "open" and q["id"] not in k["first"])
-    answered = "".join(row(q) for q in k["questions"] if q["check"] == "answered" and q["id"] not in k["first"])
+    opens_q = [q for q in k["questions"] if q["check"] == "open" and q["id"] not in k["first"]]
+    answered_q = [q for q in k["questions"] if q["check"] == "answered" and q["id"] not in k["first"]]
+    opens = "".join(row(q) for q in opens_q)
+    answered = "".join(row(q) for q in answered_q)
     keys = []
     for key in k["read"]:
         tool, as_of = written_by(record, key)
@@ -154,30 +189,36 @@ def page(record: dict[str, Any]) -> str:
         lt = f'<p class="lede">{e(lede_text)}</p>' if lede_text else ""
         return f'<section class="slide"><div class="meta"><span>{e(label)}</span></div><h2>{e(heading)}</h2>{lt}{body}</section>'
 
+    def fold(heading: str, body: str) -> str:
+        return f'<details class="more"><summary>{e(heading)}</summary>{body}</details>' if body else ""
+
+    summary = "".join(f"<li><b>{e(i)}</b>{e(line)}</li>" for i, line in summary_lines(k))
+    folds = (
+        fold(f"Open, with an owner ({len(opens_q)})", f'<div class="qa">{opens}</div>' if opens else "")
+        + fold(f"Answered from the record ({len(answered_q)})", f'<div class="qa">{answered}</div>' if answered else "")
+        + fold(
+            "What the record holds",
+            f'<div class="tablewrap keys"><table><thead><tr><th>Key</th><th>Written by</th><th>As of</th><th>Here</th></tr></thead><tbody>{"".join(keys)}</tbody></table></div>'
+            f'<p class="sub">{e(brief_line)}</p>',
+        )
+        + fold(
+            f"Every figure, with its source ({len(k['figures'])})",
+            f'<div class="tablewrap"><table><thead><tr><th>ID</th><th class="num">Figure</th><th>Source</th><th>Window</th><th>As of</th></tr></thead><tbody>{ledger}</tbody></table></div>',
+        )
+    )
+
     return (
         '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         f'<title>{e(title)}</title><style>{stylesheet()}{PAGE_CSS}</style></head><body><main class="solo">'
         f'<section class="slide cover"><div class="brand">{MARK}<span translate="no">DACARD</span></div><div class="meta">{meta}</div>'
-        f'<h1>{e(title)}</h1><p class="lede">{e(lede)}</p>{facts}</section>'
+        f'<h1>{e(title)}</h1><p class="answer">{e(answer_line(k))}</p><ul class="sum">{summary}</ul>{facts}</section>'
         + section(
             "Prepare first",
             "The five to prepare first",
             f'<div class="qa">{first}</div>',
             "Ranked in code: the result and the decision weigh most, an open question weighs more, and a question the board asked last time most of all.",
         )
-        + section("Open", "Open, with an owner", f'<div class="qa">{opens}</div>' if opens else "")
-        + section("Answered", "Answered from the record", f'<div class="qa">{answered}</div>' if answered else "")
-        + section(
-            "Record",
-            "What the record holds",
-            f'<div class="tablewrap keys"><table><thead><tr><th>Key</th><th>Written by</th><th>As of</th><th>Here</th></tr></thead><tbody>{"".join(keys)}</tbody></table></div>'
-            f'<p class="sub">{e(brief_line)}</p>',
-        )
-        + section(
-            "Ledger",
-            "Every figure, with its source",
-            f'<div class="tablewrap"><table><thead><tr><th>ID</th><th class="num">Figure</th><th>Source</th><th>Window</th><th>As of</th></tr></thead><tbody>{ledger}</tbody></table></div>',
-        )
+        + section("More", "The rest, folded", folds, lede)
         + '<p class="foot">Every answer quotes a figure the loop record holds, with its source; code checks each one. '
         "An answer says what moved and when, not why. Landed, watch or stalled is did-it-land's call, printed as it set it.</p></main></body></html>\n"
     )
@@ -211,6 +252,8 @@ def markdown(record: dict[str, Any]) -> str:
     status = (record.get("landed") or {}).get("status") or "not read"
     lines = [f"# Board questions: {k['bet_title']}", ""]
     lines.append(f"As of {k['as_of']}. {k['tool']}. Step 05 Report." + (" Illustrative: every figure is invented." if k.get("illustrative") else ""))
+    lines += ["", f"**{answer_line(k)}**", ""]
+    lines += [f"- {i}. {line}" for i, line in summary_lines(k)]
     lines += ["", f"{n['questions']} questions: {n['answered']} answered from the record, {n['open']} open with an owner. Bet status, from did-it-land: {status}.", ""]
 
     def item(q: dict[str, Any]) -> list[str]:
@@ -229,6 +272,7 @@ def markdown(record: dict[str, Any]) -> str:
         lines += item(qs[i])
     rest_open = [q for q in k["questions"] if q["check"] == "open" and q["id"] not in k["first"]]
     rest_ans = [q for q in k["questions"] if q["check"] == "answered" and q["id"] not in k["first"]]
+    lines += ["<details>", "<summary>The rest: open and answered questions, and every figure with its source</summary>", ""]
     if rest_open:
         lines += ["## Open, with an owner", ""]
         for q in rest_open:
@@ -241,5 +285,5 @@ def markdown(record: dict[str, Any]) -> str:
     for fid, f in k["figures"].items():
         w = f["window"]
         lines.append(f"| {fid} | {_shown(f)} | {str(f['source']).replace('|', '/')} | {_window(w)} | {str(f['as_of'])[:10]} |")
-    lines += ["", "Not in the record yet: " + (", ".join(k["not_in_record"]) or "nothing") + "."]
+    lines += ["", "Not in the record yet: " + (", ".join(k["not_in_record"]) or "nothing") + ".", "", "</details>"]
     return "\n".join(lines) + "\n"
