@@ -47,35 +47,36 @@ main.solo{margin-left:0}
 .solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;max-width:22ch;margin-bottom:20px}
 .solo .lede{margin-bottom:24px}
 .solo .lede b{color:var(--t1);font-weight:500}
-.marks{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;margin:0 0 20px;font:400 10px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.marks{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;margin:0 0 20px;font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
 .marks>span{display:inline-flex;align-items:center;gap:10px}
 .panel{border:1px solid var(--line);border-radius:12px;background:var(--s1);padding:24px 28px 20px}
+.legend{margin:0 0 14px;font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
 @media (min-width:1100px){.panel .sk{display:grid;grid-template-columns:640px minmax(0,1fr);gap:16px 40px;align-items:center}.panel .sk figcaption{margin-top:0;flex-direction:column;align-items:flex-start}}
 .next{margin-top:28px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px 32px;align-items:baseline;border:1px solid var(--brass);border-radius:12px;padding:20px 24px;background:var(--brass-bg)}
-.next>b{font:400 10px/22px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
+.next>b{font:400 11px/22px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
 .next p{margin:0;font-size:16px;line-height:1.5;color:var(--t1)}
 .next .who{display:flex;flex-wrap:wrap;gap:4px 24px;margin-top:10px;font:400 11.5px/16px var(--mono);color:var(--brass)}
-.next .who span::before{font-size:10px;letter-spacing:.1em;color:var(--t3);margin-right:8px}
+.next .who span::before{font-size:11px;letter-spacing:.1em;color:var(--t3);margin-right:8px}
 .next .who .o::before{content:"OWNER"}.next .who .d::before{content:"DUE"}
 .cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px 56px;align-items:start}
 .cols h3{margin-bottom:8px}
 .qa>div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 16px;border-top:1px solid var(--line);padding:14px 0}
-.qa .id{font:400 10px/22px var(--mono);letter-spacing:.1em;color:var(--t3)}
+.qa .id{font:400 11px/22px var(--mono);letter-spacing:.1em;color:var(--t3)}
 .qa .q{display:block;color:var(--t1);font-size:15px;line-height:1.45}
 .qa .a{display:block;color:var(--t2);font-size:13.5px;line-height:1.55;margin-top:6px;max-width:72ch}
-.qa .k{display:block;font:400 10px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:8px}
+.qa .k{display:block;font:400 11px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:8px}
 .qa details{margin-top:6px}
-.qa details>summary{cursor:pointer;font:400 10px/18px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.qa details>summary{cursor:pointer;font:400 11px/18px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
 .qa details>summary:hover{color:var(--t1)}
 .qa details .a{margin-top:4px}
-.chip{font:400 10px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t1);border:1px solid var(--line3);border-radius:3px;padding:1px 6px;white-space:nowrap}
+.chip{font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t1);border:1px solid var(--line3);border-radius:3px;padding:1px 6px;white-space:nowrap}
 .chip.open{border-style:dashed}
 .own{display:block;font:400 11.5px/18px var(--mono);color:var(--brass);margin-top:8px}
-.own i{font-style:normal;font-size:10px;letter-spacing:.1em;color:var(--t3);margin-right:6px}
+.own i{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--t3);margin-right:6px}
 .own i+i{margin-left:18px}
 .rest{margin:0;padding:0;list-style:none}
 .rest li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-top:1px solid var(--line);padding:9px 0;font-size:13.5px;line-height:1.45;color:var(--t2)}
-.rest li b{font:400 10px/18px var(--mono);letter-spacing:.1em;color:var(--t3);font-weight:400}
+.rest li b{font:400 11px/18px var(--mono);letter-spacing:.1em;color:var(--t3);font-weight:400}
 .rest a{color:inherit;text-decoration:none}
 .rest a:hover{color:var(--t1)}
 .solo details.more{border-top:1px solid var(--line);padding:14px 0;margin:0}
@@ -91,7 +92,7 @@ main.solo{margin-left:0}
 .qa>div{grid-template-columns:36px minmax(0,1fr)}.qa .w{grid-column:2}
 .stack table,.stack tbody,.stack tr,.stack td{display:block}.stack tr:first-child{display:none}.stack tr{padding:10px 16px;border-bottom:1px solid var(--line)}
 .stack td{border:0;padding:3px 0;display:grid;grid-template-columns:96px 1fr;gap:12px}.stack td.num{text-align:left;white-space:normal}
-.stack td::before{content:attr(data-l);font:400 10px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
+.stack td::before{content:attr(data-l);font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
 """
 
 WRITER_LABEL = {
@@ -123,11 +124,27 @@ TOPIC = {
     "portfolio": "Why this one",
     "past": "Last meeting",
 }
+# The smallest text the page prints, at every width. The vendored template and svgkit keep their own sizes on disk
+# (both are hash-pinned); the page raises any smaller size to this one as it inlines their rules.
+FONT_FLOOR = 11
+FONT_SIZE = re.compile(r"(font-size:\s*|font:[^;{}]*?)(\d+(?:\.\d+)?)px")
+
+
+def floor_fonts(css: str) -> str:
+    """Every font size below FONT_FLOOR, raised to it: font-size and the size in a font shorthand."""
+    return FONT_SIZE.sub(lambda m: m.group(1) + (str(FONT_FLOOR) if float(m.group(2)) < FONT_FLOOR else m.group(2)) + "px", css)
+
+
 NUMBER_WORDS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
 
 # The record's answers in the page's words. The record keeps its words; the check reads those, not these.
 WORDS = (
     (r"\bvendor-[a-z0-9]+/xl\b", "the large model"),
+    (r"\bThe record\b", "The project file"),
+    (r"\b(?<![\w-])record(?![\w-])", "project file"),
+    (r"\bFrom decision-record, as of\b", "As of"),
+    (r"(^|\. )bet-portfolio-review\b", r"\1The portfolio review"),
+    (r"\bbet-portfolio-review\b", "the portfolio review"),
     (r"\bcontext limit\b", "length limit"),
     (r"\bThe bar:", "The target:"),
     (r"\ba bar of\b", "a target of"),
@@ -223,9 +240,9 @@ def answer_line(k: dict[str, Any]) -> str:
     """The verdict: how many of the likely questions the record answers, and how many need a person."""
     n = {name: f["value"] for name, f in k["counts"].items()}
     if not n["open"]:
-        return f"The record answers all {n['questions']} likely board questions."
+        return f"The project file answers all {n['questions']} likely board questions."
     need = "needs an owner's answer" if n["open"] == 1 else "need an owner's answer"
-    return f"The record answers {n['answered']} of {n['questions']} likely board questions. {count_word(n['open'])} {need} before the meeting."
+    return f"The project file answers {n['answered']} of {n['questions']} likely board questions. {count_word(n['open'])} {need} before the meeting."
 
 
 def lede(k: dict[str, Any]) -> str:
@@ -316,7 +333,7 @@ def summary_lines(k: dict[str, Any]) -> list[tuple[str, str]]:
     out = []
     for i in k["first"]:
         q = qs[i]
-        where = f"open, owner {q['owner']}, due {q['due']}" if q["check"] == "open" else "answered from the record"
+        where = f"open, owner {q['owner']}, due {q['due']}" if q["check"] == "open" else "answered from the project file"
         if q["check"] == "answered" and q.get("stated_by"):
             where = f"answered, stated by {q['stated_by']}"
         out.append((i, f"{plain(q['question'])} ({where})"))
@@ -353,7 +370,7 @@ def page(record: dict[str, Any]) -> str:
     n = {name: f["value"] for name, f in k["counts"].items()}
     ill = bool(k.get("illustrative"))
     title = f"Board questions: {k['bet_title']}"
-    header = sk.page_header("board-qa-prep", date=f"As of {k['as_of']}", version="v" + k["tool"].rsplit(" ", 1)[-1], illustrative=ill)
+    header = sk.page_header("Board Q&A prep", date=f"As of {k['as_of']}", version="v" + k["tool"].rsplit(" ", 1)[-1], illustrative=ill)
     status = (record.get("landed") or {}).get("status")
     status_html = f'<span class="st {e(status)}">{e(status)}</span>' if status in ("landed", "watch", "stalled") else '<span class="mono t3">not read</span>'
     marks = f'<p class="marks"><span>Project status, from did-it-land {status_html}</span><span>{n["answered"]} answered</span><span>{n["open"]} open</span></p>'
@@ -369,7 +386,7 @@ def page(record: dict[str, Any]) -> str:
             f'<div class="next"><b>What to do next</b><div><p>Get an answer to {e(lead["id"])}, &ldquo;{e(plain(lead["question"]))}&rdquo;, '
             f'from its owner before the meeting.</p><span class="who"><span class="o">{e(lead["owner"])}</span><span class="d">{e(lead["due"])}</span></span></div></div>'
         )
-    cover = f'<section class="slide cover">{header}<h1>{e(answer_line(k))}</h1><p class="lede">{lede(k)}</p>{marks}<div class="panel">{pic}</div>{step}</section>'
+    cover = f'<section class="slide cover">{header}<h1>{e(answer_line(k))}</h1><p class="lede">{lede(k)}</p>{marks}<div class="panel"><p class="legend">\u25cf prepare first</p>{pic}</div>{step}</section>'
 
     first = "".join(row(qs[i], short=True) for i in k["first"])
     rest = [q for q in k["questions"] if q["id"] not in k["first"]]
@@ -385,7 +402,7 @@ def page(record: dict[str, Any]) -> str:
         tool, as_of = written_by(record, key)
         keys.row(("mo", e(key)), ("", e(tool)), ("mo", e(as_of)), ("", "read"))
     for key in k["not_in_record"]:
-        keys.row(("mo", e(key)), ("", e(WRITER_LABEL[key])), ("mo", ""), ("t3", "not in the record yet"))
+        keys.row(("mo", e(key)), ("", e(WRITER_LABEL[key])), ("mo", ""), ("t3", "not in the project file yet"))
     brief = k["brief"]
     brief_line = (
         f"Landing brief {brief['path']}: " + ("complete" if brief["complete"] else "cannot be used") + (", unchanged since the record opened." if brief["unchanged"] else ".")
@@ -395,7 +412,7 @@ def page(record: dict[str, Any]) -> str:
         ledger.row(("mo", e(fid)), ("num", e(_shown(f))), ("", e(f["source"])), ("mo", e(_window(f["window"]))), ("mo", e(str(f["as_of"])[:10])), row_id=fid)
     rest_rows = "".join(row(q) for q in rest)
     engineers = (
-        f"{keys.html()}<p>{e(brief_line)}</p>{ledger.html()}"
+        f"<p>Skill: <code>board-qa-prep</code> {e(k['tool'].rsplit(' ', 1)[-1])}.</p>{keys.html()}<p>{e(brief_line)}</p>{ledger.html()}"
         "<p>The answers above print the record's words in plain words; the record keeps them as written, and the check reads those. "
         "board_qa.py adds its page to the project file: the <code>board_qa</code> key of <code>landing/&lt;bet&gt;.json</code>, and no other key.</p>"
     )
@@ -407,7 +424,7 @@ def page(record: dict[str, Any]) -> str:
     )
     return (
         '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<title>{e(title)}</title><style>{stylesheet()}{sk.CSS}{PAGE_CSS}</style></head><body><main class="solo">'
+        f'<title>{e(title)}</title><style>{floor_fonts(stylesheet() + sk.CSS + PAGE_CSS)}</style></head><body><main class="solo">'
         f"{cover}{detail}{more}"
         '<p class="foot">Every answer quotes a figure the project file holds, with its source; code checks each one. '
         "An answer says what moved and when, not why. Landed, watch or stalled is did-it-land's call, printed as it set it.</p></main></body></html>\n"
@@ -442,7 +459,7 @@ def markdown(record: dict[str, Any]) -> str:
     qs = {q["id"]: q for q in k["questions"]}
     status = (record.get("landed") or {}).get("status") or "not read"
     lines = [f"# {answer_line(k)}", ""]
-    lines.append(f"board-qa-prep v{k['tool'].rsplit(' ', 1)[-1]}. As of {k['as_of']}." + (" Illustrative: every figure is invented." if k.get("illustrative") else ""))
+    lines.append(f"Board Q&A prep v{k['tool'].rsplit(' ', 1)[-1]}. As of {k['as_of']}." + (" Illustrative: every figure is invented." if k.get("illustrative") else ""))
     lines += ["", re.sub(r"</?b>", "", html.unescape(lede(k))), ""]
     lines += [f"**Project status, from did-it-land:** {status}. {n['answered']} answered, {n['open']} open.", ""]
     lead = next((qs[i] for i in k["first"] if qs[i]["check"] == "open"), None)
@@ -478,6 +495,7 @@ def markdown(record: dict[str, Any]) -> str:
     for q in rest:
         lines += item(q, short=False)
     lines += ["</details>", "", "<details>", "<summary>For your engineers</summary>", ""]
+    lines += [f"Skill: `board-qa-prep` {k['tool'].rsplit(' ', 1)[-1]}.", ""]
     lines += ["| ID | Figure | Source | Window | As of |", "|---|---|---|---|---|"]
     for fid, f in k["figures"].items():
         lines.append(f"| {fid} | {_shown(f)} | {str(f['source']).replace('|', '/')} | {_window(f['window'])} | {str(f['as_of'])[:10]} |")

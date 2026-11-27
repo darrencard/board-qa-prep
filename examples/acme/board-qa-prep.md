@@ -1,6 +1,6 @@
-# The record answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.
+# The project file answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.
 
-board-qa-prep v0.3.1. As of 2026-11-26. Illustrative: every figure is invented.
+Board Q&A prep v0.3.1. As of 2026-11-26. Illustrative: every figure is invented.
 
 Quote drafting is a project you expect to move a number. Its landing brief, a one-page plan, sets what good looks like, by when and at what cost. As the project moves from plan to board, each step adds its page to the project file. These are the questions a board will likely ask, each answered from that file with its source, or left open with a named owner. Code checks every figure.
 
@@ -16,7 +16,7 @@ Get an answer to Q15, "Is any customer data sent to the model provider?", from i
 
 _Asked at the last meeting._
 
-Nothing in the record answers it, so it needs a person's answer. Owner: Head of Product, Quoting squad. Due: before the board meeting.
+Nothing in the project file answers it, so it needs a person's answer. Owner: Head of Product, Quoting squad. Due: before the board meeting.
 
 **Q02. Did it land?** (answered)
 
@@ -51,7 +51,7 @@ Open bugs within the severity limits: shipped on the OK of Head of Product, Quot
 <details>
 <summary>The full answer, with sources</summary>
 
-No later release check in the record says it closed. Owner: Lead, Quoting squad. Due: before the board meeting.
+No later release check in the project file says it closed. Owner: Lead, Quoting squad. Due: before the board meeting.
 
 </details>
 
@@ -62,7 +62,7 @@ Before launch the number averaged 21.7% [F05], with a spread of 3.83% [F06].
 <details>
 <summary>The full answer, with sources</summary>
 
-By the date it sat 5.05 times that spread above the average [F07]. That rules out noise. It does not say what moved it: no comparison group held back is in the record.
+By the date it sat 5.05 times that spread above the average [F07]. That rules out noise. It does not say what moved it: no comparison group held back is in the project file.
 
 </details>
 
@@ -88,11 +88,11 @@ Tradespeople spend evenings writing quotes by hand, so quotes go out late and lo
 
 **Q04. Did the result the number should move, move too?** (answered)
 
-The result it should drive (Illustrative CRM export, quotes_won_weekly.csv) went from 31 [F08] on 2026-08-31 to 36 [F09] on 2026-11-23. It moved the same way as the number; the record does not show why.
+The result it should drive (Illustrative CRM export, quotes_won_weekly.csv) went from 31 [F08] on 2026-08-31 to 36 [F09] on 2026-11-23. It moved the same way as the number; the project file does not show why.
 
 **Q05. What did we decide, and who decided?** (answered)
 
-From decision-record, as of 2026-11-26: 5 decided [F10]. Set the undo trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10); Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-10); Build quote drafting now, against its landing brief (Head of Product, Quoting squad, 2026-07-27).
+As of 2026-11-26: 5 decided [F10]. Set the undo trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10); Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-10); Build quote drafting now, against its landing brief (Head of Product, Quoting squad, 2026-07-27).
 
 **Q06. Is quality holding as more of the work runs without a person?** (answered)
 
@@ -104,7 +104,7 @@ Pass rate on test cases kept back went from 70% [F14] on version 1.3 to 80% [F11
 
 **Q09. Who brings cost back within budget, and by when?** (answered)
 
-The record names the model behind most of it, the large model: $0.963 [F22] of $1.89 [F23] over budget. The after-action review names the fix: Send only drafts over the standard model's length limit to the large model, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
+The project file names the model behind most of it, the large model: $0.963 [F22] of $1.89 [F23] over budget. The after-action review names the fix: Send only drafts over the standard model's length limit to the large model, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
 
 **Q10. Was it ready to ship when it shipped?** (answered)
 
@@ -120,12 +120,14 @@ The learning review of 2026-11-26 covers 2 incidents [F30] from 2026-09-07 to 20
 
 **Q14. Why this project, over the others?** (answered)
 
-bet-portfolio-review ranked it 4 of 8 projects, 1 needs work first [F32] on 2026-07-27. Its brief scored 14 points of 14 [F33].
+The portfolio review ranked it 4 of 8 projects, 1 needs work first [F32] on 2026-07-27. Its brief scored 14 points of 14 [F33].
 
 </details>
 
 <details>
 <summary>For your engineers</summary>
+
+Skill: `board-qa-prep` 0.3.1.
 
 | ID | Figure | Source | Window | As of |
 |---|---|---|---|---|

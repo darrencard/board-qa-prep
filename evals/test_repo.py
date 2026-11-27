@@ -93,7 +93,7 @@ class Sample(unittest.TestCase):
         body = page.split("</style>", 1)[1]
         key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
         self.assertIn(f"<h1>{render_html.e(render_html.answer_line(key))}</h1>", body)
-        self.assertEqual(render_html.answer_line(key), "The record answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.")
+        self.assertEqual(render_html.answer_line(key), "The project file answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.")
         visible = re.sub(r"<details.*?</details>", "", body, flags=re.S)
         for qid in key["first"]:
             self.assertIn(f'<div id="{qid}">', visible)
@@ -158,7 +158,7 @@ class Visual(unittest.TestCase):
         for label in labels:
             self.assertEqual(
                 label,
-                "The record answers 13 of 15 likely board questions. Two need an owner&#x27;s answer before the meeting. "
+                "The project file answers 13 of 15 likely board questions. Two need an owner&#x27;s answer before the meeting. "
                 "Open: Q11, owned by Lead, Quoting squad, due before the board meeting; Q15, owned by Head of Product, Quoting squad, due before the board meeting.",
             )
 
@@ -181,9 +181,35 @@ class Visual(unittest.TestCase):
                 ".json",
             ):
                 self.assertNotIn(word, text)
+            # The words a reader outside the loop does not know, as whole words.
+            self.assertEqual(re.findall(r"\b(records?|bets?|the bar|prds?|arr|tokens?)\b", text), [])
             for word in ("project", "target", "likely range", "too close to call", "the large model"):
                 self.assertIn(word, text)
         self.assertIn("<b>landing brief</b>, a one-page plan, sets what good looks like, by when and at what cost", self.page)
+
+    def test_no_text_smaller_than_11px_at_any_width(self):
+        css = " ".join(re.findall(r"<style>(.*?)</style>", self.page, re.S) + re.findall(r'style="([^"]*)"', self.page))
+        sizes = [float(m) for m in re.findall(r"(?:font-size:\s*|font:[^;{}]*?)(\d+(?:\.\d+)?)px", css)]
+        sizes += [float(m) for m in re.findall(r'font-size="(\d+(?:\.\d+)?)"', self.page)]
+        self.assertTrue(sizes)
+        self.assertGreaterEqual(min(sizes), 11)
+        # The vendored template is untouched on disk: the page raises its small sizes as it inlines them.
+        self.assertIn("font:400 10px/16px", (SKILL / "assets" / "vendor" / "template.html").read_text(encoding="utf-8"))
+
+    def test_header_prints_the_plain_name_and_the_fold_the_code_name(self):
+        header = re.search(r'<header class="sk-hdr">.*?</header>', self.page, re.S).group(0)
+        self.assertIn("<span>Board Q&amp;A prep</span>", header)
+        self.assertNotIn("board-qa-prep", header)
+        self.assertIn("<code>board-qa-prep</code>", self.page.split("For your engineers", 1)[1])
+        self.assertIn("\nBoard Q&A prep v0.3.1.", self.md)
+
+    def test_the_tiles_carry_a_legend_for_the_dot_and_the_standard_gap_under_the_heading(self):
+        panel = self.page.split('<div class="panel">', 1)[1]
+        self.assertTrue(panel.startswith('<p class="legend">\u25cf prepare first</p><figure class="sk">'))
+        self.assertIn("Nothing in the project file answers it", self.page)
+        # The heading's gap is the family's: the same rules as did-it-land and eval-kit.
+        self.assertIn(".solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;max-width:22ch;margin-bottom:20px}", self.page)
+        self.assertIn(".solo .lede{margin-bottom:24px}", self.page)
 
     def test_the_page_follows_the_sample_anatomy(self):
         body = self.page.split('<main class="solo">', 1)[1]
@@ -192,7 +218,7 @@ class Visual(unittest.TestCase):
         self.assertEqual(at, sorted(at))
         self.assertEqual(body.count('<div class="next">'), 1, "one next step leads the page")
         self.assertIn('<span class="o">Head of Product, Quoting squad</span><span class="d">before the board meeting</span>', body)
-        self.assertIn("<span>board-qa-prep</span><span>As of 2026-11-26</span><span>v0.3.1</span>", body)
+        self.assertIn("<span>Board Q&amp;A prep</span><span>As of 2026-11-26</span><span>v0.3.1</span>", body)
         self.assertNotIn("Book a call", body, "a sample is the skill's own output: no call to action")
 
 

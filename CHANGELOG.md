@@ -2,12 +2,13 @@
 
 ## 0.3.1, 2026-11-27
 
-- The HTML page follows the Landing Loop sample anatomy: the shared header (mark, DACARD, skill, date, version, blue Illustrative tag), the verdict as the heading ("The record answers 13 of 15 likely board questions. Two need an owner's answer before the meeting."), the project's status from did-it-land, the signature picture, one next step (the first open question to prepare) with its owner in brass, then the five to prepare first beside the other ten in two columns.
+- The HTML page follows the Landing Loop sample anatomy: the shared header (mark, DACARD, skill, date, version, blue Illustrative tag), the verdict as the heading ("The project file answers 13 of 15 likely board questions. Two need an owner's answer before the meeting."), the project's status from did-it-land, the signature picture, one next step (the first open question to prepare) with its owner in brass, then the five to prepare first beside the other ten in two columns.
 - The long text folds behind the five to prepare first: each shows its point in one sentence, with the full answer and its sources in a fold. The other questions, the figures with their sources and the record key fold under "The other 10 questions" and "For your engineers". The Markdown twin folds the same way.
 - The signature picture: one tile per question, answered (a quiet filled tile) or open (a brass outline with its owner), a dot on the five to prepare first. A 640 wide variant for desktop and a 340 wide one for phones; the aria-label states the answer. Drawn with svgkit, vendored byte-identical from landing-loop and pinned in `VENDORED.json` under `landing-loop`.
 - Public copy in plain words, on the page and in the twin: project, target, landing brief (defined at first use), test cases kept back, the likely range, too close to call, the large model, AI usage per task, a named person's OK in place of a waiver. The record keeps its words, and the check reads those.
 - The Illustrative tag is the family's blue, not the template's grey.
 - Tests: the picture draws only printed figures, green appears only beside the word landed, the aria-label states the answer, public copy uses the plain words, and the vendored svgkit matches its pin.
+- Design fix round 2: no text below 11px at any width (the page raises the vendored template's and svgkit's smaller sizes as it inlines them; the files on disk are unchanged); the header prints the plain name, Board Q&A prep, and the code name moves to the engineers' fold; public copy drops record, bet, the bar, PRD, ARR and tokens ("the project file"; "Nothing in the project file answers it"; the portfolio review by name); a legend line by the tiles, "● prepare first"; the heading keeps the family's standard gap.
 
 ## 0.3.0, 2026-11-26
 
