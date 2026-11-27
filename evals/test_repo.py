@@ -248,7 +248,11 @@ class Visual(unittest.TestCase):
             blocks.append((start, at))
         for m in re.finditer(re.escape("::details-content{"), css):
             self.assertTrue(any(a <= m.start() < b for a, b in blocks), "a ::details-content rule outside @supports")
-        self.assertIn("@supports not selector(::details-content){.scg .sc-d .sc-r{grid-template-columns:minmax(0,1fr) max-content;grid-template-areas:'n s' 'l l'", css, "the fallback stacks each folded row")
+        self.assertIn(
+            "@supports not selector(::details-content){.scg .sc-d .sc-r{grid-template-columns:minmax(0,1fr) max-content;grid-template-areas:'n s' 'l l'",
+            css,
+            "the fallback stacks each folded row",
+        )
 
     def test_opening_the_fold_cannot_move_the_rows_above(self):
         frame = svgkit.frames_in(self.page)[0]
@@ -258,7 +262,9 @@ class Visual(unittest.TestCase):
         self.assertIn(f"--sc-fw:calc({widest}ch + ", style, "the figure column fits the widest folded figure")
         self.assertIn("--sc-ww:min(180px, max(", style)
         self.assertIn("grid-template-columns:minmax(120px,.9fr) minmax(96px,1.3fr) var(--sc-fw,max-content) var(--sc-ww,fit-content(180px))", self.css())
-        self.assertEqual(render_html.column_widths(["ab"], ["open"], ["Lead"]), "--sc-fw:calc(2ch + 0.12em + 2px);--sc-ww:min(180px, max(calc(4ch + 0.24em + 2px), calc(4ch + 16px)))")
+        self.assertEqual(
+            render_html.column_widths(["ab"], ["open"], ["Lead"]), "--sc-fw:calc(2ch + 0.12em + 2px);--sc-ww:min(180px, max(calc(4ch + 0.24em + 2px), calc(4ch + 16px)))"
+        )
 
     def test_cited_check_words_are_the_contract_words(self):
         quality = next(q for q in self.key["questions"] if q["topic"] == "quality")
