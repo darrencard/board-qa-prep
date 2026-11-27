@@ -330,7 +330,8 @@ class DecisionsMade(unittest.TestCase):
         self.assertIn("Set the rollback trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10)", made["answer"])
         self.assertIn("Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-10)", made["answer"])
         self.assertIn(made["id"], html.read_text(encoding="utf-8"))
-        self.assertIn("Set the rollback trigger", md.read_text(encoding="utf-8"))
+        # The twin prints the record's words in plain words: the rollback trigger is the undo trigger.
+        self.assertIn("Set the undo trigger for quote drafting", md.read_text(encoding="utf-8"))
 
     def test_a_record_older_than_the_read_keeps_the_scale_call_open(self):
         rec = copy.deepcopy(self.up)

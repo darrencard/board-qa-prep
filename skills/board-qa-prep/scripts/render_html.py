@@ -1,10 +1,20 @@
-"""The board_qa key as one self-contained HTML page in the Leader Report style guide, and its Markdown twin.
+"""The board_qa key as one self-contained HTML page, in the Leader Report style guide and the Landing Loop's one
+visual family, and its Markdown twin.
 
 The page takes the report's whole stylesheet from its template (assets/vendor/template.html, vendored
-byte-identical at a pinned commit), so it is the same brand family as the deck. It follows the report's
-references/design.md: mono capitals for labels, sans for sentences, hairlines not boxes. Green, grey-white and
-red mean a bet's status only, and appear once, on the status did-it-land set. Brass marks a person's call: an
-open question's owner and due date. Check chips, answered and open alike, are ink, never a status colour.
+byte-identical at a pinned commit) and draws its picture with svgkit (scripts/vendor/svgkit.py, vendored
+byte-identical from landing-loop). Only a few rules for this page's layout are added.
+
+It reads top down for someone who has never seen the loop: the shared header, the verdict as the heading, the
+project's status as did-it-land set it, then the picture: one tile per likely question, answered (filled) or open
+(a brass outline with its owner). One next step follows: the first open question, owned by its person. The five to
+prepare first lead the detail, each with its point in one line and the long answer folded; the other questions,
+the figures with their sources and the record key fold away. Public copy uses plain words: project, target, the
+likely range, too close to call, the large model.
+
+Green, grey-white and red mean a project's status only, and appear once, on the status did-it-land set. Brass marks
+a person's call: an open question's owner and due date. Check chips, answered and open alike, are ink. The picture
+draws only figures the page prints, and its aria-label states the answer.
 
 Nothing is loaded from the network, nothing depends on the clock or the machine, and every piece of text from
 the record is escaped.
@@ -16,54 +26,74 @@ from __future__ import annotations
 
 import html
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
-from display import num
+sys.path.insert(0, str(Path(__file__).resolve().parent / "vendor"))
+
+import svgkit as sk  # noqa: E402  (vendored, unchanged; see VENDORED.json)
+from display import num  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parent.parent / "assets" / "vendor" / "template.html"
 STYLE = re.compile(r"<style>(.*?)</style>", re.S)
 CITE = re.compile(r"\s*\[(F\d{1,3})\]")
 
+# Layout for this page only. Everything else comes from the template's stylesheet and svgkit.CSS.
 PAGE_CSS = """
-/* The vendored template paints selection and focus green; green is kept for the bet status, so both print in ink here. */
-::selection{background:var(--t1);color:var(--bg)}
-:focus-visible{outline-color:var(--t1)}
 main.solo{margin-left:0}
 .solo .slide{min-height:0}
-.solo .slide.cover{padding-top:72px;padding-bottom:40px}
-.solo .lede{margin-bottom:8px}
-.qa{margin-top:4px}
-.qa>div{display:grid;grid-template-columns:56px minmax(0,1fr) 92px;gap:6px 28px;border-top:1px solid var(--line);padding:16px 0}
+.solo .slide.cover{min-height:0;padding-top:40px;padding-bottom:48px;justify-content:flex-start}
+.solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;max-width:22ch;margin-bottom:20px}
+.solo .lede{margin-bottom:24px}
+.solo .lede b{color:var(--t1);font-weight:500}
+.marks{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;margin:0 0 20px;font:400 10px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.marks>span{display:inline-flex;align-items:center;gap:10px}
+.panel{border:1px solid var(--line);border-radius:12px;background:var(--s1);padding:24px 28px 20px}
+@media (min-width:1100px){.panel .sk{display:grid;grid-template-columns:640px minmax(0,1fr);gap:16px 40px;align-items:center}.panel .sk figcaption{margin-top:0;flex-direction:column;align-items:flex-start}}
+.next{margin-top:28px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px 32px;align-items:baseline;border:1px solid var(--brass);border-radius:12px;padding:20px 24px;background:var(--brass-bg)}
+.next>b{font:400 10px/22px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
+.next p{margin:0;font-size:16px;line-height:1.5;color:var(--t1)}
+.next .who{display:flex;flex-wrap:wrap;gap:4px 24px;margin-top:10px;font:400 11.5px/16px var(--mono);color:var(--brass)}
+.next .who span::before{font-size:10px;letter-spacing:.1em;color:var(--t3);margin-right:8px}
+.next .who .o::before{content:"OWNER"}.next .who .d::before{content:"DUE"}
+.cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px 56px;align-items:start}
+.cols h3{margin-bottom:8px}
+.qa>div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 16px;border-top:1px solid var(--line);padding:14px 0}
 .qa .id{font:400 10px/22px var(--mono);letter-spacing:.1em;color:var(--t3)}
-.qa .q{color:var(--t1);font-size:15px;line-height:1.45}
-.qa .a{display:block;color:var(--t2);font-size:13.5px;margin-top:6px;max-width:78ch}
+.qa .q{display:block;color:var(--t1);font-size:15px;line-height:1.45}
+.qa .a{display:block;color:var(--t2);font-size:13.5px;line-height:1.55;margin-top:6px;max-width:72ch}
 .qa .k{display:block;font:400 10px/16px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:8px}
-.qa .w{text-align:right}
-.chip.answered{color:var(--t1);border-color:var(--line3)}
-.chip.open{color:var(--t1);border-color:var(--line3);border-style:dashed}
+.qa details{margin-top:6px}
+.qa details>summary{cursor:pointer;font:400 10px/18px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.qa details>summary:hover{color:var(--t1)}
+.qa details .a{margin-top:4px}
+.chip{font:400 10px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t1);border:1px solid var(--line3);border-radius:3px;padding:1px 6px;white-space:nowrap}
+.chip.open{border-style:dashed}
 .own{display:block;font:400 11.5px/18px var(--mono);color:var(--brass);margin-top:8px}
 .own i{font-style:normal;font-size:10px;letter-spacing:.1em;color:var(--t3);margin-right:6px}
 .own i+i{margin-left:18px}
-.facts span.st{display:inline-flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;line-height:30px}
-.keys td:first-child{font-family:var(--mono);font-size:11.5px}
-.answer{font-size:19px;line-height:1.4;color:var(--t1);margin:0 0 14px;max-width:64ch}
-.sum{list-style:none;margin:0 0 20px;padding:0;max-width:78ch}
-.sum li{border-top:1px solid var(--line);padding:7px 0;font-size:13.5px;color:var(--t2)}
-.sum li b{font:400 10px/18px var(--mono);letter-spacing:.1em;color:var(--t3);margin-right:10px}
-.more{border-top:1px solid var(--line);padding:14px 0}
+.rest{margin:0;padding:0;list-style:none}
+.rest li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;border-top:1px solid var(--line);padding:9px 0;font-size:13.5px;line-height:1.45;color:var(--t2)}
+.rest li b{font:400 10px/18px var(--mono);letter-spacing:.1em;color:var(--t3);font-weight:400}
+.rest a{color:inherit;text-decoration:none}
+.rest a:hover{color:var(--t1)}
+.solo details.more{border-top:1px solid var(--line);padding:14px 0;margin:0}
 .more>summary{cursor:pointer;font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t2)}
 .more>summary:hover{color:var(--t1)}
 .more[open]>summary{margin-bottom:8px}
+.more p{font-size:13px;color:var(--t2);max-width:80ch}
+.tablewrap td,.tablewrap th{overflow-wrap:anywhere}
+::selection{background:var(--t1);color:var(--bg)}
+:focus-visible{outline-color:var(--t1)}
 .foot{max-width:1120px;margin:0 auto;padding:28px 40px 64px;color:var(--t3);font-size:12px}
-@media (max-width:980px){.qa>div{grid-template-columns:1fr;gap:4px}.qa .w{text-align:left}.foot{padding:24px 16px 48px}.solo .slide.cover{padding-top:48px}}
+@media (max-width:980px){.foot{padding:24px 16px 48px}.solo .slide.cover{padding-top:24px}.cols,.next{grid-template-columns:1fr}.panel{padding:18px 16px 16px}
+.qa>div{grid-template-columns:36px minmax(0,1fr)}.qa .w{grid-column:2}
+.stack table,.stack tbody,.stack tr,.stack td{display:block}.stack tr:first-child{display:none}.stack tr{padding:10px 16px;border-bottom:1px solid var(--line)}
+.stack td{border:0;padding:3px 0;display:grid;grid-template-columns:96px 1fr;gap:12px}.stack td.num{text-align:left;white-space:normal}
+.stack td::before{content:attr(data-l);font:400 10px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
 """
 
-MARK = (
-    '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">'
-    '<rect x="2" y="13" width="3" height="7" fill="var(--agent)"/><rect x="7" y="10" width="3" height="10" fill="var(--agent)"/>'
-    '<rect x="12" y="2" width="1.5" height="20" fill="var(--brass)"/><rect x="16" y="4" width="4" height="16" fill="var(--t1)"/></svg>'
-)
 WRITER_LABEL = {
     "portfolio": "bet-portfolio-review",
     "decisions": "decision-record",
@@ -75,10 +105,80 @@ WRITER_LABEL = {
     "signals": "customer-signal-digest",
     "postmortem": "postmortem",
 }
+# Each question's topic as a tile's one or two words. Unknown topics print as they are.
+TOPIC = {
+    "brief": "The plan",
+    "landed": "Did it land",
+    "noise": "Real or noise",
+    "outcome": "The result",
+    "decision-made": "Decisions",
+    "decision-open": "Open calls",
+    "quality": "Quality",
+    "eval-gain": "New version",
+    "cost": "Cost",
+    "cost-owner": "Cost owner",
+    "release": "Release",
+    "signals": "Customers",
+    "postmortem": "Fixes",
+    "portfolio": "Why this one",
+    "past": "Last meeting",
+}
+NUMBER_WORDS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
+
+# The record's answers in the page's words. The record keeps its words; the check reads those, not these.
+WORDS = (
+    (r"\bvendor-[a-z0-9]+/xl\b", "the large model"),
+    (r"\bcontext limit\b", "length limit"),
+    (r"\bThe bar:", "The target:"),
+    (r"\ba bar of\b", "a target of"),
+    (r"(?<![\w-])bar(?![\w-])", "target"),
+    (r"\bWhat did we bet on\b", "What did we set out to do"),
+    (r"(?<![\w-])bets(?![\w-])", "projects"),
+    (r"(?<![\w-])bet(?![\w-])", "project"),
+    (r"(^|\. )v(\d+(?:\.\d+)+)('s)? held-out pass rate\b", r"\1Version \2\3 pass rate on test cases kept back"),
+    (r"\bHeld-out pass rate\b", "Pass rate on test cases kept back"),
+    (r"\bheld-out pass rate\b", "pass rate on test cases kept back"),
+    (r"(^|\. )v(\d+(?:\.\d+)+)\b", r"\1Version \2"),
+    (r"\bv(\d+(?:\.\d+)+)\b", r"version \1"),
+    (r"\bthe 95% interval\b", "the likely range"),
+    (r"\b95% interval\b", "likely range"),
+    (r"\binside (?:the )?noise\b", "too close to call"),
+    (r"\beval-kit's build check\b", "The quality test"),
+    (r"\bthe cost-budget-check result\b", "the cost check's result"),
+    (r"\bthe eval-kit result\b", "the quality test's result"),
+    (r"(^|\. )eval-kit\b", r"\1The quality test"),
+    (r"\beval-kit\b", "the quality test"),
+    (r"(^|\. )cost-budget-check\b", r"\1The cost check"),
+    (r"\bcost-budget-check\b", "the cost check"),
+    (r"\bTokens per task:", "AI usage per task:"),
+    (r"\bPrice per token:", "AI price per unit:"),
+    (r"\bThe postmortem\b", "The after-action review"),
+    (r"\bthe postmortem\b", "the after-action review"),
+    (r"\brollback trigger\b", "undo trigger"),
+    (r"\brollback\b", "undo plan"),
+    (r"\beval-plan\b", "quality test plan"),
+    (r"\bno holdout group\b", "no comparison group held back"),
+    (r"\bspreads above that mean\b", "times that spread above the average"),
+    (r"\bThe outcome series\b", "The result it should drive"),
+    (r"\bthe metric\b", "the number"),
+    (r"\bThe point estimate\b", "The rate itself"),
+    (r"\bFlags on the read: over-cost-budget\.", "The read also flags that cost is over budget."),
+    (r"\bread hold under a waiver from (.+?) until\b", r"failed its check and shipped on the OK of \1, until"),
+    (r"\bwaived by (.+?) until\b", r"shipped on the OK of \1, until"),
+    (r"^Was the waived check closed before its waiver ran out\?$", "A failed check shipped on a named person's OK. Was it closed before that OK ran out?"),
+    (r"\bthe waived check\b", "the check that shipped on a named person's OK"),
+    (r"\bits waiver ran out\b", "that OK ran out"),
+)
 
 
 def e(text: Any) -> str:
     return html.escape(str(text), quote=True)
+
+
+def plain(text: str) -> str:
+    for pattern, to in WORDS:
+        text = re.sub(pattern, to, text)
+    return text
 
 
 def stylesheet() -> str:
@@ -87,6 +187,10 @@ def stylesheet() -> str:
     except OSError:
         found = None
     return found.group(1) if found else ""
+
+
+def count_word(n: int) -> str:
+    return NUMBER_WORDS[n] if n < len(NUMBER_WORDS) else str(n)
 
 
 def cites(text: str) -> str:
@@ -100,6 +204,12 @@ def cites(text: str) -> str:
     return "".join(out)
 
 
+def first_sentence(text: str) -> tuple[str, str]:
+    """The point, and the rest. A sentence ends at a full stop before a space and a capital letter or a digit."""
+    m = re.search(r"\.\s+(?=[A-Z0-9$])", text)
+    return (text, "") if not m else (text[: m.start() + 1], text[m.end() :])
+
+
 def written_by(record: dict[str, Any], key: str) -> tuple[str, str]:
     """(tool and version, as_of) a key says it was written by, as it says it."""
     k = record.get(key) or {}
@@ -110,12 +220,94 @@ def written_by(record: dict[str, Any], key: str) -> tuple[str, str]:
 
 
 def answer_line(k: dict[str, Any]) -> str:
-    """The point in one line: how many of the likely questions the record answers, and how many need a person."""
+    """The verdict: how many of the likely questions the record answers, and how many need a person."""
     n = {name: f["value"] for name, f in k["counts"].items()}
     if not n["open"]:
-        return f"All {n['questions']} likely questions are answered from the loop record."
-    need = "needs an answer" if n["open"] == 1 else "need an answer"
-    return f"{n['answered']} of {n['questions']} likely questions are answered from the loop record; {n['open']} {need} from their owner before the meeting."
+        return f"The record answers all {n['questions']} likely board questions."
+    need = "needs an owner's answer" if n["open"] == 1 else "need an owner's answer"
+    return f"The record answers {n['answered']} of {n['questions']} likely board questions. {count_word(n['open'])} {need} before the meeting."
+
+
+def lede(k: dict[str, Any]) -> str:
+    return (
+        f"{e(k['bet_title'])} is a project you expect to move a number. Its <b>landing brief</b>, a one-page plan, sets what good looks like, "
+        "by when and at what cost. As the project moves from plan to board, each step adds its page to the project file. These are the questions "
+        "a board will likely ask, each answered from that file with its source, or left open with a named owner. Code checks every figure."
+    )
+
+
+# The signature picture
+
+
+def wrap(text: str, room: float) -> list[str]:
+    """A role into lines that fit a mono label's width: a break at each comma first, then between words."""
+    lines: list[str] = []
+    for part in text.split(", "):
+        start = len(lines)
+        for word in part.split():
+            if len(lines) > start and sk.label_width(f"{lines[-1]} {word}") <= room:
+                lines[-1] = f"{lines[-1]} {word}"
+            else:
+                lines.append(word)
+    return lines
+
+
+def tiles(k: dict[str, Any], variant: str) -> str:
+    """One tile per likely question, in order. Answered: filled. Open: a brass outline with its owner, a person's
+    call. A dot marks the five to prepare first."""
+    wide = variant == "wide"
+    width = 640.0 if wide else float(sk.TALL)
+    cols = 5 if wide else 3
+    gap = 5.0
+    w = (width - gap * (cols - 1)) / cols
+    room = w - 14
+    first = set(k["first"])
+    owners = {q["id"]: wrap(q["owner"], room) for q in k["questions"] if q["check"] == "open"}
+    h = 40 + 14 * max([len(v) for v in owners.values()] + [0]) + (4 if owners else 0)
+    parts = []
+    for n, q in enumerate(k["questions"]):
+        x, y = (n % cols) * (w + gap), (n // cols) * (h + gap)
+        done = q["check"] == "answered"
+        # Answered: the muted fill, quiet, so the open tiles (the work left) carry the eye.
+        parts.append(f'<g opacity="0.32">{sk.tile(x, y, w, h, filled=True, tone=sk.MUTED)}</g>' if done else sk.tile(x, y, w, h, tone=sk.BRASS))
+        parts.append(sk.label(x + 7, y + 17, q["id"], tone=sk.INK2 if done else sk.INK))
+        parts.append(sk.label(x + 7, y + 31, TOPIC.get(q["topic"], q["topic"]), tone=sk.INK2 if done else sk.INK))
+        if q["id"] in first:
+            parts.append(sk.point(x + w - 11, y + 12, r=3.5, fill=sk.INK, ring=None))
+        for i, line in enumerate(owners.get(q["id"], [])):
+            parts.append(sk.label(x + 7, y + 49 + 14 * i, line, tone=sk.BRASS))
+    rows = -(-len(k["questions"]) // cols)
+    opens = [q for q in k["questions"] if q["check"] == "open"]
+    aria = answer_line(k)
+    if opens:
+        aria += " Open: " + "; ".join(f"{q['id']}, owned by {q['owner']}, due {q['due']}" for q in opens) + "."
+    return sk.frame("".join(parts), label=aria, height=rows * (h + gap) - gap, width=width, variant=variant)
+
+
+# The rows
+
+
+def row(q: dict[str, Any], short: bool = False) -> str:
+    """One question. Short: the point in one line, the rest of the answer folded."""
+    body = plain(str((q.get("answer") if q["check"] == "answered" else q.get("missing")) or ""))
+    extra = ""
+    if q["check"] == "open":
+        extra = f'<span class="own"><i>OWNER</i>{e(q["owner"])}<i>DUE</i>{e(q["due"])}</span>'
+    elif q.get("stated_by"):
+        extra = f'<span class="k">Stated by {e(q["stated_by"])}</span>'
+    asked = '<span class="k">Asked at the last meeting</span>' if q.get("asked_last_time") else ""
+    if short:
+        point, more = first_sentence(body)
+        text = f'<span class="a">{cites(point)}</span>'
+        if more:
+            text += f'<details><summary>The full answer, with sources</summary><span class="a">{cites(more)}</span></details>'
+    else:
+        text = f'<span class="a">{cites(body)}</span>'
+    return (
+        f'<div id="{e(q["id"])}"><span class="id">{e(q["id"])}</span>'
+        f'<span><span class="q">{e(plain(q["question"]))}</span>{text}{extra}{asked}</span>'
+        f'<span class="w"><span class="chip {e(q["check"])}">{e(q["check"])}</span></span></div>'
+    )
 
 
 def summary_lines(k: dict[str, Any]) -> list[tuple[str, str]]:
@@ -127,99 +319,97 @@ def summary_lines(k: dict[str, Any]) -> list[tuple[str, str]]:
         where = f"open, owner {q['owner']}, due {q['due']}" if q["check"] == "open" else "answered from the record"
         if q["check"] == "answered" and q.get("stated_by"):
             where = f"answered, stated by {q['stated_by']}"
-        out.append((i, f"{q['question']} ({where})"))
+        out.append((i, f"{plain(q['question'])} ({where})"))
     return out
 
 
-def row(q: dict[str, Any]) -> str:
-    body = q.get("answer") if q["check"] == "answered" else q.get("missing")
-    extra = ""
-    if q["check"] == "open":
-        extra = f'<span class="own"><i>OWNER</i>{e(q["owner"])}<i>DUE</i>{e(q["due"])}</span>'
-    elif q.get("stated_by"):
-        extra = f'<span class="k">Stated by {e(q["stated_by"])}</span>'
-    asked = '<span class="k">Asked at the last meeting</span>' if q.get("asked_last_time") else ""
-    return (
-        f'<div id="{e(q["id"])}"><span class="id">{e(q["id"])}</span>'
-        f'<span><span class="q">{e(q["question"])}</span><span class="a">{cites(str(body or ""))}</span>{extra}{asked}</span>'
-        f'<span class="w"><span class="chip {e(q["check"])}">{e(q["check"])}</span></span></div>'
-    )
+class Table:
+    """A table whose cells carry their column name, so a phone shows each row as labelled lines."""
+
+    def __init__(self, heads: tuple[str, ...]) -> None:
+        self.heads = heads
+        self.rows: list[str] = []
+
+    def row(self, *cells: tuple[str, str], row_id: str = "") -> None:
+        tds = []
+        for head, (cls, body) in zip(self.heads, cells, strict=True):
+            attr = f' class="{cls}"' if cls else ""
+            tds.append(f'<td{attr} data-l="{e(head)}">{body}</td>')
+        rid = f' id="{e(row_id)}"' if row_id else ""
+        self.rows.append(f"<tr{rid}>" + "".join(tds) + "</tr>")
+
+    def html(self) -> str:
+        head = "<tr>" + "".join(f"<th>{e(h)}</th>" for h in self.heads) + "</tr>"
+        return f'<div class="tablewrap stack"><table>{head}{"".join(self.rows)}</table></div>'
+
+
+def fold(heading: str, body: str) -> str:
+    return f'<details class="more"><summary>{e(heading)}</summary>{body}</details>' if body else ""
 
 
 def page(record: dict[str, Any]) -> str:
     k = record["board_qa"]
     qs = {q["id"]: q for q in k["questions"]}
     n = {name: f["value"] for name, f in k["counts"].items()}
+    ill = bool(k.get("illustrative"))
     title = f"Board questions: {k['bet_title']}"
-    meta = "".join(f"<span>{e(m)}</span>" for m in (f"As of {k['as_of']}", k["tool"], "05 Report"))
-    if k.get("illustrative"):
-        meta += '<span class="ill">Illustrative</span>'
+    header = sk.page_header("board-qa-prep", date=f"As of {k['as_of']}", version="v" + k["tool"].rsplit(" ", 1)[-1], illustrative=ill)
     status = (record.get("landed") or {}).get("status")
     status_html = f'<span class="st {e(status)}">{e(status)}</span>' if status in ("landed", "watch", "stalled") else '<span class="mono t3">not read</span>'
-    lede = (
-        f"{n['questions']} questions a board will likely ask about this bet. {n['answered']} are answered from the loop record, each figure with its source. "
-        f"{n['open']} are open, each with an owner to chase before the meeting."
+    marks = f'<p class="marks"><span>Project status, from did-it-land {status_html}</span><span>{n["answered"]} answered</span><span>{n["open"]} open</span></p>'
+    caption = (
+        f"Each tile is one likely question, {n['questions']} in all. Filled: answered from the project file. "
+        "Brass outline: open, with the person who owns the answer. A dot marks the five to prepare first."
     )
-    facts = (
-        f'<div class="facts"><span><b>{n["questions"]}</b>Questions</span><span><b>{n["answered"]}</b>Answered</span>'
-        f"<span><b>{n['open']}</b>Open</span><span>{status_html}Bet status, from did-it-land</span></div>"
+    pic = sk.figure(tiles(k, "wide"), tiles(k, "tall"), caption=caption, illustrative=ill)
+    lead = next((qs[i] for i in k["first"] if qs[i]["check"] == "open"), None)
+    step = ""
+    if lead:
+        step = (
+            f'<div class="next"><b>What to do next</b><div><p>Get an answer to {e(lead["id"])}, &ldquo;{e(plain(lead["question"]))}&rdquo;, '
+            f'from its owner before the meeting.</p><span class="who"><span class="o">{e(lead["owner"])}</span><span class="d">{e(lead["due"])}</span></span></div></div>'
+        )
+    cover = f'<section class="slide cover">{header}<h1>{e(answer_line(k))}</h1><p class="lede">{lede(k)}</p>{marks}<div class="panel">{pic}</div>{step}</section>'
+
+    first = "".join(row(qs[i], short=True) for i in k["first"])
+    rest = [q for q in k["questions"] if q["id"] not in k["first"]]
+    others = "".join(f'<li><b>{e(q["id"])}</b><a href="#{e(q["id"])}">{e(plain(q["question"]))}</a><span class="chip {e(q["check"])}">{e(q["check"])}</span></li>' for q in rest)
+    detail = (
+        '<section class="slide"><div class="meta"><span>Prepare first</span></div><div class="cols">'
+        f'<div><h3>The five to prepare first</h3><div class="qa">{first}</div></div>'
+        f'<div><h3>The other {len(rest)}</h3><ul class="rest">{others}</ul></div></div></section>'
     )
-    first = "".join(row(qs[i]) for i in k["first"])
-    opens_q = [q for q in k["questions"] if q["check"] == "open" and q["id"] not in k["first"]]
-    answered_q = [q for q in k["questions"] if q["check"] == "answered" and q["id"] not in k["first"]]
-    opens = "".join(row(q) for q in opens_q)
-    answered = "".join(row(q) for q in answered_q)
-    keys = []
+
+    keys = Table(("Key", "Written by", "As of", "Here"))
     for key in k["read"]:
         tool, as_of = written_by(record, key)
-        keys.append(f"<tr><td>{e(key)}</td><td>{e(tool)}</td><td class='mo'>{e(as_of)}</td><td>read</td></tr>")
+        keys.row(("mo", e(key)), ("", e(tool)), ("mo", e(as_of)), ("", "read"))
     for key in k["not_in_record"]:
-        keys.append(f"<tr><td>{e(key)}</td><td>{e(WRITER_LABEL[key])}</td><td class='mo'></td><td class='t3'>not in the record yet</td></tr>")
+        keys.row(("mo", e(key)), ("", e(WRITER_LABEL[key])), ("mo", ""), ("t3", "not in the record yet"))
     brief = k["brief"]
-    brief_line = f"Brief {brief['path']}: " + ("complete" if brief["complete"] else "cannot be used") + (", unchanged since the record opened." if brief["unchanged"] else ".")
-    ledger = "".join(
-        f"<tr id='{e(fid)}'><td class='mo'>{e(fid)}</td><td class='num'>{e(_shown(f))}</td><td>{e(f['source'])}</td>"
-        f"<td class='mo'>{e(_window(f['window']))}</td><td class='mo'>{e(str(f['as_of'])[:10])}</td></tr>"
-        for fid, f in k["figures"].items()
+    brief_line = (
+        f"Landing brief {brief['path']}: " + ("complete" if brief["complete"] else "cannot be used") + (", unchanged since the record opened." if brief["unchanged"] else ".")
     )
-
-    def section(label: str, heading: str, body: str, lede_text: str = "") -> str:
-        if not body:
-            return ""
-        lt = f'<p class="lede">{e(lede_text)}</p>' if lede_text else ""
-        return f'<section class="slide"><div class="meta"><span>{e(label)}</span></div><h2>{e(heading)}</h2>{lt}{body}</section>'
-
-    def fold(heading: str, body: str) -> str:
-        return f'<details class="more"><summary>{e(heading)}</summary>{body}</details>' if body else ""
-
-    summary = "".join(f"<li><b>{e(i)}</b>{e(line)}</li>" for i, line in summary_lines(k))
-    folds = (
-        fold(f"Open, with an owner ({len(opens_q)})", f'<div class="qa">{opens}</div>' if opens else "")
-        + fold(f"Answered from the record ({len(answered_q)})", f'<div class="qa">{answered}</div>' if answered else "")
-        + fold(
-            "What the record holds",
-            f'<div class="tablewrap keys"><table><thead><tr><th>Key</th><th>Written by</th><th>As of</th><th>Here</th></tr></thead><tbody>{"".join(keys)}</tbody></table></div>'
-            f'<p class="sub">{e(brief_line)}</p>',
-        )
-        + fold(
-            f"Every figure, with its source ({len(k['figures'])})",
-            f'<div class="tablewrap"><table><thead><tr><th>ID</th><th class="num">Figure</th><th>Source</th><th>Window</th><th>As of</th></tr></thead><tbody>{ledger}</tbody></table></div>',
-        )
+    ledger = Table(("ID", "Figure", "Source", "Window", "As of"))
+    for fid, f in k["figures"].items():
+        ledger.row(("mo", e(fid)), ("num", e(_shown(f))), ("", e(f["source"])), ("mo", e(_window(f["window"]))), ("mo", e(str(f["as_of"])[:10])), row_id=fid)
+    rest_rows = "".join(row(q) for q in rest)
+    engineers = (
+        f"{keys.html()}<p>{e(brief_line)}</p>{ledger.html()}"
+        "<p>The answers above print the record's words in plain words; the record keeps them as written, and the check reads those. "
+        "board_qa.py adds its page to the project file: the <code>board_qa</code> key of <code>landing/&lt;bet&gt;.json</code>, and no other key.</p>"
     )
-
+    more = (
+        '<section class="slide"><div class="meta"><span>Detail</span></div>'
+        + fold(f"The other {len(rest)} questions, answered or open", f'<div class="qa">{rest_rows}</div>' if rest_rows else "")
+        + fold("For your engineers", engineers)
+        + "</section>"
+    )
     return (
         '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<title>{e(title)}</title><style>{stylesheet()}{PAGE_CSS}</style></head><body><main class="solo">'
-        f'<section class="slide cover"><div class="brand">{MARK}<span translate="no">DACARD</span></div><div class="meta">{meta}</div>'
-        f'<h1>{e(title)}</h1><p class="answer">{e(answer_line(k))}</p><ul class="sum">{summary}</ul>{facts}</section>'
-        + section(
-            "Prepare first",
-            "The five to prepare first",
-            f'<div class="qa">{first}</div>',
-            "Ranked in code: the result and the decision weigh most, an open question weighs more, and a question the board asked last time most of all.",
-        )
-        + section("More", "The rest, folded", folds, lede)
-        + '<p class="foot">Every answer quotes a figure the loop record holds, with its source; code checks each one. '
+        f'<title>{e(title)}</title><style>{stylesheet()}{sk.CSS}{PAGE_CSS}</style></head><body><main class="solo">'
+        f"{cover}{detail}{more}"
+        '<p class="foot">Every answer quotes a figure the project file holds, with its source; code checks each one. '
         "An answer says what moved and when, not why. Landed, watch or stalled is did-it-land's call, printed as it set it.</p></main></body></html>\n"
     )
 
@@ -246,44 +436,51 @@ def _shown(f: dict[str, Any]) -> str:
 
 
 def markdown(record: dict[str, Any]) -> str:
-    """The plain-text twin of the page."""
+    """The plain-text twin of the page: the same words, in the same order, with the long text folded."""
     k = record["board_qa"]
     n = {name: f["value"] for name, f in k["counts"].items()}
+    qs = {q["id"]: q for q in k["questions"]}
     status = (record.get("landed") or {}).get("status") or "not read"
-    lines = [f"# Board questions: {k['bet_title']}", ""]
-    lines.append(f"As of {k['as_of']}. {k['tool']}. Step 05 Report." + (" Illustrative: every figure is invented." if k.get("illustrative") else ""))
-    lines += ["", f"**{answer_line(k)}**", ""]
-    lines += [f"- {i}. {line}" for i, line in summary_lines(k)]
-    lines += ["", f"{n['questions']} questions: {n['answered']} answered from the record, {n['open']} open with an owner. Bet status, from did-it-land: {status}.", ""]
+    lines = [f"# {answer_line(k)}", ""]
+    lines.append(f"board-qa-prep v{k['tool'].rsplit(' ', 1)[-1]}. As of {k['as_of']}." + (" Illustrative: every figure is invented." if k.get("illustrative") else ""))
+    lines += ["", re.sub(r"</?b>", "", html.unescape(lede(k))), ""]
+    lines += [f"**Project status, from did-it-land:** {status}. {n['answered']} answered, {n['open']} open.", ""]
+    lead = next((qs[i] for i in k["first"] if qs[i]["check"] == "open"), None)
+    if lead:
+        lines += [
+            "## What to do next",
+            "",
+            f'Get an answer to {lead["id"]}, "{plain(lead["question"])}", from its owner before the meeting. Owner: {lead["owner"]}. Due: {lead["due"]}.',
+            "",
+        ]
 
-    def item(q: dict[str, Any]) -> list[str]:
-        out = [f"**{q['id']}. {q['question']}** ({q['check']})", ""]
+    def item(q: dict[str, Any], short: bool) -> list[str]:
+        out = [f"**{q['id']}. {plain(q['question'])}** ({q['check']})", ""]
         if q.get("asked_last_time"):
             out += ["_Asked at the last meeting._", ""]
-        if q["check"] == "answered":
-            out.append(str(q.get("answer")) + (f" Stated by {q['stated_by']}." if q.get("stated_by") else ""))
-        else:
-            out.append(f"{q['missing']} Owner: {q['owner']}. Due: {q['due']}.")
+        body = plain(str((q.get("answer") if q["check"] == "answered" else q.get("missing")) or ""))
+        point, rest = first_sentence(body) if short else (body, "")
+        tail = f" Stated by {q['stated_by']}." if q["check"] == "answered" and q.get("stated_by") else ""
+        if q["check"] == "open":
+            tail = f" Owner: {q['owner']}. Due: {q['due']}."
+        out.append(point + ("" if rest else tail))
+        if rest:
+            out += ["", "<details>", "<summary>The full answer, with sources</summary>", "", rest + tail, "", "</details>"]
         return [*out, ""]
 
-    qs = {q["id"]: q for q in k["questions"]}
-    lines += ["## Prepare these first", ""]
+    lines += ["## The five to prepare first", ""]
     for i in k["first"]:
-        lines += item(qs[i])
-    rest_open = [q for q in k["questions"] if q["check"] == "open" and q["id"] not in k["first"]]
-    rest_ans = [q for q in k["questions"] if q["check"] == "answered" and q["id"] not in k["first"]]
-    lines += ["<details>", "<summary>The rest: open and answered questions, and every figure with its source</summary>", ""]
-    if rest_open:
-        lines += ["## Open, with an owner", ""]
-        for q in rest_open:
-            lines += item(q)
-    if rest_ans:
-        lines += ["## Answered from the record", ""]
-        for q in rest_ans:
-            lines += item(q)
-    lines += ["## Ledger", "", "| ID | Figure | Source | Window | As of |", "|---|---|---|---|---|"]
+        lines += item(qs[i], short=True)
+    rest = [q for q in k["questions"] if q["id"] not in k["first"]]
+    lines += [f"## The other {len(rest)}", ""]
+    lines += [f"- {q['id']}. {plain(q['question'])} ({q['check']})" for q in rest]
+    lines += ["", "<details>", f"<summary>The other {len(rest)} questions, answered or open</summary>", ""]
+    for q in rest:
+        lines += item(q, short=False)
+    lines += ["</details>", "", "<details>", "<summary>For your engineers</summary>", ""]
+    lines += ["| ID | Figure | Source | Window | As of |", "|---|---|---|---|---|"]
     for fid, f in k["figures"].items():
-        w = f["window"]
-        lines.append(f"| {fid} | {_shown(f)} | {str(f['source']).replace('|', '/')} | {_window(w)} | {str(f['as_of'])[:10]} |")
-    lines += ["", "Not in the record yet: " + (", ".join(k["not_in_record"]) or "nothing") + ".", "", "</details>"]
+        lines.append(f"| {fid} | {_shown(f)} | {str(f['source']).replace('|', '/')} | {_window(f['window'])} | {str(f['as_of'])[:10]} |")
+    lines += ["", "Read: " + (", ".join(k["read"]) or "nothing") + ". Not in the record yet: " + (", ".join(k["not_in_record"]) or "nothing") + ".", ""]
+    lines += ["board_qa.py adds its page to the project file: the `board_qa` key of `landing/<bet>.json`, and no other key.", "", "</details>"]
     return "\n".join(lines) + "\n"

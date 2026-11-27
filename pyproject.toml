@@ -1,6 +1,6 @@
 [project]
 name = "board-qa-prep"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Claude skill that drafts the questions a board will likely ask about a bet, answered from the Landing Loop record or open with an owner."
 requires-python = ">=3.11"
 # Standard library only, on purpose: the scripts run inside sandboxes that cannot install packages.
@@ -9,6 +9,8 @@ dependencies = []
 [tool.ruff]
 line-length = 180
 target-version = "py311"
+# svgkit is copied unchanged from landing-loop at a pinned commit (VENDORED.json); linted there, never edited here.
+extend-exclude = ["skills/board-qa-prep/scripts/vendor"]
 
 [tool.ruff.lint]
 # E, F: errors and unused names. I: import order. B: likely bugs. UP: old syntax.
@@ -24,7 +26,7 @@ select = ["E", "F", "I", "B", "UP", "SIM", "S"]
 "skills/board-qa-prep/scripts/render_html.py" = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["board_qa", "check", "display", "figures", "landing_brief", "loop", "render_html", "test_record"]
+known-first-party = ["board_qa", "check", "display", "figures", "landing_brief", "loop", "render_html", "svgkit", "test_record"]
 
 [tool.ruff.format]
 exclude = ["skills/board-qa-prep/scripts/landing_brief.py"]

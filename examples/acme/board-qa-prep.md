@@ -1,18 +1,16 @@
-# Board questions: Quote drafting
+# The record answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.
 
-As of 2026-11-26. board-qa-prep 0.3.0. Step 05 Report. Illustrative: every figure is invented.
+board-qa-prep v0.3.1. As of 2026-11-26. Illustrative: every figure is invented.
 
-**13 of 15 likely questions are answered from the loop record; 2 need an answer from their owner before the meeting.**
+Quote drafting is a project you expect to move a number. Its landing brief, a one-page plan, sets what good looks like, by when and at what cost. As the project moves from plan to board, each step adds its page to the project file. These are the questions a board will likely ask, each answered from that file with its source, or left open with a named owner. Code checks every figure.
 
-- Q15. Is any customer data sent to the model provider? (open, owner Head of Product, Quoting squad, due before the board meeting)
-- Q02. Did it land? (answered from the record)
-- Q08. What does each task cost, against the budget? (answered from the record)
-- Q11. Was the waived check closed before its waiver ran out? (open, owner Lead, Quoting squad, due before the board meeting)
-- Q03. Is the move real, or normal noise? (answered from the record)
+**Project status, from did-it-land:** landed. 13 answered, 2 open.
 
-15 questions: 13 answered from the record, 2 open with an owner. Bet status, from did-it-land: landed.
+## What to do next
 
-## Prepare these first
+Get an answer to Q15, "Is any customer data sent to the model provider?", from its owner before the meeting. Owner: Head of Product, Quoting squad. Due: before the board meeting.
+
+## The five to prepare first
 
 **Q15. Is any customer data sent to the model provider?** (open)
 
@@ -24,54 +22,93 @@ Nothing in the record answers it, so it needs a person's answer. Owner: Head of 
 
 _Asked at the last meeting._
 
-did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a bar of 40% [F03] by 2026-11-15. At the date it read 41% [F04]. Flags on the read: over-cost-budget.
+did-it-land says landed.
+
+<details>
+<summary>The full answer, with sources</summary>
+
+Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a target of 40% [F03] by 2026-11-15. At the date it read 41% [F04]. The read also flags that cost is over budget.
+
+</details>
 
 **Q08. What does each task cost, against the budget?** (answered)
 
 _Asked at the last meeting._
 
-$0.0338 per task [F15] from 2026-11-01 to 2026-11-14, against a budget of $0.027 [F16]: over budget by 25% [F17]. Tokens per task: 10,300 [F18] against 9,000 [F19]. Price per token: $0.00000328 [F20] against $0.000003 [F21]. cost-budget-check computes these; eval-kit cites the same cost per task.
+$0.0338 per task [F15] from 2026-11-01 to 2026-11-14, against a budget of $0.027 [F16]: over budget by 25% [F17].
 
-**Q11. Was the waived check closed before its waiver ran out?** (open)
+<details>
+<summary>The full answer, with sources</summary>
 
-Open bugs within the severity limits: waived by Head of Product, Quoting squad until 2026-09-19. No later release check in the record says it closed. Owner: Lead, Quoting squad. Due: before the board meeting.
+AI usage per task: 10,300 [F18] against 9,000 [F19]. AI price per unit: $0.00000328 [F20] against $0.000003 [F21]. The cost check computes these; the quality test cites the same cost per task.
+
+</details>
+
+**Q11. A failed check shipped on a named person's OK. Was it closed before that OK ran out?** (open)
+
+Open bugs within the severity limits: shipped on the OK of Head of Product, Quoting squad, until 2026-09-19.
+
+<details>
+<summary>The full answer, with sources</summary>
+
+No later release check in the record says it closed. Owner: Lead, Quoting squad. Due: before the board meeting.
+
+</details>
 
 **Q03. Is the move real, or normal noise?** (answered)
 
-Before launch the metric averaged 21.7% [F05], with a spread of 3.83% [F06]. By the date it sat 5.05 spreads above that mean [F07]. That rules out noise. It does not say what moved it: no holdout group is in the record.
+Before launch the number averaged 21.7% [F05], with a spread of 3.83% [F06].
 
 <details>
-<summary>The rest: open and answered questions, and every figure with its source</summary>
+<summary>The full answer, with sources</summary>
 
-## Answered from the record
+By the date it sat 5.05 times that spread above the average [F07]. That rules out noise. It does not say what moved it: no comparison group held back is in the record.
 
-**Q01. What did we bet on, and how will we know it worked?** (answered)
+</details>
 
-Tradespeople spend evenings writing quotes by hand, so quotes go out late and lose the job. The bar: Quote draft acceptance rate at 40% or higher by 2026-11-15 [F01]. Head of Product, Quoting squad decides the next step.
+## The other 10
 
-**Q04. Did the result the metric should move, move too?** (answered)
+- Q01. What did we set out to do, and how will we know it worked? (answered)
+- Q04. Did the result the number should move, move too? (answered)
+- Q05. What did we decide, and who decided? (answered)
+- Q06. Is quality holding as more of the work runs without a person? (answered)
+- Q07. Is version 1.4 really better than version 1.3? (answered)
+- Q09. Who brings cost back within budget, and by when? (answered)
+- Q10. Was it ready to ship when it shipped? (answered)
+- Q12. What are customers saying about it? (answered)
+- Q13. What went wrong, and who owns each fix? (answered)
+- Q14. Why this project, over the others? (answered)
 
-The outcome series (Illustrative CRM export, quotes_won_weekly.csv) went from 31 [F08] on 2026-08-31 to 36 [F09] on 2026-11-23. It moved the same way as the metric; the record does not show why.
+<details>
+<summary>The other 10 questions, answered or open</summary>
+
+**Q01. What did we set out to do, and how will we know it worked?** (answered)
+
+Tradespeople spend evenings writing quotes by hand, so quotes go out late and lose the job. The target: Quote draft acceptance rate at 40% or higher by 2026-11-15 [F01]. Head of Product, Quoting squad decides the next step.
+
+**Q04. Did the result the number should move, move too?** (answered)
+
+The result it should drive (Illustrative CRM export, quotes_won_weekly.csv) went from 31 [F08] on 2026-08-31 to 36 [F09] on 2026-11-23. It moved the same way as the number; the record does not show why.
 
 **Q05. What did we decide, and who decided?** (answered)
 
-From decision-record, as of 2026-11-26: 5 decided [F10]. Set the rollback trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10); Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-10); Build quote drafting now, against its landing brief (Head of Product, Quoting squad, 2026-07-27).
+From decision-record, as of 2026-11-26: 5 decided [F10]. Set the undo trigger for quote drafting (Head of Product, Quoting squad, 2026-08-10); Choose the model tier for quote drafts (Tech lead, Quoting squad, 2026-08-10); Build quote drafting now, against its landing brief (Head of Product, Quoting squad, 2026-07-27).
 
 **Q06. Is quality holding as more of the work runs without a person?** (answered)
 
-v1.4's held-out pass rate is 80% [F11] on 30 cases [F13] (95% interval 62.7% to 90.5%). 71.5% of tasks finished with no person [F12]. eval-kit's build check: not confirmed: inside noise. The point estimate meets the target, but the low end of the 95% interval does not clear it.
+Version 1.4's pass rate on test cases kept back is 80% [F11] on 30 cases [F13] (likely range 62.7% to 90.5%). 71.5% of tasks finished with no person [F12]. The quality test: not confirmed: too close to call. The rate itself meets the target, but the low end of the likely range does not clear it.
 
-**Q07. Is v1.4 really better than v1.3?** (answered)
+**Q07. Is version 1.4 really better than version 1.3?** (answered)
 
-Held-out pass rate went from 70% [F14] on v1.3 to 80% [F11] on v1.4, on the same cases. eval-kit marks the gain as inside the noise for this case count, so it is not yet a proven gain.
+Pass rate on test cases kept back went from 70% [F14] on version 1.3 to 80% [F11] on version 1.4, on the same cases. The quality test marks the gain as too close to call for this case count, so it is not yet a proven gain.
 
 **Q09. Who brings cost back within budget, and by when?** (answered)
 
-The record names the model behind most of it, vendor-a/xl: $0.963 [F22] of $1.89 [F23] over budget. The postmortem names the fix: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
+The record names the model behind most of it, the large model: $0.963 [F22] of $1.89 [F23] over budget. The after-action review names the fix: Send only drafts over the standard model's length limit to the large model, and route the rest back. Owner: Lead, Quoting squad, due 2026-12-10.
 
 **Q10. Was it ready to ship when it shipped?** (answered)
 
-release-readiness said ready to ship for Acme quote drafting v1.0 on 2026-09-05: 6 [F24] of 7 [F25] checks ready to ship. Open bugs within the severity limits read hold under a waiver from Head of Product, Quoting squad until 2026-09-19. Every spec-auditor hold was closed before release (rollback, eval-plan).
+release-readiness said ready to ship for Acme quote drafting version 1.0 on 2026-09-05: 6 [F24] of 7 [F25] checks ready to ship. Open bugs within the severity limits failed its check and shipped on the OK of Head of Product, Quoting squad, until 2026-09-19. Every spec-auditor hold was closed before release (undo plan, quality test plan).
 
 **Q12. What are customers saying about it?** (answered)
 
@@ -79,13 +116,16 @@ customer-signal-digest says problem still raised. It read 21 signals [F26] from 
 
 **Q13. What went wrong, and who owns each fix?** (answered)
 
-The learning review of 2026-11-26 covers 2 incidents [F30] from 2026-09-07 to 2026-11-26. Each change it lists cites its evidence. 4 fixes [F31], each with one owner and a due date: Send only drafts over the standard model's context limit to vendor-a/xl, and route the rest back (Lead, Quoting squad, due 2026-12-10); Give every routing change made during an incident an end date, and list the open ones in the weekly incident review (Product manager, Quoting squad, due 2026-12-17); Put the cost-budget-check result beside the eval-kit result on every quote drafting release candidate (Tech lead, Quoting squad, due 2027-01-08); Show 'price updating' and retry when the price book sync lags, instead of price pending (Product manager, Quoting squad, due 2026-12-17).
+The learning review of 2026-11-26 covers 2 incidents [F30] from 2026-09-07 to 2026-11-26. Each change it lists cites its evidence. 4 fixes [F31], each with one owner and a due date: Send only drafts over the standard model's length limit to the large model, and route the rest back (Lead, Quoting squad, due 2026-12-10); Give every routing change made during an incident an end date, and list the open ones in the weekly incident review (Product manager, Quoting squad, due 2026-12-17); Put the cost check's result beside the quality test's result on every quote drafting release candidate (Tech lead, Quoting squad, due 2027-01-08); Show 'price updating' and retry when the price book sync lags, instead of price pending (Product manager, Quoting squad, due 2026-12-17).
 
-**Q14. Why this bet, over the others?** (answered)
+**Q14. Why this project, over the others?** (answered)
 
-bet-portfolio-review ranked it 4 of 8 bets, 1 needs work first [F32] on 2026-07-27. Its brief scored 14 points of 14 [F33].
+bet-portfolio-review ranked it 4 of 8 projects, 1 needs work first [F32] on 2026-07-27. Its brief scored 14 points of 14 [F33].
 
-## Ledger
+</details>
+
+<details>
+<summary>For your engineers</summary>
 
 | ID | Figure | Source | Window | As of |
 |---|---|---|---|---|
@@ -123,6 +163,8 @@ bet-portfolio-review ranked it 4 of 8 bets, 1 needs work first [F32] on 2026-07-
 | F32 | 4 rank of 8 bets, 1 needs work first | bets.csv | 2026-07-27 | 2026-07-27 |
 | F33 | 14 points of 14 | briefs/quote-drafting.md | 2026-07-27 | 2026-07-27 |
 
-Not in the record yet: nothing.
+Read: portfolio, decisions, spec, release, cost, evals, landed, signals, postmortem. Not in the record yet: nothing.
+
+board_qa.py adds its page to the project file: the `board_qa` key of `landing/<bet>.json`, and no other key.
 
 </details>

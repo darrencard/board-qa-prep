@@ -20,12 +20,14 @@ Acme is invented: invoicing software for trades businesses. Every figure is illu
 python3 examples/acme/sample.py
 ```
 
-It rewrites [examples/acme/board-qa-prep.html](examples/acme/board-qa-prep.html), its Markdown twin and the `board_qa` key of [examples/acme/landing/quote-drafting.json](examples/acme/landing/quote-drafting.json), byte for byte as committed (a test checks this). The bet is quote drafting, bar "quote draft acceptance rate at 40% or higher by 2026-11-15". The page opens with a one-line answer and the five questions to prepare first, one line each; the rest is folded below. From the page:
+It rewrites [examples/acme/board-qa-prep.html](examples/acme/board-qa-prep.html), its Markdown twin and the `board_qa` key of [examples/acme/landing/quote-drafting.json](examples/acme/landing/quote-drafting.json), byte for byte as committed (a test checks this). The bet is quote drafting, bar "quote draft acceptance rate at 40% or higher by 2026-11-15". The page opens with the verdict as its heading, one tile per question (answered, or open with its owner), and the five questions to prepare first, each with its point in one line and the full answer folded; the rest is folded below. From the Markdown twin:
 
 ```text
 **Q02. Did it land?** (answered)
 
-did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a bar of 40% [F03] by 2026-11-15. At the date it read 41% [F04].
+did-it-land says landed.
+
+Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a target of 40% [F03] by 2026-11-15. At the date it read 41% [F04].
 ```
 
 The sample reads the full record, every key from portfolio to postmortem, and marks each question answered from the record or open with an owner. Decisions come from decision-record's open rows and decided list (the sample's record has 5 decided and none open, so no decision question is left open), quality from eval-kit's build word (here not confirmed: inside noise, printed with its 95% interval), the release from release-readiness's readiness word, waivers and spec holds, customers from customer-signal-digest's problem still raised or problem not raised, and fixes from the postmortem's one owner and due date per fix. When the loop record changes, one command refreshes the input and the sample:
@@ -62,7 +64,7 @@ python3 skills/board-qa-prep/scripts/board_qa.py prep landing/<bet>.json --past 
 
 ```json
 "board_qa": {
-  "tool": "board-qa-prep 0.3.0",
+  "tool": "board-qa-prep 0.3.1",
   "as_of": "2026-11-26",
   "read": ["portfolio", "decisions", "spec", "release", "cost", "evals", "landed", "signals", "postmortem"],
   "not_in_record": [],

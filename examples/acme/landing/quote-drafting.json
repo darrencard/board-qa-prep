@@ -2560,7 +2560,7 @@
     "illustrative": true
   },
   "board_qa": {
-    "tool": "board-qa-prep 0.3.0",
+    "tool": "board-qa-prep 0.3.1",
     "as_of": "2026-11-26",
     "bet_title": "Quote drafting",
     "read": [
@@ -2585,7 +2585,7 @@
       "questions": {
         "value": 15,
         "unit": "questions",
-        "source": "board-qa-prep 0.3.0: count of questions in board_qa",
+        "source": "board-qa-prep 0.3.1: count of questions in board_qa",
         "window": {
           "from": "2026-11-26",
           "to": "2026-11-26"
@@ -2595,7 +2595,7 @@
       "answered": {
         "value": 13,
         "unit": "questions",
-        "source": "board-qa-prep 0.3.0: count of questions in board_qa",
+        "source": "board-qa-prep 0.3.1: count of questions in board_qa",
         "window": {
           "from": "2026-11-26",
           "to": "2026-11-26"
@@ -2605,7 +2605,7 @@
       "open": {
         "value": 2,
         "unit": "questions",
-        "source": "board-qa-prep 0.3.0: count of questions in board_qa",
+        "source": "board-qa-prep 0.3.1: count of questions in board_qa",
         "window": {
           "from": "2026-11-26",
           "to": "2026-11-26"

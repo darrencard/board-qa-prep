@@ -18,6 +18,7 @@ from _path import ACME, ROOT, SCRIPTS
 import board_qa
 import landing_brief
 import render_html
+import svgkit
 
 SKILL = SCRIPTS.parent
 OUTPUTS = ("board-qa-prep.html", "board-qa-prep.md", "landing/quote-drafting.json")
@@ -58,7 +59,9 @@ class Sample(unittest.TestCase):
 
     def test_the_page_is_self_contained_and_marked_illustrative(self):
         page = (ACME / "board-qa-prep.html").read_text(encoding="utf-8")
-        self.assertIn('<span class="ill">Illustrative</span>', page)
+        self.assertIn('<span class="sk-ill">Illustrative</span>', page)
+        self.assertIn(":root{--ill:#74A5DA}", page, "the Illustrative tag is blue")
+        self.assertNotIn('class="ill"', page, "the template's grey tag")
         self.assertNotRegex(page, r"""(src|href)=["']https?://""")
         self.assertNotIn("<script", page)
 
@@ -67,8 +70,18 @@ class Sample(unittest.TestCase):
         body = page.split("</style>", 1)[1]
         self.assertEqual(len(re.findall(r'class="st (landed|watch|stalled)"', body)), 1)
         self.assertNotIn("--landed", render_html.PAGE_CSS)
-        # Brass marks a person's call only: an open question's owner and due date. Check chips are ink.
-        self.assertEqual(set(re.findall(r"([.\w-]+)\{[^}]*--brass", render_html.PAGE_CSS)), {".own"})
+        # Brass marks a person's call only: an open question's owner and due date, in its row and in the next step.
+        self.assertEqual(set(re.findall(r"([.\w> -]+)\{[^}]*--brass", render_html.PAGE_CSS)), {".own", ".next", ".next>b", ".next .who"})
+        self.assertNotIn("brass", "".join(re.findall(r"\.chip[^{]*\{[^}]*\}", render_html.PAGE_CSS)), "check chips are ink")
+        # In the picture, brass outlines only the open tiles and prints only their owners.
+        key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
+        opens = [q for q in key["questions"] if q["check"] == "open"]
+        for svg in svgkit.visuals_in(body):
+            self.assertEqual(svg.count('stroke="var(--brass)"'), len(opens))
+            brass = " ".join(re.findall(r'style="color:var\(--brass\)">([^<]+)</text>', svg))
+            for q in opens:
+                for part in q["owner"].upper().replace(",", "").split():
+                    self.assertIn(part, brass)
 
     def test_selection_and_focus_print_in_ink_not_green(self):
         css = re.search(r"<style>(.*?)</style>", (ACME / "board-qa-prep.html").read_text(encoding="utf-8"), re.S).group(1)
@@ -79,20 +92,23 @@ class Sample(unittest.TestCase):
         page = (ACME / "board-qa-prep.html").read_text(encoding="utf-8")
         body = page.split("</style>", 1)[1]
         key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
-        self.assertIn(f'<p class="answer">{render_html.e(render_html.answer_line(key))}</p>', body)
-        self.assertEqual(len(re.findall(r"<li><b>Q\d\d</b>", re.search(r'<ul class="sum">(.*?)</ul>', body).group(1))), 5)
+        self.assertIn(f"<h1>{render_html.e(render_html.answer_line(key))}</h1>", body)
+        self.assertEqual(render_html.answer_line(key), "The record answers 13 of 15 likely board questions. Two need an owner's answer before the meeting.")
         visible = re.sub(r"<details.*?</details>", "", body, flags=re.S)
         for qid in key["first"]:
             self.assertIn(f'<div id="{qid}">', visible)
+        # The five to prepare first show their point; each long answer folds behind them.
+        five = body.split("The five to prepare first", 1)[1].split("<h3>", 1)[0]
+        self.assertEqual(five.count("The full answer, with sources"), 4)  # Q15's answer is one sentence
         folded = "".join(re.findall(r"<details.*?</details>", body, flags=re.S))
         rest = [q["id"] for q in key["questions"] if q["id"] not in key["first"]]
         self.assertTrue(rest)
         for qid in rest:
             self.assertIn(f'<div id="{qid}">', folded)
-        self.assertLess(len(re.sub(r"<[^>]+>", " ", visible).split()), 600)
+        self.assertLess(len(re.sub(r"<[^>]+>", " ", re.sub(r"<style>.*?</style>|<svg.*?</svg>", "", visible, flags=re.S)).split()), 600)
         md = (ACME / "board-qa-prep.md").read_text(encoding="utf-8")
-        self.assertIn(f"**{render_html.answer_line(key)}**", md.split("## Prepare these first")[0])
-        self.assertIn("<details>", md)
+        self.assertTrue(md.startswith(f"# {render_html.answer_line(key)}\n"))
+        self.assertIn("<details>", md.split("## The five to prepare first")[1])
 
     def test_the_readme_excerpt_is_real_output(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -100,6 +116,84 @@ class Sample(unittest.TestCase):
         md = (ACME / "board-qa-prep.md").read_text(encoding="utf-8")
         for para in [p for p in block.split("\n\n") if p.strip()]:
             self.assertIn(para.strip(), md)
+
+
+class Visual(unittest.TestCase):
+    """The page in the Landing Loop's one visual family: svgkit pinned, the picture honest, the words plain."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.page = (ACME / "board-qa-prep.html").read_text(encoding="utf-8")
+        cls.md = (ACME / "board-qa-prep.md").read_text(encoding="utf-8")
+        cls.key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
+
+    def test_svgkit_matches_its_landing_loop_pin(self):
+        pin = json.loads((SKILL / "VENDORED.json").read_text(encoding="utf-8"))["landing-loop"]
+        self.assertEqual(pin["commit"], "5d01756d08ab3eb92b457c3286729791df6bcf5f")
+        self.assertEqual(set(pin["files"]), {"scripts/vendor/svgkit.py"})
+        for rel, info in pin["files"].items():
+            digest = hashlib.sha256((SKILL / rel).read_bytes()).hexdigest()
+            self.assertEqual(digest, info["sha256"], f"{rel} changed. Copy it again from landing-loop at the pinned commit and update VENDORED.json.")
+
+    def test_the_visual_draws_only_figures_the_page_prints(self):
+        visuals = svgkit.visuals_in(self.page)
+        self.assertEqual(len(visuals), 2, "the wide picture and the tall one")
+        self.assertEqual(svgkit.unprinted(self.page), [])
+        for svg in visuals:
+            drawn = svgkit.texts_in(svg)
+            # One tile per question, each with its id, and a dot on each of the five to prepare first.
+            self.assertEqual([t for t in drawn if re.fullmatch(r"Q\d\d", t)], [q["id"] for q in self.key["questions"]])
+            self.assertEqual(svg.count("<circle"), len(self.key["first"]))
+
+    def test_green_and_red_only_beside_their_words(self):
+        body = self.page.split("</style>", 1)[1]
+        rest = re.sub(r'<span class="st (landed|stalled)">\1</span>', "", body)
+        for word in ("landed", "stalled"):
+            self.assertNotIn(f"var(--{word})", rest)
+            self.assertNotIn(f"st {word}", rest)
+
+    def test_each_visual_states_its_answer(self):
+        labels = re.findall(r'<svg class="sk-(?:wide|tall)"[^>]* aria-label="([^"]+)"', self.page)
+        self.assertEqual(len(labels), 2)
+        for label in labels:
+            self.assertEqual(
+                label,
+                "The record answers 13 of 15 likely board questions. Two need an owner&#x27;s answer before the meeting. "
+                "Open: Q11, owned by Lead, Quoting squad, due before the board meeting; Q15, owned by Head of Product, Quoting squad, due before the board meeting.",
+            )
+
+    def test_public_copy_uses_plain_words(self):
+        public = svgkit.page_text(self.page.split("For your engineers", 1)[0]).lower()
+        md = self.md.split("<summary>For your engineers</summary>", 1)[0].lower()
+        for text in (public, md):
+            for word in (
+                " bet ",
+                " bets ",
+                " bar ",
+                "held-out",
+                "95% interval",
+                "inside noise",
+                "inside the noise",
+                "vendor-a/xl",
+                "waiver",
+                "tokens per task",
+                "rollback",
+                ".json",
+            ):
+                self.assertNotIn(word, text)
+            for word in ("project", "target", "likely range", "too close to call", "the large model"):
+                self.assertIn(word, text)
+        self.assertIn("<b>landing brief</b>, a one-page plan, sets what good looks like, by when and at what cost", self.page)
+
+    def test_the_page_follows_the_sample_anatomy(self):
+        body = self.page.split('<main class="solo">', 1)[1]
+        order = ['class="sk-hdr"', "<h1>", 'class="marks"', 'class="panel"', "What to do next", 'class="cols"', "For your engineers"]
+        at = [body.index(x) for x in order]
+        self.assertEqual(at, sorted(at))
+        self.assertEqual(body.count('<div class="next">'), 1, "one next step leads the page")
+        self.assertIn('<span class="o">Head of Product, Quoting squad</span><span class="d">before the board meeting</span>', body)
+        self.assertIn("<span>board-qa-prep</span><span>As of 2026-11-26</span><span>v0.3.1</span>", body)
+        self.assertNotIn("Book a call", body, "a sample is the skill's own output: no call to action")
 
 
 class Floor(unittest.TestCase):
@@ -112,13 +206,13 @@ class Floor(unittest.TestCase):
 
 
 class Versions(unittest.TestCase):
-    def test_every_version_field_is_0_3_0(self):
+    def test_every_version_field_is_0_3_1(self):
         plugin = json.loads((ROOT / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
         skill = re.search(r'version: "([^"]+)"', (SKILL / "SKILL.md").read_text(encoding="utf-8")).group(1)
         log = re.search(r"^## (\S+), (\d{4}-\d{2}-\d{2})", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"), re.M)
-        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.0"})
-        self.assertEqual(log.group(2), "2026-11-26")
+        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.1"})
+        self.assertEqual(log.group(2), "2026-11-27")
 
 
 class Pins(unittest.TestCase):
