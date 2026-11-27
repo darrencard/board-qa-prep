@@ -44,7 +44,7 @@ import loop  # noqa: E402
 import render_html  # noqa: E402
 from display import num, sig  # noqa: E402
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 TOOL = f"board-qa-prep {VERSION}"
 DEFAULT_DUE = "before the board meeting"
 MAX_PAST_BYTES = 200_000
@@ -157,6 +157,10 @@ class Ledger:
 # --- the brief -----------------------------------------------------------------------------------
 
 
+# did-it-land's flag codes that board members read, in did-it-land's own words.
+FLAG_WORDS = {"within-noise": "inside normal ups and downs"}
+
+
 def read_brief(record_path: Path, record: dict[str, Any]) -> dict[str, Any]:
     """The brief as the loop's shared parser reads it, its completeness, and whether it changed since the record opened."""
     p = loop.brief_path(record_path, record)
@@ -231,7 +235,8 @@ def q_landed(d: Draft) -> None:
     parts = [f"did-it-land says {status}. {ld.get('metric', 'The metric')} reads {cur[0]} {cur[1]} to {to}, against a bar of {bar[0]} {bar[1]} by {ld.get('by')}."]
     if at:
         parts.append(f"At the date it read {at[0]} {at[1]}.")
-    codes = [str(fl.get("code")) for fl in ld.get("flags") or [] if isinstance(fl, dict) and fl.get("code")]
+    # did-it-land's noise flag prints in its own words, "inside normal ups and downs"; other codes print as written.
+    codes = [FLAG_WORDS.get(str(fl.get("code")), str(fl.get("code"))) for fl in ld.get("flags") or [] if isinstance(fl, dict) and fl.get("code")]
     if codes:
         parts.append("Flags on the read: " + ", ".join(codes) + ".")
     d.answered("landed", question, " ".join(parts), ["landed"])
@@ -345,9 +350,10 @@ def q_quality(d: Draft) -> None:
     status = r["evals"].get("status")
     if status in ("meets target", "below target"):
         parts.append(f"eval-kit's build check: {status}.")
-    elif status == "not confirmed: inside noise":
-        # eval-kit's word when the point estimate meets the target but the 95% interval's low end does not clear it.
-        parts.append(f"eval-kit's build check: {status}. The point estimate meets the target, but the low end of the 95% interval does not clear it.")
+    elif status in ("not confirmed: too close to call", "not confirmed: inside noise"):
+        # eval-kit's word when the point estimate meets the target but the 95% interval's low end does not clear it. One
+        # check word per skill: an older record's "inside noise" prints as the contract's "too close to call".
+        parts.append("eval-kit's build check: not confirmed: too close to call. The point estimate meets the target, but the low end of the 95% interval does not clear it.")
     d.answered("quality", question, " ".join(parts), ["evals"])
 
     prom = r["evals"].get("promotion")
@@ -355,7 +361,7 @@ def q_quality(d: Draft) -> None:
         a, b = d.ledger.cite(f"evals/figures/pass_rate@{prom['champion']}"), pr
         if a and isinstance(prom.get("within_noise"), bool):
             noise = (
-                "eval-kit marks the gain as inside the noise for this case count, so it is not yet a proven gain."
+                "eval-kit marks the gain as too close to call for this case count, so it is not yet a proven gain."
                 if prom["within_noise"]
                 else "eval-kit marks the gain as outside the noise."
             )

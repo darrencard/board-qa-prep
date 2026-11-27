@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2, 2026-11-27
+
+- The picture is scorecard rows in the grammar of the outcome scorecard on dacard.ai/update (svgkit 1.2.0, landing-loop 78784ef): a share bar first ("13 of 15" answered, "2 open"), then one row per likely question, open first with its due date, OPEN in ink and its owner in brass, then the answered ones by topic with the steps of the project file each reads and ANSWERED muted. Geist Mono 12px for labels and figures, Geist 14px for names, no text inside a picture, no box inside the frame. The tiles, their panel and the boxed check chips are gone; check words print as text.
+- Cited check words in their skill's words: eval-kit's "not confirmed: too close to call" (an older project file's "inside noise" prints as it), and did-it-land's noise flag as "inside normal ups and downs".
+- README and SKILL.md in plain words: project, target, the project file, the landing brief defined as a one-page plan. Keys, file names and flags are unchanged. SKILL.md uses the user's own word if they say bet.
+- Tests from the rollout recipe: no text inside an SVG, no scaled SVG, labels 12px and names 14px, no box inside the frame, no legacy svgkit primitive (rendered with DeprecationWarning as an error), one frame with the share row then open then answered, brass only on open owners, the aria-label is the verdict, and the cited check words. The page's word budget is 650, as the rows print as text what the tiles drew inside an SVG.
+
 ## 0.3.1, 2026-11-27
 
 - The HTML page follows the Landing Loop sample anatomy: the shared header (mark, DACARD, skill, date, version, blue Illustrative tag), the verdict as the heading ("The project file answers 13 of 15 likely board questions. Two need an owner's answer before the meeting."), the project's status from did-it-land, the signature picture, one next step (the first open question to prepare) with its owner in brass, then the five to prepare first beside the other ten in two columns.

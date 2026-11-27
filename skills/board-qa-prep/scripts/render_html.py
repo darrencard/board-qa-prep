@@ -6,15 +6,19 @@ byte-identical at a pinned commit) and draws its picture with svgkit (scripts/ve
 byte-identical from landing-loop). Only a few rules for this page's layout are added.
 
 It reads top down for someone who has never seen the loop: the shared header, the verdict as the heading, the
-project's status as did-it-land set it, then the picture: one tile per likely question, answered (filled) or open
-(a brass outline with its owner). One next step follows: the first open question, owned by its person. The five to
-prepare first lead the detail, each with its point in one line and the long answer folded; the other questions,
-the figures with their sources and the record key fold away. Public copy uses plain words: project, target, the
-likely range, too close to call, the large model.
+project's status as did-it-land set it, then the picture as scorecard rows (svgkit 1.2.0): a share bar first (13 of
+15 answered), then one row per likely question, open first with its due date and its owner in brass, then the
+answered ones with the steps of the project file each reads. Geist Mono 12px for labels and figures, Geist 14px for
+names, no text inside a picture, no box inside the frame. One next step follows: the first open question, owned by
+its person. The five to prepare first lead the detail, each with its point in one line and the long answer folded;
+the other questions, the figures with their sources and the project file's key fold away. Public copy uses plain
+words: project, target, the likely range, too close to call, the large model. Cited check words print in their
+skill's words: eval-kit's "not confirmed: too close to call", did-it-land's "inside normal ups and downs".
 
 Green, grey-white and red mean a project's status only, and appear once, on the status did-it-land set. Brass marks
-a person's call: an open question's owner and due date. Check chips, answered and open alike, are ink. The picture
-draws only figures the page prints, and its aria-label states the answer.
+a person's call: an open question's owner and due date. Check words, answered and open alike, are text, never boxed
+chips: open in ink, answered muted. The picture draws only figures the page prints, and its aria-label states the
+answer.
 
 Nothing is loaded from the network, nothing depends on the clock or the machine, and every piece of text from
 the record is escaped.
@@ -49,9 +53,6 @@ main.solo{margin-left:0}
 .solo .lede b{color:var(--t1);font-weight:500}
 .marks{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;margin:0 0 20px;font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
 .marks>span{display:inline-flex;align-items:center;gap:10px}
-.panel{border:1px solid var(--line);border-radius:12px;background:var(--s1);padding:24px 28px 20px}
-.legend{margin:0 0 14px;font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-@media (min-width:1100px){.panel .sk{display:grid;grid-template-columns:640px minmax(0,1fr);gap:16px 40px;align-items:center}.panel .sk figcaption{margin-top:0;flex-direction:column;align-items:flex-start}}
 .next{margin-top:28px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px 32px;align-items:baseline;border:1px solid var(--brass);border-radius:12px;padding:20px 24px;background:var(--brass-bg)}
 .next>b{font:400 11px/22px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
 .next p{margin:0;font-size:16px;line-height:1.5;color:var(--t1)}
@@ -69,8 +70,8 @@ main.solo{margin-left:0}
 .qa details>summary{cursor:pointer;font:400 11px/18px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
 .qa details>summary:hover{color:var(--t1)}
 .qa details .a{margin-top:4px}
-.chip{font:400 11px/16px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t1);border:1px solid var(--line3);border-radius:3px;padding:1px 6px;white-space:nowrap}
-.chip.open{border-style:dashed}
+.wd{font:400 12px/16px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+.wd.open{color:var(--t1)}
 .own{display:block;font:400 11.5px/18px var(--mono);color:var(--brass);margin-top:8px}
 .own i{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--t3);margin-right:6px}
 .own i+i{margin-left:18px}
@@ -88,12 +89,11 @@ main.solo{margin-left:0}
 ::selection{background:var(--t1);color:var(--bg)}
 :focus-visible{outline-color:var(--t1)}
 .foot{max-width:1120px;margin:0 auto;padding:28px 40px 64px;color:var(--t3);font-size:12px}
-@media (max-width:980px){.foot{padding:24px 16px 48px}.solo .slide.cover{padding-top:24px}.cols,.next{grid-template-columns:1fr}.panel{padding:18px 16px 16px}
+@media (max-width:980px){.foot{padding:24px 16px 48px}.solo .slide.cover{padding-top:24px}.cols,.next{grid-template-columns:1fr}
 .qa>div{grid-template-columns:36px minmax(0,1fr)}.qa .w{grid-column:2}
 .stack table,.stack tbody,.stack tr,.stack td{display:block}.stack tr:first-child{display:none}.stack tr{padding:10px 16px;border-bottom:1px solid var(--line)}
 .stack td{border:0;padding:3px 0;display:grid;grid-template-columns:96px 1fr;gap:12px}.stack td.num{text-align:left;white-space:normal}
 .stack td::before{content:attr(data-l);font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
-@media (max-width:440px){.panel{margin:0 -8px;padding:16px 8px 14px}}
 """
 
 WRITER_LABEL = {
@@ -106,24 +106,6 @@ WRITER_LABEL = {
     "landed": "did-it-land",
     "signals": "customer-signal-digest",
     "postmortem": "postmortem",
-}
-# Each question's topic as a tile's one or two words. Unknown topics print as they are.
-TOPIC = {
-    "brief": "The plan",
-    "landed": "Did it land",
-    "noise": "Real or noise",
-    "outcome": "The result",
-    "decision-made": "Decisions",
-    "decision-open": "Open calls",
-    "quality": "Quality",
-    "eval-gain": "New version",
-    "cost": "Cost",
-    "cost-owner": "Cost owner",
-    "release": "Release",
-    "signals": "Customers",
-    "postmortem": "Fixes",
-    "portfolio": "Why this one",
-    "past": "Last meeting",
 }
 # The smallest text the page prints, at every width. The vendored template and svgkit keep their own sizes on disk
 # (both are hash-pinned); the page raises any smaller size to this one as it inlines their rules.
@@ -254,52 +236,82 @@ def lede(k: dict[str, Any]) -> str:
     )
 
 
-# The signature picture
+# The signature picture: scorecard rows (svgkit 1.2.0)
+
+# Each answered question's topic in one or two words, so the rows stay short; the full question is in the detail.
+# Unknown topics print as they are.
+TOPIC = {
+    "brief": "The plan",
+    "landed": "Did it land",
+    "noise": "Real or noise",
+    "outcome": "The result",
+    "decision-made": "Decisions",
+    "decision-open": "Open calls",
+    "quality": "Quality",
+    "eval-gain": "New version",
+    "cost": "Cost",
+    "cost-owner": "Cost owner",
+    "release": "Release",
+    "signals": "Customers",
+    "postmortem": "Fixes",
+    "portfolio": "Why this one",
+    "past": "Last meeting",
+}
+
+# Where an answer comes from, in plain words: the step that wrote the key it reads.
+SOURCE = {
+    "brief": "landing brief",
+    "portfolio": "portfolio review",
+    "decisions": "decisions",
+    "spec": "build plan check",
+    "release": "release readiness",
+    "cost": "cost check",
+    "evals": "quality test",
+    "landed": "did it land",
+    "signals": "customer signals",
+    "postmortem": "after-action review",
+}
 
 
-def wrap(text: str, room: float) -> list[str]:
-    """A role into lines that fit a mono label's width: a break at each comma first, then between words."""
-    lines: list[str] = []
-    for part in text.split(", "):
-        start = len(lines)
-        for word in part.split():
-            if len(lines) > start and sk.label_width(f"{lines[-1]} {word}") <= room:
-                lines[-1] = f"{lines[-1]} {word}"
-            else:
-                lines.append(word)
-    return lines
+def source_line(q: dict[str, Any]) -> str:
+    """The steps an answer reads, as the figure: `DID IT LAND`, `COST CHECK · AFTER-ACTION REVIEW`."""
+    return " · ".join(SOURCE.get(x, x) for x in q.get("from_keys") or []).upper() or "THE PROJECT FILE"
 
 
-def tiles(k: dict[str, Any], variant: str) -> str:
-    """One tile per likely question, in order. Answered: filled. Open: a brass outline with its owner, a person's
-    call. A dot marks the five to prepare first."""
-    wide = variant == "wide"
-    width = 640.0 if wide else float(sk.TALL)
-    cols = 5 if wide else 3
-    gap = 5.0
-    w = (width - gap * (cols - 1)) / cols
-    room = w - 14
-    first = set(k["first"])
-    owners = {q["id"]: wrap(q["owner"], room) for q in k["questions"] if q["check"] == "open"}
-    h = 40 + 14 * max([len(v) for v in owners.values()] + [0]) + (4 if owners else 0)
-    parts = []
-    for n, q in enumerate(k["questions"]):
-        x, y = (n % cols) * (w + gap), (n // cols) * (h + gap)
-        done = q["check"] == "answered"
-        # Answered: the muted fill, quiet, so the open tiles (the work left) carry the eye.
-        parts.append(f'<g opacity="0.32">{sk.tile(x, y, w, h, filled=True, tone=sk.MUTED)}</g>' if done else sk.tile(x, y, w, h, tone=sk.BRASS))
-        parts.append(sk.label(x + 7, y + 17, q["id"], tone=sk.INK2 if done else sk.INK))
-        parts.append(sk.label(x + 7, y + 31, TOPIC.get(q["topic"], q["topic"]), tone=sk.INK2 if done else sk.INK))
-        if q["id"] in first:
-            parts.append(sk.point(x + w - 11, y + 12, r=3.5, fill=sk.INK, ring=None))
-        for i, line in enumerate(owners.get(q["id"], [])):
-            parts.append(sk.label(x + 7, y + 49 + 14 * i, line, tone=sk.BRASS))
-    rows = -(-len(k["questions"]) // cols)
+def rows(k: dict[str, Any]) -> str:
+    """A share bar first (answered of all), then one row per question, open first: the question, its due date and
+    its owner in brass; then the answered ones by topic, with the steps they read from. Check words are text, never
+    chips."""
+    n = {name: f["value"] for name, f in k["counts"].items()}
+    out = [
+        sk.sc_row(
+            "Answered from the project file",
+            picture=sk.share_bar(n["answered"], n["questions"]),
+            figure=sk.figure_line(f"{n['answered']} of {n['questions']}"),
+            word=sk.check_word(f"{n['open']} open", ink=True) if n["open"] else sk.check_word("none open"),
+        )
+    ]
     opens = [q for q in k["questions"] if q["check"] == "open"]
-    aria = answer_line(k)
-    if opens:
-        aria += " Open: " + "; ".join(f"{q['id']}, owned by {q['owner']}, due {q['due']}" for q in opens) + "."
-    return sk.frame("".join(parts), label=aria, height=rows * (h + gap) - gap, width=width, variant=variant)
+    done = [q for q in k["questions"] if q["check"] != "open"]
+    for q in opens:
+        out.append(
+            sk.sc_row(
+                f"{q['id']}. {plain(q['question'])}",
+                figure=sk.figure_line(str(q["due"]).upper()),
+                word=sk.check_word("open", ink=True) + sk.person_call(q["owner"]),
+            )
+        )
+    for q in done:
+        out.append(sk.sc_row(f"{q['id']}. {TOPIC.get(q['topic'], q['topic'])}", figure=sk.figure_line(source_line(q)), word=sk.check_word("answered")))
+    return sk.sc_frame(
+        out,
+        label=answer_line(k),
+        title="Likely board questions",
+        head=["Question", "", "Due · read from", "Check"],
+        legend=sk.legend("actual", "answered"),
+        caption=(f"One row per likely question, {n['questions']} in all: open first, each owner in brass; then answered, by topic, with the steps each answer reads."),
+        illustrative=bool(k.get("illustrative")),
+    )
 
 
 # The rows
@@ -324,7 +336,7 @@ def row(q: dict[str, Any], short: bool = False) -> str:
     return (
         f'<div id="{e(q["id"])}"><span class="id">{e(q["id"])}</span>'
         f'<span><span class="q">{e(plain(q["question"]))}</span>{text}{extra}{asked}</span>'
-        f'<span class="w"><span class="chip {e(q["check"])}">{e(q["check"])}</span></span></div>'
+        f'<span class="w"><span class="wd {e(q["check"])}">{e(q["check"])}</span></span></div>'
     )
 
 
@@ -375,11 +387,6 @@ def page(record: dict[str, Any]) -> str:
     status = (record.get("landed") or {}).get("status")
     status_html = f'<span class="st {e(status)}">{e(status)}</span>' if status in ("landed", "watch", "stalled") else '<span class="mono t3">not read</span>'
     marks = f'<p class="marks"><span>Project status, from did-it-land {status_html}</span><span>{n["answered"]} answered</span><span>{n["open"]} open</span></p>'
-    caption = (
-        f"Each tile is one likely question, {n['questions']} in all. Filled: answered from the project file. "
-        "Brass outline: open, with the person who owns the answer. A dot marks the five to prepare first."
-    )
-    pic = sk.figure(tiles(k, "wide"), tiles(k, "tall"), caption=caption, illustrative=ill)
     lead = next((qs[i] for i in k["first"] if qs[i]["check"] == "open"), None)
     step = ""
     if lead:
@@ -387,11 +394,11 @@ def page(record: dict[str, Any]) -> str:
             f'<div class="next"><b>What to do next</b><div><p>Get an answer to {e(lead["id"])}, &ldquo;{e(plain(lead["question"]))}&rdquo;, '
             f'from its owner before the meeting.</p><span class="who"><span class="o">{e(lead["owner"])}</span><span class="d">{e(lead["due"])}</span></span></div></div>'
         )
-    cover = f'<section class="slide cover">{header}<h1>{e(answer_line(k))}</h1><p class="lede">{lede(k)}</p>{marks}<div class="panel"><p class="legend">\u25cf prepare first</p>{pic}</div>{step}</section>'
+    cover = f'<section class="slide cover">{header}<h1>{e(answer_line(k))}</h1><p class="lede">{lede(k)}</p>{marks}{rows(k)}{step}</section>'
 
     first = "".join(row(qs[i], short=True) for i in k["first"])
     rest = [q for q in k["questions"] if q["id"] not in k["first"]]
-    others = "".join(f'<li><b>{e(q["id"])}</b><a href="#{e(q["id"])}">{e(plain(q["question"]))}</a><span class="chip {e(q["check"])}">{e(q["check"])}</span></li>' for q in rest)
+    others = "".join(f'<li><b>{e(q["id"])}</b><a href="#{e(q["id"])}">{e(plain(q["question"]))}</a><span class="wd {e(q["check"])}">{e(q["check"])}</span></li>' for q in rest)
     detail = (
         '<section class="slide"><div class="meta"><span>Prepare first</span></div><div class="cols">'
         f'<div><h3>The five to prepare first</h3><div class="qa">{first}</div></div>'
@@ -425,7 +432,7 @@ def page(record: dict[str, Any]) -> str:
     )
     return (
         '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<title>{e(title)}</title><style>{floor_fonts(stylesheet() + sk.CSS + PAGE_CSS)}</style></head><body><main class="solo">'
+        f'<title>{e(title)}</title><style>{floor_fonts(stylesheet() + sk.CSS + sk.SCORECARD_CSS + PAGE_CSS)}</style></head><body><main class="solo">'
         f"{cover}{detail}{more}"
         '<p class="foot">Every answer quotes a figure the project file holds, with its source; code checks each one. '
         "An answer says what moved and when, not why. Landed, watch or stalled is did-it-land's call, printed as it set it.</p></main></body></html>\n"

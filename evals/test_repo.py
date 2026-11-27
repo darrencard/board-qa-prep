@@ -72,16 +72,12 @@ class Sample(unittest.TestCase):
         self.assertNotIn("--landed", render_html.PAGE_CSS)
         # Brass marks a person's call only: an open question's owner and due date, in its row and in the next step.
         self.assertEqual(set(re.findall(r"([.\w> -]+)\{[^}]*--brass", render_html.PAGE_CSS)), {".own", ".next", ".next>b", ".next .who"})
-        self.assertNotIn("brass", "".join(re.findall(r"\.chip[^{]*\{[^}]*\}", render_html.PAGE_CSS)), "check chips are ink")
-        # In the picture, brass outlines only the open tiles and prints only their owners.
+        self.assertNotIn("brass", "".join(re.findall(r"\.wd[^{]*\{[^}]*\}", render_html.PAGE_CSS)), "check words are ink or muted")
+        # In the rows, brass is only an open question's owner: one person call per open question.
         key = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))["board_qa"]
         opens = [q for q in key["questions"] if q["check"] == "open"]
-        for svg in svgkit.visuals_in(body):
-            self.assertEqual(svg.count('stroke="var(--brass)"'), len(opens))
-            brass = " ".join(re.findall(r'style="color:var\(--brass\)">([^<]+)</text>', svg))
-            for q in opens:
-                for part in q["owner"].upper().replace(",", "").split():
-                    self.assertIn(part, brass)
+        frame = svgkit.frames_in(body)[0]
+        self.assertEqual(re.findall(r'<span class="sc-o">.*?</svg>([^<]+)</span>', frame), [q["owner"] for q in opens])
 
     def test_selection_and_focus_print_in_ink_not_green(self):
         css = re.search(r"<style>(.*?)</style>", (ACME / "board-qa-prep.html").read_text(encoding="utf-8"), re.S).group(1)
@@ -105,7 +101,9 @@ class Sample(unittest.TestCase):
         self.assertTrue(rest)
         for qid in rest:
             self.assertIn(f'<div id="{qid}">', folded)
-        self.assertLess(len(re.sub(r"<[^>]+>", " ", re.sub(r"<style>.*?</style>|<svg.*?</svg>", "", visible, flags=re.S)).split()), 600)
+        # 650: the scorecard rows print as text what the old tiles drew inside an SVG (ids, topics, owners), which this
+        # count skipped; the page itself is no longer.
+        self.assertLess(len(re.sub(r"<[^>]+>", " ", re.sub(r"<style>.*?</style>|<svg.*?</svg>", "", visible, flags=re.S)).split()), 650)
         md = (ACME / "board-qa-prep.md").read_text(encoding="utf-8")
         self.assertTrue(md.startswith(f"# {render_html.answer_line(key)}\n"))
         self.assertIn("<details>", md.split("## The five to prepare first")[1])
@@ -129,21 +127,21 @@ class Visual(unittest.TestCase):
 
     def test_svgkit_matches_its_landing_loop_pin(self):
         pin = json.loads((SKILL / "VENDORED.json").read_text(encoding="utf-8"))["landing-loop"]
-        self.assertEqual(pin["commit"], "5d01756d08ab3eb92b457c3286729791df6bcf5f")
+        self.assertEqual(pin["commit"], "78784efd2ecd5282f6ec264e545ce2075e459be2")
         self.assertEqual(set(pin["files"]), {"scripts/vendor/svgkit.py"})
         for rel, info in pin["files"].items():
             digest = hashlib.sha256((SKILL / rel).read_bytes()).hexdigest()
             self.assertEqual(digest, info["sha256"], f"{rel} changed. Copy it again from landing-loop at the pinned commit and update VENDORED.json.")
 
     def test_the_visual_draws_only_figures_the_page_prints(self):
-        visuals = svgkit.visuals_in(self.page)
-        self.assertEqual(len(visuals), 2, "the wide picture and the tall one")
         self.assertEqual(svgkit.unprinted(self.page), [])
-        for svg in visuals:
-            drawn = svgkit.texts_in(svg)
-            # One tile per question, each with its id, and a dot on each of the five to prepare first.
-            self.assertEqual([t for t in drawn if re.fullmatch(r"Q\d\d", t)], [q["id"] for q in self.key["questions"]])
-            self.assertEqual(svg.count("<circle"), len(self.key["first"]))
+        frame = svgkit.frames_in(self.page)[0]
+        n = {name: f["value"] for name, f in self.key["counts"].items()}
+        # The share bar first: answered of all, its figure printed beside it.
+        first = re.search(r'<div class="sc-r">.*?</span></div>', frame).group(0)
+        self.assertIn(f'<span class="sc-l"><b>{n["answered"]} of {n["questions"]}</b></span>', first)
+        self.assertIn('<svg class="sc-sh"', first)
+        self.assertIn(f'width="{svgkit.num(n["answered"] / n["questions"] * 100)}%"', first)
 
     def test_green_and_red_only_beside_their_words(self):
         body = self.page.split("</style>", 1)[1]
@@ -151,16 +149,64 @@ class Visual(unittest.TestCase):
         for word in ("landed", "stalled"):
             self.assertNotIn(f"var(--{word})", rest)
             self.assertNotIn(f"st {word}", rest)
+        for row in re.findall(r'<div class="sc-r">.*?</div>', body):
+            self.assertNotRegex(row, r'class="ac (landed|stalled)"')
 
     def test_each_visual_states_its_answer(self):
-        labels = re.findall(r'<svg class="sk-(?:wide|tall)"[^>]* aria-label="([^"]+)"', self.page)
-        self.assertEqual(len(labels), 2)
-        for label in labels:
-            self.assertEqual(
-                label,
-                "The project file answers 13 of 15 likely board questions. Two need an owner&#x27;s answer before the meeting. "
-                "Open: Q11, owned by Lead, Quoting squad, due before the board meeting; Q15, owned by Head of Product, Quoting squad, due before the board meeting.",
-            )
+        labels = re.findall(r'role="img" aria-label="([^"]+)"', self.page)
+        self.assertEqual(labels, ["The project file answers 13 of 15 likely board questions. Two need an owner&#x27;s answer before the meeting."])
+
+    # The scorecard grammar (landing-loop tools/SCORECARD-ROLLOUT.md, svgkit 1.2.0)
+
+    def css(self) -> str:
+        return self.page.split("<style>", 1)[1].split("</style>", 1)[0]
+
+    def test_no_text_inside_a_picture_and_no_picture_scales(self):
+        self.assertEqual(svgkit.svgs_with_text(self.page), [], "text inside an SVG")
+        self.assertEqual(svgkit.scaled_svgs_in(self.page), [], "a picture with a viewBox would scale")
+
+    def test_labels_render_12px_and_names_14px(self):
+        css = self.css()
+        self.assertEqual(set(svgkit.font_sizes(css)), {"var(--sc-m)", "var(--sc-n)"})
+        self.assertIn("--sc-m:calc(12px / var(--sc-z))", css)
+        self.assertIn("--sc-n:calc(14px / var(--sc-z))", css)
+        self.assertIn(".scg{--sc-z:1;", css, "a sample page has no zoom")
+
+    def test_no_box_inside_the_frame_and_no_overlap(self):
+        self.assertEqual(svgkit.boxes_in_frames(self.page, self.css()), [])
+        self.assertNotIn('class="chip', self.page.split("For your engineers", 1)[0])
+        self.assertNotIn("position:absolute", svgkit.SCORECARD_CSS)
+
+    def test_no_legacy_svgkit_primitive_draws_on_the_page(self):
+        import warnings
+
+        self.assertEqual(svgkit.legacy_in(self.page), [])
+        record = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            render_html.page(record)
+
+    def test_one_frame_the_share_row_then_open_then_answered(self):
+        frames = svgkit.frames_in(self.page)
+        self.assertEqual(len(frames), 1)
+        names = re.findall(r'<span class="sc-n">([^<]+)</span>', frames[0])
+        opens = [q["id"] for q in self.key["questions"] if q["check"] == "open"]
+        done = [q["id"] for q in self.key["questions"] if q["check"] != "open"]
+        self.assertEqual(len(names), 1 + len(self.key["questions"]))
+        self.assertEqual([x.split(".", 1)[0] for x in names[1:]], opens + done)
+        words = re.findall(r'<span class="sc-s">(.*?)</span></div>', frames[0])
+        self.assertEqual(len(words), len(names))
+        for w in words[1 : 1 + len(opens)]:
+            self.assertIn('<span class="sc-w ink">open</span>', w)
+            self.assertIn('class="sc-o"', w)
+        for w in words[1 + len(opens) :]:
+            self.assertEqual(w, '<span class="sc-w">answered</span>')
+
+    def test_cited_check_words_are_the_contract_words(self):
+        quality = next(q for q in self.key["questions"] if q["topic"] == "quality")
+        self.assertIn("eval-kit's build check: not confirmed: too close to call.", quality["answer"])
+        self.assertIn("NOT CONFIRMED: TOO CLOSE TO CALL", svgkit.page_text(self.page))
+        self.assertEqual(board_qa.FLAG_WORDS["within-noise"], "inside normal ups and downs")
 
     def test_public_copy_uses_plain_words(self):
         public = svgkit.page_text(self.page.split("For your engineers", 1)[0]).lower()
@@ -193,8 +239,6 @@ class Visual(unittest.TestCase):
         sizes += [float(m) for m in re.findall(r'font-size="(\d+(?:\.\d+)?)"', self.page)]
         self.assertTrue(sizes)
         self.assertGreaterEqual(min(sizes), 11)
-        # The phone picture is 340 wide; at 390 and 375 the panel gives it 340px or more, so its 11px labels never shrink.
-        self.assertIn("@media (max-width:440px){.panel{margin:0 -8px;padding:16px 8px 14px}}", self.page)
         # The vendored template is untouched on disk: the page raises its small sizes as it inlines them.
         self.assertIn("font:400 10px/16px", (SKILL / "assets" / "vendor" / "template.html").read_text(encoding="utf-8"))
 
@@ -203,11 +247,9 @@ class Visual(unittest.TestCase):
         self.assertIn("<span>Board Q&amp;A prep</span>", header)
         self.assertNotIn("board-qa-prep", header)
         self.assertIn("<code>board-qa-prep</code>", self.page.split("For your engineers", 1)[1])
-        self.assertIn("\nBoard Q&A prep v0.3.1.", self.md)
+        self.assertIn("\nBoard Q&A prep v0.3.2.", self.md)
 
-    def test_the_tiles_carry_a_legend_for_the_dot_and_the_standard_gap_under_the_heading(self):
-        panel = self.page.split('<div class="panel">', 1)[1]
-        self.assertTrue(panel.startswith('<p class="legend">\u25cf prepare first</p><figure class="sk">'))
+    def test_the_standard_gap_under_the_heading(self):
         self.assertIn("Nothing in the project file answers it", self.page)
         # The heading's gap is the family's: the same rules as did-it-land and eval-kit.
         self.assertIn(".solo h1{font-size:clamp(34px,4.6vw,60px);line-height:1;letter-spacing:-.04em;max-width:22ch;margin-bottom:20px}", self.page)
@@ -215,12 +257,12 @@ class Visual(unittest.TestCase):
 
     def test_the_page_follows_the_sample_anatomy(self):
         body = self.page.split('<main class="solo">', 1)[1]
-        order = ['class="sk-hdr"', "<h1>", 'class="marks"', 'class="panel"', "What to do next", 'class="cols"', "For your engineers"]
+        order = ['class="sk-hdr"', "<h1>", 'class="marks"', 'class="sc scg"', "What to do next", 'class="cols"', "For your engineers"]
         at = [body.index(x) for x in order]
         self.assertEqual(at, sorted(at))
         self.assertEqual(body.count('<div class="next">'), 1, "one next step leads the page")
         self.assertIn('<span class="o">Head of Product, Quoting squad</span><span class="d">before the board meeting</span>', body)
-        self.assertIn("<span>Board Q&amp;A prep</span><span>As of 2026-11-26</span><span>v0.3.1</span>", body)
+        self.assertIn("<span>Board Q&amp;A prep</span><span>As of 2026-11-26</span><span>v0.3.2</span>", body)
         self.assertNotIn("Book a call", body, "a sample is the skill's own output: no call to action")
 
 
@@ -234,12 +276,12 @@ class Floor(unittest.TestCase):
 
 
 class Versions(unittest.TestCase):
-    def test_every_version_field_is_0_3_1(self):
+    def test_every_version_field_is_0_3_2(self):
         plugin = json.loads((ROOT / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
         skill = re.search(r'version: "([^"]+)"', (SKILL / "SKILL.md").read_text(encoding="utf-8")).group(1)
         log = re.search(r"^## (\S+), (\d{4}-\d{2}-\d{2})", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"), re.M)
-        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.1"})
+        self.assertEqual({plugin, project, skill, board_qa.VERSION, log.group(1)}, {"0.3.2"})
         self.assertEqual(log.group(2), "2026-11-27")
 
 

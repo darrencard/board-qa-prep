@@ -2562,7 +2562,7 @@
     "illustrative": true
   },
   "board_qa": {
-    "tool": "board-qa-prep 0.3.1",
+    "tool": "board-qa-prep 0.3.2",
     "as_of": "2026-11-26",
     "bet_title": "Quote drafting",
     "read": [
@@ -2587,7 +2587,7 @@
       "questions": {
         "value": 15,
         "unit": "questions",
-        "source": "board-qa-prep 0.3.1: count of questions in board_qa",
+        "source": "board-qa-prep 0.3.2: count of questions in board_qa",
         "window": {
           "from": "2026-11-26",
           "to": "2026-11-26"
@@ -2597,7 +2597,7 @@
       "answered": {
         "value": 13,
         "unit": "questions",
-        "source": "board-qa-prep 0.3.1: count of questions in board_qa",
+        "source": "board-qa-prep 0.3.2: count of questions in board_qa",
         "window": {
           "from": "2026-11-26",
           "to": "2026-11-26"
@@ -2607,7 +2607,7 @@
       "open": {
         "value": 2,
         "unit": "questions",
-        "source": "board-qa-prep 0.3.1: count of questions in board_qa",
+        "source": "board-qa-prep 0.3.2: count of questions in board_qa",
         "window": {
           "from": "2026-11-26",
           "to": "2026-11-26"
@@ -2686,7 +2686,7 @@
         "topic": "quality",
         "question": "Is quality holding as more of the work runs without a person?",
         "check": "answered",
-        "answer": "v1.4's held-out pass rate is 80% [F11] on 30 cases [F13] (95% interval 62.7% to 90.5%). 71.5% of tasks finished with no person [F12]. eval-kit's build check: not confirmed: inside noise. The point estimate meets the target, but the low end of the 95% interval does not clear it.",
+        "answer": "v1.4's held-out pass rate is 80% [F11] on 30 cases [F13] (95% interval 62.7% to 90.5%). 71.5% of tasks finished with no person [F12]. eval-kit's build check: not confirmed: too close to call. The point estimate meets the target, but the low end of the 95% interval does not clear it.",
         "from_keys": [
           "evals"
         ],
@@ -2697,7 +2697,7 @@
         "topic": "eval-gain",
         "question": "Is v1.4 really better than v1.3?",
         "check": "answered",
-        "answer": "Held-out pass rate went from 70% [F14] on v1.3 to 80% [F11] on v1.4, on the same cases. eval-kit marks the gain as inside the noise for this case count, so it is not yet a proven gain.",
+        "answer": "Held-out pass rate went from 70% [F14] on v1.3 to 80% [F11] on v1.4, on the same cases. eval-kit marks the gain as too close to call for this case count, so it is not yet a proven gain.",
         "from_keys": [
           "evals"
         ],

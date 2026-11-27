@@ -187,7 +187,8 @@ class TheAcmeRead(unittest.TestCase):
         self.assertEqual(ev["status"], "not confirmed: inside noise")
         lo, hi = ev["figures"][f"pass_rate@{ev['version']}"]["interval_95"]
         self.assertIn(f"(95% interval {lo}% to {hi}%)", q["answer"])
-        self.assertIn("eval-kit's build check: not confirmed: inside noise.", q["answer"])
+        # One check word per skill: the older record's "inside noise" prints as eval-kit's "too close to call".
+        self.assertIn("eval-kit's build check: not confirmed: too close to call.", q["answer"])
         self.assertNotIn("meets target", q["answer"])
 
     def test_release_reads_readiness_waivers_and_spec_holds(self):
