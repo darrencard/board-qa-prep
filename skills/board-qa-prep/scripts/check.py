@@ -1,135 +1,153 @@
-"""Check a board Q&A prep file. Deterministic; the model never grades itself.
+"""Check the board_qa key of a Landing Loop record. Deterministic; the model never grades itself.
 
-Errors (any one blocks render.py):
-  figure-not-in-ledger   a figure in an answer matches no figure in the rows it cites
-  cite-missing           an answered question cites no ledger row and is not a stated answer
-  stated-has-figure      a stated answer (stated_by a named person) contains a figure
-  stated-no-name         stated_by is a placeholder, not a named person or role
-  cite-unknown-row       an answer cites an ID the ledger does not have
-  cite-unknown-confidence an answer rests on a row whose confidence is Unknown
-  confidence-label-missing an answer cites an Estimated row without saying "estimated"
-  gap-no-owner           a gap has no named owner
-  gap-has-answer         a gap carries answer text with figures or citations
-  status-word            an answer uses a status word other than landed, watch or stalled
-  causal-claim           an answer says one thing caused another; the ledger shows what moved, not why
-  bad-status             status is not "answered" or "gap"
-  empty-question         a question has no text
-  duplicate-id           two questions share an ID
+Errors (any one blocks a save and a render):
+  figure-not-cited     a figure in a question, answer or missing line matches no figure the text cites as [F01]
+  cite-unknown         the text cites a figure ID the key does not hold
+  figure-shape         a figure lacks value, unit, source, window (from, to) or as_of, or has an empty source
+  figure-changed       a figure copied from the record no longer matches the record at its `from` path
+  check-word           check is not "answered" or "open"
+  open-no-owner        an open question has no owner, or a placeholder such as TBD
+  open-no-missing      an open question does not say what is missing
+  answered-no-source   an answered question cites no figure, names no record key, and is not a stated answer
+  stated-no-name       a stated answer's stated_by is a placeholder
+  status-word          landed, watch or stalled outside the "Did it land?" answer, or one that is not landed.status;
+                       or a status word the loop does not use (on track, at risk, green, amber, RAG)
+  causal-claim         an answer says one thing caused another; the record shows what moved, not why
+  empty-question       a question has no text
+  duplicate-id         two questions share an ID
 
-Usage: python3 scripts/check.py qa.json [--json]
-Exit code 0 when there are no errors, 1 otherwise, 2 when the file cannot be read.
+Usage: python3 check.py landing/<bet>.json
+Standard library only. Python 3.11 or later.
 """
 
 from __future__ import annotations
 
-import argparse
 import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from figures import figures, unmatched  # noqa: E402
-from questions import row_figures  # noqa: E402
+import loop  # noqa: E402
+from display import num, sig  # noqa: E402
+from figures import Figure, figures  # noqa: E402
 
-CITE_RE = re.compile(r"\[\[?(L\d{1,3})\]?\]")
-PLACEHOLDER_OWNERS = {"", "tbd", "tbc", "unassigned", "unknown", "none", "n/a", "na", "?", "someone", "owner"}
-STATUS_RE = re.compile(r"\b(on track|off track|at risk|green|amber|red status|rag)\b", re.IGNORECASE)
-CAUSAL_RE = re.compile(
-    r"\b(caused|causes|drove|driven by|because of|due to|thanks to|as a result of|led to|resulted in|proves?|proved)\b",
-    re.IGNORECASE,
-)
+CITE = re.compile(r"\[(F\d{1,3})\]")
+PLACEHOLDERS = {"", "tbd", "tbc", "unassigned", "unknown", "none", "n/a", "na", "?", "someone", "owner", "todo"}
+BET_STATUS = re.compile(r"\b(landed|watch|stalled)\b", re.I)
+OTHER_STATUS = re.compile(r"\b(on track|off track|at risk|green|amber|red status|rag)\b", re.I)
+CAUSAL = re.compile(r"\b(caused|causes|drove|driven by|because of|due to|thanks to|as a result of|led to|resulted in|proves?|proved)\b", re.I)
+REQUIRED = ("value", "unit", "source", "window", "as_of")
 
 
-def check(qa: dict) -> list[dict]:
-    ledger = {str(r.get("id")): r for r in qa.get("ledger") or []}
-    problems: list[dict] = []
-    seen_ids: set[str] = set()
+def placeholder(name: Any) -> bool:
+    return not isinstance(name, str) or name.strip().lower() in PLACEHOLDERS
 
-    def err(q: dict, code: str, message: str) -> None:
-        problems.append({"question": q.get("id"), "slide": q.get("slide"), "code": code, "message": message})
 
-    for q in qa.get("questions") or []:
-        qid = str(q.get("id"))
-        if qid in seen_ids:
-            err(q, "duplicate-id", f"{qid} is used twice.")
-        seen_ids.add(qid)
+def strip_figures(text: str) -> str:
+    """Text quoted from another key, with any figure it holds replaced, since board_qa may print only figures it cites."""
+    found = figures(text)
+    for f in sorted(found, key=lambda f: -len(f.text)):
+        text = text.replace(f.text, "(see the record)")
+    return text
+
+
+def allowed(f: dict[str, Any]) -> list[Figure]:
+    """The figures a citation of f lets the text print: its value as displayed, the numbers in its unit, and its interval."""
+    out = figures(num(f)) + figures(str(f.get("unit") or ""))
+    if str(f.get("unit") or "").lower().startswith("point") and isinstance(f.get("value"), int | float):
+        out.append(Figure("pct", float(f["value"]), "points"))  # "14 points" reads as points, as the unit says
+    iv = f.get("interval_95")
+    if isinstance(iv, list):
+        out += [Figure("pct", 95.0, "95%")] + [x for v in iv for x in figures(f"{sig(v)}%")]
+    return out
+
+
+def check(record: dict[str, Any]) -> list[dict[str, Any]]:
+    key = record.get(loop.KEY) or {}
+    problems: list[dict[str, Any]] = []
+
+    def err(qid: Any, code: str, message: str) -> None:
+        problems.append({"question": qid, "code": code, "message": message})
+
+    figs = key.get("figures") or {}
+    for fid, f in figs.items():
+        if not isinstance(f, dict) or any(k not in f for k in REQUIRED) or not f.get("source") or not isinstance(f.get("window"), dict) or set(f["window"]) != {"from", "to"}:
+            err(None, "figure-shape", f"{fid} needs value, unit, source, window (from, to) and as_of.")
+            continue
+        src = f.get("from", "")
+        if src and not src.startswith(("brief/", "evals/rows/")):
+            there = loop.get(record, src)
+            if not loop.is_figure(there) or there.get("value") != f["value"] or there.get("source") != f["source"]:
+                err(None, "figure-changed", f"{fid} no longer matches {src} in the record.")
+    for name, f in (key.get("counts") or {}).items():
+        if not isinstance(f, dict) or any(k not in f for k in REQUIRED):
+            err(None, "figure-shape", f"counts.{name} needs value, unit, source, window and as_of.")
+
+    status = (record.get("landed") or {}).get("status")
+    seen: set[str] = set()
+    for q in key.get("questions") or []:
+        qid = q.get("id")
+        if qid in seen:
+            err(qid, "duplicate-id", f"{qid} is used twice.")
+        seen.add(qid)
         if not str(q.get("question") or "").strip():
-            err(q, "empty-question", "The question has no text.")
-        status = q.get("status")
-        answer = str(q.get("answer") or "")
-
-        if status == "gap":
-            gap = q.get("gap") or {}
-            owner = str(gap.get("owner") or "").strip()
-            if owner.lower() in PLACEHOLDER_OWNERS:
-                err(q, "gap-no-owner", "A gap needs a named owner (a person or a role), not a placeholder.")
-            if answer.strip() and (figures(answer) or CITE_RE.search(answer)):
-                err(q, "gap-has-answer", "A gap cannot carry figures or citations. Answer it from the ledger or leave the answer empty.")
+            err(qid, "empty-question", "The question has no text.")
+        word = q.get("check")
+        if word not in ("answered", "open"):
+            err(qid, "check-word", f"check is {word!r}; use answered or open.")
             continue
-        if status != "answered":
-            err(q, "bad-status", f"status is {status!r}; use 'answered' or 'gap'.")
-            continue
-
-        cites = CITE_RE.findall(answer)
-        stated_by = q.get("stated_by")
-        if stated_by is not None:
-            if str(stated_by).strip().lower() in PLACEHOLDER_OWNERS:
-                err(q, "stated-no-name", "stated_by must name the person or role who gave the answer.")
-            if not cites and figures(answer):
-                err(q, "stated-has-figure", "A stated answer cannot carry a figure. Cite the ledger row that holds it, or remove it.")
-        if not cites and (stated_by is None or not answer.strip()):
-            err(q, "cite-missing", "An answer must cite a ledger row, as [L08], or be a figure-free answer stated_by a named person. Otherwise make it a gap.")
-            continue
-        rows = []
-        for cid in dict.fromkeys(cites):
-            row = ledger.get(cid)
-            if row is None:
-                err(q, "cite-unknown-row", f"{cid} is not in the evidence ledger.")
+        if word == "open":
+            if placeholder(q.get("owner")):
+                err(qid, "open-no-owner", "An open question needs a named owner: a person or a role.")
+            if not str(q.get("missing") or "").strip():
+                err(qid, "open-no-missing", "Say what is missing.")
+        else:
+            body = str(q.get("answer") or "")
+            if "stated_by" in q:
+                if placeholder(q.get("stated_by")):
+                    err(qid, "stated-no-name", "Name the person or role who gave the answer.")
+            elif not CITE.search(body) and not q.get("from_keys"):
+                err(qid, "answered-no-source", "Cite a figure as [F01], or record who said it with close --by.")
+        for field in ("question", "answer", "missing"):
+            text = str(q.get(field) or "")
+            if not text:
                 continue
-            confidence = str(row.get("confidence") or "Unknown").lower()
-            if confidence == "unknown":
-                err(q, "cite-unknown-confidence", f"{cid} is Unknown; it cannot answer a board question. Make this a gap.")
-            if confidence == "estimated" and not re.search(r"\bestimat", answer, re.IGNORECASE):
-                err(q, "confidence-label-missing", f"{cid} is Estimated; the answer must say so.")
-            rows.append(row)
-
-        allowed = [f for row in rows for f in row_figures(row)]
-        for fig in unmatched(answer, allowed) if cites else []:  # a stated answer is checked above
-            elsewhere = [rid for rid, row in ledger.items() if any(fig.matches(f) for f in row_figures(row))]
-            hint = f" It matches {', '.join(elsewhere)}; cite that row." if elsewhere else " No ledger row holds it."
-            err(q, "figure-not-in-ledger", f"{fig.text} is not in the rows cited ({', '.join(dict.fromkeys(cites))}).{hint}")
-
-        if STATUS_RE.search(answer):
-            err(q, "status-word", f"'{STATUS_RE.search(answer).group(0)}' is not a status word here. Use landed, watch or stalled.")
-        if CAUSAL_RE.search(answer):
-            err(q, "causal-claim", f"'{CAUSAL_RE.search(answer).group(0)}' claims a cause. The ledger shows what moved, not why.")
+            cited = CITE.findall(text)
+            ok: list[Figure] = []
+            for fid in cited:
+                if fid not in figs:
+                    err(qid, "cite-unknown", f"{field} cites {fid}, which the key does not hold.")
+                else:
+                    ok += allowed(figs[fid])
+            for f in figures(text):
+                if not any(f.matches(a) for a in ok):
+                    err(qid, "figure-not-cited", f"{field}: {f.text!r} matches no figure it cites. Cite the record figure, or remove it.")
+            for m in BET_STATUS.finditer(text):
+                if q.get("topic") != "landed" or field != "answer" or m.group(1).lower() != status:
+                    err(qid, "status-word", f"{field}: {m.group(1)!r} is a bet status. Only the 'Did it land?' answer prints it, as did-it-land set it.")
+            m = OTHER_STATUS.search(text)
+            if m:
+                err(qid, "status-word", f"{field}: {m.group(1)!r} is not a loop word. A bet is landed, watch or stalled; a question is answered or open.")
+            if field != "question":
+                m = CAUSAL.search(text)
+                if m:
+                    err(qid, "causal-claim", f"{field}: {m.group(1)!r}. Say what moved and when, not why.")
     return problems
 
 
-def summary(qa: dict, problems: list[dict]) -> str:
-    qs = qa.get("questions") or []
-    gaps = sum(q.get("status") == "gap" for q in qs)
-    lines = [f"{len(qs)} questions, {len(qs) - gaps} answered, {gaps} gaps, {len(problems)} errors."]
-    for p in problems:
-        lines.append(f"  {p['question']} (slide {p['slide']}) {p['code']}: {p['message']}")
-    return "\n".join(lines)
-
-
-def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description="Check every answer cites the ledger and every gap has an owner.")
-    p.add_argument("qa")
-    p.add_argument("--json", action="store_true", help="Print the problems as JSON.")
-    args = p.parse_args(argv)
-    try:
-        qa = json.loads(Path(args.qa).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        print(f"error: cannot read {args.qa}: {exc}", file=sys.stderr)
+def main() -> int:
+    if len(sys.argv) != 2:
+        print(__doc__, file=sys.stderr)
         return 2
-    problems = check(qa)
-    print(json.dumps(problems, indent=2) if args.json else summary(qa, problems))
-    return 1 if problems else 0
+    record = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    errors = check(record)
+    for e in errors:
+        print(f"{e['question'] or '-'} {e['code']}: {e['message']}")
+    print(f"check: {len(errors)} errors.")
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":

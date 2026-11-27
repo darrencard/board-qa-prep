@@ -1,0 +1,1233 @@
+{
+  "schema": "landing-loop/1",
+  "bet": "quote-drafting",
+  "brief": {
+    "path": "briefs/quote-drafting.md",
+    "sha256": "decbe39590cc57b3d47125722a8d43e445d33c8f2f525c00277b94b7937dc95f"
+  },
+  "portfolio": {
+    "tool": "bet-portfolio-review 0.3.0",
+    "as_of": "2026-07-27",
+    "rank": {
+      "value": 4,
+      "unit": "rank of 8 bets, 1 needs work first",
+      "source": "bets.csv",
+      "window": {
+        "from": "2026-07-27",
+        "to": "2026-07-27"
+      },
+      "as_of": "2026-07-27"
+    },
+    "brief_score": {
+      "value": 14,
+      "unit": "points of 14",
+      "source": "briefs/quote-drafting.md",
+      "window": {
+        "from": "2026-07-27",
+        "to": "2026-07-27"
+      },
+      "as_of": "2026-07-27"
+    },
+    "brief_score_percent": {
+      "value": 100,
+      "unit": "%",
+      "source": "briefs/quote-drafting.md",
+      "window": {
+        "from": "2026-07-27",
+        "to": "2026-07-27"
+      },
+      "as_of": "2026-07-27"
+    },
+    "linked_work": {
+      "value": 4,
+      "unit": "work items",
+      "source": "work.csv",
+      "window": {
+        "from": "2026-07-27",
+        "to": "2026-07-27"
+      },
+      "as_of": "2026-07-27"
+    },
+    "owner": "Quoting squad lead",
+    "decides": "Head of Product, Quoting squad",
+    "gaps": [
+      "no-result"
+    ],
+    "brief_problems": [],
+    "next_step": "Next in the loop, 02 Spec: run spec-auditor on the bet's spec against this brief before build starts."
+  },
+  "spec": {
+    "tool": "spec-auditor",
+    "version": "0.3.0",
+    "as_of": "2026-08-03",
+    "source": {
+      "kind": "file",
+      "title": "PRD: Quote drafting assistant",
+      "location": "examples/acme/specs/quote-drafting.md",
+      "updated_at": "",
+      "file": "examples/acme/specs/quote-drafting.md"
+    },
+    "verdict": "hold",
+    "ai_feature": true,
+    "counts": {
+      "hold": {
+        "value": 2,
+        "unit": "findings",
+        "source": "spec-auditor 0.3.0, audit of examples/acme/specs/quote-drafting.md",
+        "window": {
+          "from": "2026-08-03",
+          "to": "2026-08-03"
+        },
+        "as_of": "2026-08-03"
+      },
+      "note": {
+        "value": 1,
+        "unit": "findings",
+        "source": "spec-auditor 0.3.0, audit of examples/acme/specs/quote-drafting.md",
+        "window": {
+          "from": "2026-08-03",
+          "to": "2026-08-03"
+        },
+        "as_of": "2026-08-03"
+      },
+      "pass": {
+        "value": 11,
+        "unit": "findings",
+        "source": "spec-auditor 0.3.0, audit of examples/acme/specs/quote-drafting.md",
+        "window": {
+          "from": "2026-08-03",
+          "to": "2026-08-03"
+        },
+        "as_of": "2026-08-03"
+      }
+    },
+    "brief": {
+      "metric": "Quote draft acceptance rate",
+      "better": "higher",
+      "by": "2026-11-15",
+      "line": "model call",
+      "decides": "Head of Product, Quoting squad",
+      "bar": {
+        "value": 40.0,
+        "unit": "%",
+        "source": "examples/acme/briefs/quote-drafting.md, line 9",
+        "window": {
+          "from": "2026-08-03",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-08-03"
+      }
+    },
+    "holds": [
+      {
+        "check": "rollback",
+        "file": "spec",
+        "lines": [
+          48,
+          50
+        ],
+        "message": "The rollback plan has no trigger threshold.",
+        "fix": "Say what number triggers it (such as an error rate over 2%) and how it is done."
+      },
+      {
+        "check": "eval-plan",
+        "file": "spec",
+        "lines": [
+          37,
+          39,
+          40
+        ],
+        "message": "The eval plan has no time it runs.",
+        "fix": "State the number of cases, the pass bar as a number, and when the evals run."
+      }
+    ],
+    "notes": [
+      {
+        "check": "baseline",
+        "file": "spec",
+        "lines": [],
+        "message": "No current value for the metric, so the size of the gap to the bar is unknown."
+      }
+    ],
+    "brief_file": {
+      "path": "examples/acme/briefs/quote-drafting.md",
+      "sha256": "decbe39590cc57b3d47125722a8d43e445d33c8f2f525c00277b94b7937dc95f"
+    }
+  },
+  "cost": {
+    "tool": "cost-budget-check 0.3.0",
+    "budget_status": "over budget",
+    "lines": {
+      "price_per_token": {
+        "actual": {
+          "value": 3.2775728155339805e-06,
+          "unit": "USD per token",
+          "source": "cost-budget-check 0.3.0: priced cost / tokens; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "budget": {
+          "value": 3e-06,
+          "unit": "USD per token",
+          "source": "landing brief quote-drafting.md",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "against_budget": {
+          "value": 0.09252427184466017,
+          "unit": "share over budget",
+          "source": "cost-budget-check 0.3.0: actual / budget - 1; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "budget_status": "over budget",
+        "prior": {
+          "value": 2.5178571428571425e-06,
+          "unit": "USD per token",
+          "source": "cost-budget-check 0.3.0: priced cost / tokens, 2026-10-18..2026-10-31; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-10-18",
+            "to": "2026-10-31"
+          },
+          "as_of": "2026-11-15"
+        },
+        "change": {
+          "value": 0.301731047304276,
+          "unit": "share change since the prior window",
+          "source": "cost-budget-check 0.3.0: this window / prior window - 1; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        }
+      },
+      "tokens_per_task": {
+        "actual": {
+          "value": 10300.0,
+          "unit": "tokens per task",
+          "source": "cost-budget-check 0.3.0: tokens / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "budget": {
+          "value": 9000.0,
+          "unit": "tokens per task",
+          "source": "landing brief quote-drafting.md",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "against_budget": {
+          "value": 0.14444444444444438,
+          "unit": "share over budget",
+          "source": "cost-budget-check 0.3.0: actual / budget - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "budget_status": "over budget",
+        "prior": {
+          "value": 8400.0,
+          "unit": "tokens per task",
+          "source": "cost-budget-check 0.3.0: tokens / tasks, 2026-10-18..2026-10-31; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-10-18",
+            "to": "2026-10-31"
+          },
+          "as_of": "2026-11-15"
+        },
+        "change": {
+          "value": 0.22619047619047628,
+          "unit": "share change since the prior window",
+          "source": "cost-budget-check 0.3.0: this window / prior window - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        }
+      },
+      "cost_per_task": {
+        "actual": {
+          "value": 0.033759,
+          "unit": "USD per task",
+          "source": "cost-budget-check 0.3.0: priced cost / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "budget": {
+          "value": 0.027,
+          "unit": "USD per task",
+          "source": "landing brief quote-drafting.md (tokens per task x price per token)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "against_budget": {
+          "value": 0.2503333333333333,
+          "unit": "share over budget",
+          "source": "cost-budget-check 0.3.0: actual / budget - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        },
+        "budget_status": "over budget",
+        "prior": {
+          "value": 0.02115,
+          "unit": "USD per task",
+          "source": "cost-budget-check 0.3.0: priced cost / tasks, 2026-10-18..2026-10-31; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-10-18",
+            "to": "2026-10-31"
+          },
+          "as_of": "2026-11-15"
+        },
+        "change": {
+          "value": 0.5961702127659574,
+          "unit": "share change since the prior window",
+          "source": "cost-budget-check 0.3.0: this window / prior window - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+          "window": {
+            "from": "2026-11-01",
+            "to": "2026-11-14"
+          },
+          "as_of": "2026-11-15"
+        }
+      }
+    },
+    "gaps": [],
+    "tokens_per_task": {
+      "value": 10300.0,
+      "unit": "tokens per task",
+      "source": "cost-budget-check 0.3.0: tokens / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+      "window": {
+        "from": "2026-11-01",
+        "to": "2026-11-14"
+      },
+      "as_of": "2026-11-15"
+    },
+    "price_per_token": {
+      "value": 3.2775728155339805e-06,
+      "unit": "USD per token",
+      "source": "cost-budget-check 0.3.0: priced cost / tokens; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+      "window": {
+        "from": "2026-11-01",
+        "to": "2026-11-14"
+      },
+      "as_of": "2026-11-15"
+    },
+    "cost_per_task": {
+      "value": 0.033759,
+      "unit": "USD per task",
+      "source": "cost-budget-check 0.3.0: priced cost / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+      "window": {
+        "from": "2026-11-01",
+        "to": "2026-11-14"
+      },
+      "as_of": "2026-11-15"
+    },
+    "not_checked": {},
+    "budget": {
+      "cost_per_task": {
+        "value": 0.027,
+        "unit": "USD per task",
+        "source": "landing brief quote-drafting.md (tokens per task x price per token)",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15"
+      },
+      "tokens_per_task": {
+        "value": 9000.0,
+        "unit": "tokens per task",
+        "source": "landing brief quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15"
+      },
+      "price_per_token": {
+        "value": 3e-06,
+        "unit": "USD per token",
+        "source": "landing brief quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15"
+      }
+    },
+    "priced_cost": {
+      "value": 9.45252,
+      "unit": "USD",
+      "source": "cost-budget-check 0.3.0: sum of tokens x rate per token type; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+      "window": {
+        "from": "2026-11-01",
+        "to": "2026-11-14"
+      },
+      "as_of": "2026-11-15"
+    },
+    "over_budget": {
+      "value": 1.8925200000000002,
+      "unit": "USD",
+      "source": "cost-budget-check 0.3.0: priced cost - tasks x budgeted cost per task; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+      "window": {
+        "from": "2026-11-01",
+        "to": "2026-11-14"
+      },
+      "as_of": "2026-11-15"
+    },
+    "driver": {
+      "model": "vendor-a/xl",
+      "over_budget": {
+        "value": 0.9626399999999999,
+        "unit": "USD",
+        "source": "cost-budget-check 0.3.0: model cost - model token share x budgeted cost; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15"
+      }
+    },
+    "tasks": {
+      "value": 280,
+      "unit": "tasks",
+      "source": "distinct task ids in gateway.jsonl",
+      "window": {
+        "from": "2026-11-01",
+        "to": "2026-11-14"
+      },
+      "as_of": "2026-11-15"
+    }
+  },
+  "evals": {
+    "skill": "eval-kit",
+    "skill_version": "0.3.2",
+    "feature": "Quote drafting",
+    "version": "v1.4",
+    "as_of": "2026-11-15",
+    "status": "meets target",
+    "blocking": false,
+    "reasons": [
+      "held-out pass rate 80% meets the 80% target on a sealed holdout"
+    ],
+    "against_brief": {
+      "metric": "Quote draft acceptance rate",
+      "bar": "40%",
+      "better": "higher",
+      "by": "2026-11-15",
+      "judged": null,
+      "status": null,
+      "note": "The brief's metric, Quote draft acceptance rate, is not an eval figure. did-it-land judges it; these evals are the build check."
+    },
+    "columns": [
+      "version",
+      "run_at",
+      "cases",
+      "passed",
+      "cost_per_task",
+      "tasks",
+      "tasks_unassisted"
+    ],
+    "rows": [
+      {
+        "version": "v1.3",
+        "run_at": "2026-10-15",
+        "cases": 30,
+        "passed": 21,
+        "cost_per_task": null,
+        "tasks": 200,
+        "tasks_unassisted": 118
+      },
+      {
+        "version": "v1.4",
+        "run_at": "2026-11-15",
+        "cases": 30,
+        "passed": 24,
+        "cost_per_task": 0.0338,
+        "tasks": 200,
+        "tasks_unassisted": 143
+      }
+    ],
+    "figures": {
+      "pass_rate@v1.3": {
+        "value": 70.0,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-10-15",
+          "to": "2026-10-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L1",
+        "interval_95": [
+          52.1,
+          83.3
+        ]
+      },
+      "dev_pass_rate@v1.3": {
+        "value": 74.3,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-10-15",
+          "to": "2026-10-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L2"
+      },
+      "autonomy_rate@v1.3": {
+        "value": 59.0,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-10-15",
+          "to": "2026-10-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L3",
+        "interval_95": [
+          52.1,
+          65.6
+        ]
+      },
+      "pass_rate@v1.4": {
+        "value": 80.0,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L4",
+        "interval_95": [
+          62.7,
+          90.5
+        ]
+      },
+      "dev_pass_rate@v1.4": {
+        "value": 90.0,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L5"
+      },
+      "autonomy_rate@v1.4": {
+        "value": 71.5,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L6",
+        "interval_95": [
+          64.9,
+          77.3
+        ]
+      },
+      "cost_per_task@v1.4": {
+        "value": 0.0338,
+        "unit": "$",
+        "source": "cost-budget-check 0.3.0: priced cost / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "ledger": "L7"
+      }
+    },
+    "promotion": {
+      "promote": true,
+      "reason": "challenger gains 10 points on held-out cases with no new failure",
+      "champion": "v1.3",
+      "challenger": "v1.4",
+      "delta": 10.0,
+      "new_failures": [],
+      "within_noise": true
+    },
+    "calibration": {
+      "calibrated": true,
+      "agreement": 100.0,
+      "false_accepts": []
+    },
+    "clusters": [
+      {
+        "id": "fc1",
+        "label": "before, changed, edited",
+        "size": 42,
+        "share": 66
+      },
+      {
+        "id": "fc2",
+        "label": "finish, left, missed",
+        "size": 15,
+        "share": 23
+      },
+      {
+        "id": "fc3",
+        "label": "added, book, expansion",
+        "size": 5,
+        "share": 8
+      },
+      {
+        "id": "fc4",
+        "label": "callout, left, missing",
+        "size": 2,
+        "share": 3
+      }
+    ],
+    "cost": {
+      "owner": "cost-budget-check",
+      "cited": true,
+      "note": "cited from the cost key"
+    },
+    "illustrative": true,
+    "warnings": []
+  },
+  "landed": {
+    "status": "landed",
+    "reason": "Past the bar of 40% by 2026-11-15.",
+    "computed_by": "did-it-land 0.3.0",
+    "as_of": "2026-11-26T09:00:00Z",
+    "metric": "Quote draft acceptance rate",
+    "better": "higher",
+    "by": "2026-11-15",
+    "shipped": "2026-09-07",
+    "figures": {
+      "current": {
+        "value": 43.0,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-09-07",
+          "to": "2026-11-23"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "bar": {
+        "value": 40.0,
+        "unit": "%",
+        "source": "landing brief: quote-drafting.md",
+        "window": {
+          "from": null,
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "at_date": {
+        "value": 41.0,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-09-07",
+          "to": "2026-11-09"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "baseline_mean": {
+        "value": 22.17,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-08-31"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "baseline_sd": {
+        "value": 0.75,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-08-31"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "move_z": {
+        "value": 25.02,
+        "unit": "sd",
+        "source": "computed from Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-11-09"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "outcome_from": {
+        "value": 31.0,
+        "unit": "number",
+        "source": "Illustrative CRM export, quotes_won_weekly.csv",
+        "window": {
+          "from": "2026-08-31",
+          "to": "2026-08-31"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      },
+      "outcome_to": {
+        "value": 36.0,
+        "unit": "number",
+        "source": "Illustrative CRM export, quotes_won_weekly.csv",
+        "window": {
+          "from": "2026-08-31",
+          "to": "2026-11-23"
+        },
+        "as_of": "2026-11-26T09:00:00Z"
+      }
+    },
+    "flags": [],
+    "next_step": "Keep the metric on the scorecard, and decide whether to scale the bet.",
+    "decides": "Head of Product, Quoting squad"
+  },
+  "board_qa": {
+    "tool": "board-qa-prep 0.3.0",
+    "as_of": "2026-11-26",
+    "bet_title": "Quote drafting",
+    "read": [
+      "portfolio",
+      "spec",
+      "cost",
+      "evals",
+      "landed"
+    ],
+    "not_in_record": [
+      "decisions",
+      "release",
+      "signals",
+      "postmortem"
+    ],
+    "brief": {
+      "path": "briefs/quote-drafting.md",
+      "complete": true,
+      "problems": [],
+      "unchanged": true
+    },
+    "counts": {
+      "questions": {
+        "value": 13,
+        "unit": "questions",
+        "source": "board-qa-prep 0.3.0: count of questions in board_qa",
+        "window": {
+          "from": "2026-11-26",
+          "to": "2026-11-26"
+        },
+        "as_of": "2026-11-26"
+      },
+      "answered": {
+        "value": 8,
+        "unit": "questions",
+        "source": "board-qa-prep 0.3.0: count of questions in board_qa",
+        "window": {
+          "from": "2026-11-26",
+          "to": "2026-11-26"
+        },
+        "as_of": "2026-11-26"
+      },
+      "open": {
+        "value": 5,
+        "unit": "questions",
+        "source": "board-qa-prep 0.3.0: count of questions in board_qa",
+        "window": {
+          "from": "2026-11-26",
+          "to": "2026-11-26"
+        },
+        "as_of": "2026-11-26"
+      }
+    },
+    "first": [
+      "Q13",
+      "Q02",
+      "Q05",
+      "Q08",
+      "Q09"
+    ],
+    "questions": [
+      {
+        "id": "Q01",
+        "topic": "brief",
+        "question": "What did we bet on, and how will we know it worked?",
+        "check": "answered",
+        "answer": "Tradespeople spend evenings writing quotes by hand, so quotes go out late and lose the job. The bar: Quote draft acceptance rate at 40% or higher by 2026-11-15 [F01]. Head of Product, Quoting squad decides the next step.",
+        "from_keys": [
+          "brief"
+        ],
+        "priority": 1
+      },
+      {
+        "id": "Q02",
+        "topic": "landed",
+        "question": "Did it land?",
+        "check": "answered",
+        "answer": "did-it-land says landed. Quote draft acceptance rate reads 43% [F02] to 2026-11-23, against a bar of 40% [F03] by 2026-11-15. At the date it read 41% [F04].",
+        "from_keys": [
+          "landed"
+        ],
+        "asked_last_time": [
+          "Are customers actually using the quote drafts?"
+        ],
+        "priority": 6
+      },
+      {
+        "id": "Q03",
+        "topic": "noise",
+        "question": "Is the move real, or normal noise?",
+        "check": "answered",
+        "answer": "Before launch the metric averaged 22.2% [F05], with a spread of 0.75% [F06]. By the date it sat 25 spreads above that mean [F07]. That rules out noise. It does not say what moved it: no holdout group is in the record.",
+        "from_keys": [
+          "landed"
+        ],
+        "priority": 2
+      },
+      {
+        "id": "Q04",
+        "topic": "outcome",
+        "question": "Did the result the metric should move, move too?",
+        "check": "answered",
+        "answer": "The outcome series (Illustrative CRM export, quotes_won_weekly.csv) went from 31 [F08] on 2026-08-31 to 36 [F09] on 2026-11-23. It moved the same way as the metric; the record does not show why.",
+        "from_keys": [
+          "landed"
+        ],
+        "priority": 2
+      },
+      {
+        "id": "Q05",
+        "topic": "decision",
+        "question": "Do we scale it, and who decides?",
+        "check": "open",
+        "missing": "did-it-land's next step: Keep the metric on the scorecard, and decide whether to scale the bet. No decision is recorded yet: run decision-record.",
+        "owner": "Head of Product, Quoting squad",
+        "due": "before the board meeting",
+        "from_keys": [
+          "landed",
+          "decisions"
+        ],
+        "priority": 5
+      },
+      {
+        "id": "Q06",
+        "topic": "quality",
+        "question": "Is quality holding as more of the work runs without a person?",
+        "check": "answered",
+        "answer": "v1.4's held-out pass rate is 80% [F10] on 30 cases [F12] (95% interval 62.7% to 90.5%). 71.5% of tasks finished with no person [F11]. eval-kit's build check: meets target.",
+        "from_keys": [
+          "evals"
+        ],
+        "priority": 2
+      },
+      {
+        "id": "Q07",
+        "topic": "eval-gain",
+        "question": "Is v1.4 really better than v1.3?",
+        "check": "answered",
+        "answer": "Held-out pass rate went from 70% [F13] on v1.3 to 80% [F10] on v1.4, on the same cases. eval-kit marks the gain as inside the noise for this case count, so it is not yet a proven gain.",
+        "from_keys": [
+          "evals"
+        ],
+        "priority": 1
+      },
+      {
+        "id": "Q08",
+        "topic": "cost",
+        "question": "What does each task cost, against the budget?",
+        "check": "answered",
+        "answer": "$0.0338 per task [F14] from 2026-11-01 to 2026-11-14, against a budget of $0.027 [F15]: over budget by 25% [F16]. Tokens per task: 10,300 [F17] against 9,000 [F18]. Price per token: $0.00000328 [F19] against $0.000003 [F20]. cost-budget-check computes these; eval-kit cites the same cost per task.",
+        "from_keys": [
+          "cost"
+        ],
+        "asked_last_time": [
+          "What does the AI cost us per quote?"
+        ],
+        "priority": 5
+      },
+      {
+        "id": "Q09",
+        "topic": "cost-owner",
+        "question": "Who brings cost back within budget, and by when?",
+        "check": "open",
+        "missing": "The record names the model behind most of it, vendor-a/xl: $0.963 [F21] of $1.89 [F22] over budget. It holds no plan and no owner for the fix.",
+        "owner": "Head of Product, Quoting squad",
+        "due": "before the board meeting",
+        "from_keys": [
+          "cost"
+        ],
+        "priority": 4
+      },
+      {
+        "id": "Q10",
+        "topic": "spec",
+        "question": "Were the spec's holds fixed before it shipped?",
+        "check": "open",
+        "missing": "spec-auditor held the spec on 2 findings [F23] on 2026-08-03: The rollback plan has no trigger threshold. The eval plan has no time it runs. No later audit or release check is in the record: run release-readiness.",
+        "owner": "Head of Product, Quoting squad",
+        "due": "before the board meeting",
+        "from_keys": [
+          "spec",
+          "release"
+        ],
+        "priority": 4
+      },
+      {
+        "id": "Q11",
+        "topic": "signals",
+        "question": "What are customers saying about it?",
+        "check": "open",
+        "missing": "Not in the record yet: run customer-signal-digest.",
+        "owner": "Head of Product, Quoting squad",
+        "due": "before the board meeting",
+        "from_keys": [
+          "signals"
+        ],
+        "priority": 3
+      },
+      {
+        "id": "Q12",
+        "topic": "portfolio",
+        "question": "Why this bet, over the others?",
+        "check": "answered",
+        "answer": "bet-portfolio-review ranked it 4 of 8 bets, 1 needs work first [F24] on 2026-07-27. Its brief scored 14 points of 14 [F25].",
+        "from_keys": [
+          "portfolio"
+        ],
+        "priority": 1
+      },
+      {
+        "id": "Q13",
+        "topic": "past",
+        "question": "Is any customer data sent to the model provider?",
+        "check": "open",
+        "missing": "Nothing in the record answers it, so it needs a person's answer.",
+        "owner": "Head of Product, Quoting squad",
+        "due": "before the board meeting",
+        "from_keys": [],
+        "asked_last_time": [
+          "Is any customer data sent to the model provider?"
+        ],
+        "priority": 7
+      }
+    ],
+    "figures": {
+      "F01": {
+        "value": 40.0,
+        "unit": "%",
+        "source": "landing brief briefs/quote-drafting.md (landing_brief.py)",
+        "window": {
+          "from": null,
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-26",
+        "from": "brief/bar"
+      },
+      "F02": {
+        "value": 43.0,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-09-07",
+          "to": "2026-11-23"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/current"
+      },
+      "F03": {
+        "value": 40.0,
+        "unit": "%",
+        "source": "landing brief: quote-drafting.md",
+        "window": {
+          "from": null,
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/bar"
+      },
+      "F04": {
+        "value": 41.0,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-09-07",
+          "to": "2026-11-09"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/at_date"
+      },
+      "F05": {
+        "value": 22.17,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-08-31"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/baseline_mean"
+      },
+      "F06": {
+        "value": 0.75,
+        "unit": "%",
+        "source": "Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-08-31"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/baseline_sd"
+      },
+      "F07": {
+        "value": 25.02,
+        "unit": "sd",
+        "source": "computed from Illustrative product analytics export, quote_drafts_weekly.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-11-09"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/move_z"
+      },
+      "F08": {
+        "value": 31.0,
+        "unit": "number",
+        "source": "Illustrative CRM export, quotes_won_weekly.csv",
+        "window": {
+          "from": "2026-08-31",
+          "to": "2026-08-31"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/outcome_from"
+      },
+      "F09": {
+        "value": 36.0,
+        "unit": "number",
+        "source": "Illustrative CRM export, quotes_won_weekly.csv",
+        "window": {
+          "from": "2026-08-31",
+          "to": "2026-11-23"
+        },
+        "as_of": "2026-11-26T09:00:00Z",
+        "from": "landed/figures/outcome_to"
+      },
+      "F10": {
+        "value": 80.0,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "interval_95": [
+          62.7,
+          90.5
+        ],
+        "from": "evals/figures/pass_rate@v1.4"
+      },
+      "F11": {
+        "value": 71.5,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "interval_95": [
+          64.9,
+          77.3
+        ],
+        "from": "evals/figures/autonomy_rate@v1.4"
+      },
+      "F12": {
+        "value": 30,
+        "unit": "held-out cases",
+        "source": "eval-kit 0.3.2: evals.rows, v1.4, cases",
+        "window": {
+          "from": "2026-11-15",
+          "to": "2026-11-15"
+        },
+        "as_of": "2026-11-15",
+        "from": "evals/rows/v1.4/cases"
+      },
+      "F13": {
+        "value": 70.0,
+        "unit": "%",
+        "source": "quote-drafting.csv (sha256 ee43a12a2395)",
+        "window": {
+          "from": "2026-10-15",
+          "to": "2026-10-15"
+        },
+        "as_of": "2026-11-15",
+        "interval_95": [
+          52.1,
+          83.3
+        ],
+        "from": "evals/figures/pass_rate@v1.3"
+      },
+      "F14": {
+        "value": 0.033759,
+        "unit": "USD per task",
+        "source": "cost-budget-check 0.3.0: priced cost / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/cost_per_task/actual"
+      },
+      "F15": {
+        "value": 0.027,
+        "unit": "USD per task",
+        "source": "landing brief quote-drafting.md (tokens per task x price per token)",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/cost_per_task/budget"
+      },
+      "F16": {
+        "value": 0.2503333333333333,
+        "unit": "share over budget",
+        "source": "cost-budget-check 0.3.0: actual / budget - 1; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/cost_per_task/against_budget"
+      },
+      "F17": {
+        "value": 10300.0,
+        "unit": "tokens per task",
+        "source": "cost-budget-check 0.3.0: tokens / tasks; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/tokens_per_task/actual"
+      },
+      "F18": {
+        "value": 9000.0,
+        "unit": "tokens per task",
+        "source": "landing brief quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/tokens_per_task/budget"
+      },
+      "F19": {
+        "value": 3.2775728155339805e-06,
+        "unit": "USD per token",
+        "source": "cost-budget-check 0.3.0: priced cost / tokens; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15)",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/price_per_token/actual"
+      },
+      "F20": {
+        "value": 3e-06,
+        "unit": "USD per token",
+        "source": "landing brief quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/lines/price_per_token/budget"
+      },
+      "F21": {
+        "value": 0.9626399999999999,
+        "unit": "USD",
+        "source": "cost-budget-check 0.3.0: model cost - model token share x budgeted cost; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/driver/over_budget"
+      },
+      "F22": {
+        "value": 1.8925200000000002,
+        "unit": "USD",
+        "source": "cost-budget-check 0.3.0: priced cost - tasks x budgeted cost per task; distinct task ids in gateway.jsonl; gateway.jsonl; pricing.json (Illustrative prices for the Acme sample. Not any provider's list price., retrieved 2026-10-15); quote-drafting.md",
+        "window": {
+          "from": "2026-11-01",
+          "to": "2026-11-14"
+        },
+        "as_of": "2026-11-15",
+        "from": "cost/over_budget"
+      },
+      "F23": {
+        "value": 2,
+        "unit": "findings",
+        "source": "spec-auditor 0.3.0, audit of examples/acme/specs/quote-drafting.md",
+        "window": {
+          "from": "2026-08-03",
+          "to": "2026-08-03"
+        },
+        "as_of": "2026-08-03",
+        "from": "spec/counts/hold"
+      },
+      "F24": {
+        "value": 4,
+        "unit": "rank of 8 bets, 1 needs work first",
+        "source": "bets.csv",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-07-27"
+        },
+        "as_of": "2026-07-27",
+        "from": "portfolio/rank"
+      },
+      "F25": {
+        "value": 14,
+        "unit": "points of 14",
+        "source": "briefs/quote-drafting.md",
+        "window": {
+          "from": "2026-07-27",
+          "to": "2026-07-27"
+        },
+        "as_of": "2026-07-27",
+        "from": "portfolio/brief_score"
+      }
+    },
+    "illustrative": true
+  }
+}

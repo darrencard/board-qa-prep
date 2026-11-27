@@ -1,9 +1,9 @@
 """Find the figures in a piece of text and compare them, deterministically.
 
 A figure is a number a reader would take as a claim: 41.2, $41.2M, 91.3%, 23.1K,
-1,049, "9 of 11", "three". Labels are not figures and are removed first: ledger
-references (L08), dates (30 Sep 2026, 2026-09-30, Sep 2026), years (2026), and
-codes glued to letters (Q3, FY26, H1, Sev-2).
+1,049, "9 of 11", "three". Labels are not figures and are removed first: figure
+references ([F01]), versions (v1.4, 0.3.0), dates (30 Sep 2026, 2026-09-30, Sep 2026),
+years (2026), and codes glued to letters (Q3, FY26, H1, Sev-2).
 
 Each figure becomes a Figure(kind, value): kind is "pct" (a percent or points),
 "money" (a currency amount) or "num". Two figures match when their kinds agree
@@ -24,6 +24,9 @@ MONTHS = (
 _LABELS = [
     re.compile(r"\[\[?L\d+\]?\]"),  # [L08] or [[L08]]
     re.compile(r"\bL\d{1,3}\b"),  # bare ledger IDs
+    re.compile(r"\[F\d{1,3}\]|\bF\d{1,3}\b"),  # figure IDs in the board_qa key: [F01]
+    re.compile(r"\bv\d+(?:\.\d+)*\b"),  # versions: v1.4, v0.3.0
+    re.compile(r"\b\d+\.\d+\.\d+\b"),  # bare versions: 0.3.0
     re.compile(r"\b\d{4}-\d{2}-\d{2}\b"),  # ISO dates
     re.compile(rf"\b\d{{1,2}}\s+{MONTHS}(?:\s+\d{{4}})?\b", re.IGNORECASE),  # 30 Sep 2026
     re.compile(rf"\b{MONTHS}\s+\d{{1,2}},?\s+\d{{4}}\b", re.IGNORECASE),  # Sep 30, 2026

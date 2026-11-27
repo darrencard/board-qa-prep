@@ -1,4 +1,4 @@
-# A prep run holds a company's own deck. It never belongs in the repository.
+# A prep run holds a company's own record. It never belongs in the repository.
 prep/
 __pycache__/
 *.pyc

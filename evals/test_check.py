@@ -1,99 +1,132 @@
+"""The check: the model may reword, but never add a figure or a status word the record does not hold."""
+
+import contextlib
 import copy
+import io
+import json
 import unittest
 
-import helpers  # noqa: F401
-from check import check
+from _path import ACME
 
-LEDGER = [
-    {"id": "L01", "claim": "ARR $28.4M", "value": None, "unit": None, "source": "Billing", "window": "30 Sep 2026", "confidence": "Verified"},
-    {"id": "L02", "claim": "Deploys per week up 30% against Q2", "source": "GitHub", "window": "Q3 FY26", "confidence": "Estimated"},
-    {"id": "L03", "claim": "Inference cost by segment", "source": None, "window": None, "confidence": "Unknown"},
-    {"id": "L04", "claim": "Eval pass rate 88.5%", "source": "Eval harness, 354 of 400", "window": "Run of 27 Sep 2026", "confidence": "Verified"},
-]
+# isort: split
+import board_qa
+import check
+from figures import figures
+from test_record import PAST, Work
 
-
-def qa(answer=None, status="answered", gap=None):
-    return {
-        "ledger": copy.deepcopy(LEDGER),
-        "questions": [{"id": "Q01", "slide": "1", "question": "Where is ARR?", "status": status, "answer": answer, "gap": gap}],
-    }
+RECORD = json.loads((ACME / "landing" / "quote-drafting.json").read_text(encoding="utf-8"))
 
 
-def codes(doc):
-    return [p["code"] for p in check(doc)]
+def q(rec: dict, topic: str) -> dict:
+    return next(x for x in rec["board_qa"]["questions"] if x["topic"] == topic)
 
 
-class CheckTest(unittest.TestCase):
-    def test_clean_answer_passes(self):
-        self.assertEqual(codes(qa("ARR closed at $28.4M on 30 Sep 2026 [L01].")), [])
+def codes(rec: dict) -> set[str]:
+    return {e["code"] for e in check.check(rec)}
 
-    def test_figure_from_source_or_window_counts(self):
-        self.assertEqual(codes(qa("88.5% passed, 354 of 400 cases [L04].")), [])
 
-    def test_invented_figure_is_blocked(self):
-        self.assertEqual(codes(qa("ARR closed at $28.4M, up 22% [L01].")), ["figure-not-in-ledger"])
+class Rules(unittest.TestCase):
+    def setUp(self):
+        self.rec = copy.deepcopy(RECORD)
 
-    def test_changed_figure_is_blocked(self):
-        self.assertEqual(codes(qa("ARR closed at $28.5M [L01].")), ["figure-not-in-ledger"])
+    def test_the_committed_sample_passes(self):
+        self.assertEqual(check.check(self.rec), [])
 
-    def test_figure_from_an_uncited_row_is_blocked_with_a_hint(self):
-        problems = check(qa("ARR closed at $28.4M and evals passed 88.5% [L01]."))
-        self.assertEqual([p["code"] for p in problems], ["figure-not-in-ledger"])
-        self.assertIn("L04", problems[0]["message"])
+    def test_a_figure_the_record_does_not_hold_is_blocked(self):
+        q(self.rec, "landed")["answer"] = "did-it-land says landed. Acceptance is 45% [F02]."
+        self.assertIn("figure-not-cited", codes(self.rec))
 
-    def test_answer_needs_a_citation(self):
-        self.assertEqual(codes(qa("ARR is healthy.")), ["cite-missing"])
+    def test_a_rounded_figure_is_blocked(self):
+        q(self.rec, "cost")["answer"] = "About $0.03 per task [F14]."
+        self.assertIn("figure-not-cited", codes(self.rec))
 
-    def test_unknown_row_id(self):
-        self.assertEqual(codes(qa("See [L99].")), ["cite-unknown-row"])
+    def test_a_figure_without_its_citation_is_blocked(self):
+        q(self.rec, "cost")["answer"] = "Cost per task is $0.0338."
+        self.assertIn("figure-not-cited", codes(self.rec))
 
-    def test_unknown_confidence_cannot_answer(self):
-        self.assertEqual(codes(qa("Segment cost is tracked [L03].")), ["cite-unknown-confidence"])
+    def test_citing_a_figure_that_is_not_there(self):
+        q(self.rec, "cost")["answer"] = "Cost per task is $0.0338 [F99]."
+        self.assertIn("cite-unknown", codes(self.rec))
 
-    def test_estimated_must_say_so(self):
-        self.assertEqual(codes(qa("Deploys per week rose 30% [L02].")), ["confidence-label-missing"])
-        self.assertEqual(codes(qa("Estimated: deploys per week rose 30% [L02].")), [])
+    def test_status_word_outside_its_rule(self):
+        q(self.rec, "cost")["answer"] = "Cost has stalled."
+        self.assertIn("status-word", codes(self.rec))
+        self.rec = copy.deepcopy(RECORD)
+        q(self.rec, "landed")["answer"] = "did-it-land says watch."
+        self.assertIn("status-word", codes(self.rec))
+        self.rec = copy.deepcopy(RECORD)
+        q(self.rec, "quality")["answer"] = "Quality is on track."
+        self.assertIn("status-word", codes(self.rec))
 
-    def test_status_vocabulary(self):
-        self.assertEqual(codes(qa("ARR is on track at $28.4M [L01].")), ["status-word"])
+    def test_status_words_print_only_where_the_rule_allows(self):
+        for x in RECORD["board_qa"]["questions"]:
+            for field in ("question", "answer", "missing"):
+                found = check.BET_STATUS.findall(str(x.get(field) or ""))
+                if found:
+                    self.assertEqual((x["topic"], field, {w.lower() for w in found}), ("landed", "answer", {RECORD["landed"]["status"]}))
 
-    def test_causal_claim(self):
-        self.assertEqual(codes(qa("Evals drove ARR to $28.4M [L01].")), ["causal-claim"])
+    def test_causal_claim_is_blocked(self):
+        q(self.rec, "outcome")["answer"] = "Quotes won rose because of the assistant."
+        self.assertIn("causal-claim", codes(self.rec))
 
-    def test_gap_needs_a_named_owner(self):
-        for owner in [None, "", "TBD", "unassigned"]:
-            self.assertEqual(codes(qa(status="gap", gap={"what": "No row", "owner": owner})), ["gap-no-owner"], owner)
-        self.assertEqual(codes(qa(status="gap", gap={"what": "No row", "owner": "the CFO"})), [])
+    def test_open_needs_a_real_owner(self):
+        x = next(x for x in self.rec["board_qa"]["questions"] if x["check"] == "open")
+        x["owner"] = "TBD"
+        self.assertIn("open-no-owner", codes(self.rec))
 
-    def test_gap_cannot_carry_a_figure_answer(self):
-        doc = qa("Probably about $2M.", status="gap", gap={"what": "No row", "owner": "the CFO"})
-        self.assertEqual(codes(doc), ["gap-has-answer"])
+    def test_only_two_check_words(self):
+        q(self.rec, "cost")["check"] = "partly"
+        self.assertIn("check-word", codes(self.rec))
 
-    def test_stated_answer_without_figures_passes(self):
-        doc = qa("The platform squad owns the routing work and reports back next meeting.")
-        doc["questions"][0]["stated_by"] = "the VP Engineering"
-        self.assertEqual(codes(doc), [])
+    def test_a_changed_record_figure_is_caught(self):
+        self.rec["board_qa"]["figures"]["F02"]["value"] = 45.0
+        self.assertIn("figure-changed", codes(self.rec))
 
-    def test_stated_answer_cannot_carry_a_figure(self):
-        doc = qa("Routing should save 20% of inference.")
-        doc["questions"][0]["stated_by"] = "the VP Engineering"
-        self.assertEqual(codes(doc), ["stated-has-figure"])
+    def test_figures_ignore_versions_dates_and_ids(self):
+        self.assertEqual(figures("v1.4 on 2026-11-15, board-qa-prep 0.3.0 [F01] Q03"), [])
 
-    def test_stated_answer_needs_a_name(self):
-        doc = qa("The platform squad owns it.")
-        doc["questions"][0]["stated_by"] = "TBD"
-        self.assertEqual(codes(doc), ["stated-no-name"])
 
-    def test_stated_answer_still_cannot_claim_a_cause(self):
-        doc = qa("Routing work drove the improvement.")
-        doc["questions"][0]["stated_by"] = "the CPTO"
-        self.assertEqual(codes(doc), ["causal-claim"])
+class EditAndClose(unittest.TestCase):
+    def setUp(self):
+        self.w = Work()
+        self.w.prep("--past", str(PAST))
 
-    def test_bad_status_and_duplicates(self):
-        self.assertEqual(codes(qa("x", status="maybe")), ["bad-status"])
-        doc = qa("ARR $28.4M [L01].")
-        doc["questions"].append(dict(doc["questions"][0]))
-        self.assertEqual(codes(doc), ["duplicate-id"])
+    def tearDown(self):
+        self.w.close()
+
+    def run_cmd(self, *args: str) -> int:
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            return board_qa.main([args[0], str(self.w.path), *args[1:]])
+
+    def ids(self, topic: str) -> str:
+        return q(self.w.record(), topic)["id"]
+
+    def test_a_reword_that_keeps_the_figures_is_saved(self):
+        qid = self.ids("cost")
+        text = "Each quote costs $0.0338 [F14], against a budget of $0.027 [F15]: over budget."
+        self.assertEqual(self.run_cmd("edit", qid, "--answer", text), 0)
+        self.assertEqual(q(self.w.record(), "cost")["answer"], text)
+
+    def test_a_reword_that_adds_a_figure_is_not_saved(self):
+        before = self.w.path.read_text(encoding="utf-8")
+        self.assertEqual(self.run_cmd("edit", self.ids("cost"), "--answer", "Each quote costs 3 cents."), 1)
+        self.assertEqual(self.w.path.read_text(encoding="utf-8"), before)
+
+    def test_close_records_a_stated_answer_and_recounts(self):
+        qid = self.ids("past")
+        self.assertEqual(self.run_cmd("close", qid, "--text", "No. Quote text goes to the provider with names removed.", "--by", "the CTO"), 0)
+        rec = self.w.record()
+        x = q(rec, "past")
+        self.assertEqual((x["check"], x["stated_by"]), ("answered", "the CTO"))
+        self.assertNotIn("owner", x)
+        self.assertEqual(rec["board_qa"]["counts"]["open"]["value"], 4)
+        self.assertEqual(check.check(rec), [])
+
+    def test_close_refuses_a_figure_and_a_placeholder_name(self):
+        qid = self.ids("past")
+        self.assertEqual(self.run_cmd("close", qid, "--text", "Only 2% of quotes leave the country.", "--by", "the CTO"), 1)
+        self.assertEqual(self.run_cmd("close", qid, "--text", "No.", "--by", "TBD"), 1)
+        self.assertEqual(q(self.w.record(), "past")["check"], "open")
 
 
 if __name__ == "__main__":
