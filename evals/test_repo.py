@@ -204,7 +204,7 @@ class Visual(unittest.TestCase):
 
     def test_the_share_and_the_team_print_once_in_the_frame_head(self):
         frame = svgkit.frames_in(self.page)[0]
-        head, body = frame.split('<div class="sc-b">', 1)
+        head, body = frame.split('<div class="sc-b"', 1)
         self.assertIn("<span>Likely board questions</span><span>13 of 15 answered</span>", head)
         self.assertIn("</svg>Quoting squad</span>", head)
         self.assertNotIn("Quoting squad", body.split('<span class="sc-c">', 1)[0], "each row prints the role only")
@@ -226,7 +226,39 @@ class Visual(unittest.TestCase):
         css = self.css()
         self.assertIn("@container sc (min-width:800px){.scg .sc-r:has(>.sc-p:empty)>.sc-n{grid-column:1/3}.scg .sc-r:has(>.sc-p:empty)>.sc-p{display:none}}", css)
         self.assertIn(".scg .sc-l{text-transform:uppercase;letter-spacing:.06em}", css)
-        self.assertIn(".scg .sc-d,.scg .sc-d::details-content{grid-column:1/-1;display:grid;grid-template-columns:subgrid}", css)
+        self.assertIn(".scg .sc-d{grid-column:1/-1;display:grid;grid-template-columns:subgrid;", css)
+
+    def test_no_selector_list_mixes_details_content_with_plain_selectors(self):
+        # A browser that does not know ::details-content drops a whole selector list that names it.
+        css = re.sub(r"@font-face\{[^}]*\}", "", re.sub(r"/\*.*?\*/", "", self.css(), flags=re.S))
+        lists = re.findall(r"([^{}@;]+)\{", css)
+        named = [sel for sel in lists if "::details-content" in sel]
+        self.assertTrue(named)
+        for sel in named:
+            for part in sel.split(","):
+                self.assertIn("::details-content", part, sel)
+        # And every rule that names it sits inside @supports selector(::details-content).
+        blocks = []
+        for start in (m.end() for m in re.finditer(re.escape("@supports selector(::details-content){"), css)):
+            depth, at = 1, start
+            while depth:
+                at = min(i for i in (css.find("{", at), css.find("}", at)) if i >= 0)
+                depth += 1 if css[at] == "{" else -1
+                at += 1
+            blocks.append((start, at))
+        for m in re.finditer(re.escape("::details-content{"), css):
+            self.assertTrue(any(a <= m.start() < b for a, b in blocks), "a ::details-content rule outside @supports")
+        self.assertIn("@supports not selector(::details-content){.scg .sc-d .sc-r{grid-template-columns:minmax(0,1fr) max-content;grid-template-areas:'n s' 'l l'", css, "the fallback stacks each folded row")
+
+    def test_opening_the_fold_cannot_move_the_rows_above(self):
+        frame = svgkit.frames_in(self.page)[0]
+        style = re.search(r'<div class="sc-b" style="([^"]+)">', frame).group(1)
+        done = [q for q in self.key["questions"] if q["check"] != "open"]
+        widest = max(len(render_html.source_line(q)) for q in done)
+        self.assertIn(f"--sc-fw:calc({widest}ch + ", style, "the figure column fits the widest folded figure")
+        self.assertIn("--sc-ww:min(180px, max(", style)
+        self.assertIn("grid-template-columns:minmax(120px,.9fr) minmax(96px,1.3fr) var(--sc-fw,max-content) var(--sc-ww,fit-content(180px))", self.css())
+        self.assertEqual(render_html.column_widths(["ab"], ["open"], ["Lead"]), "--sc-fw:calc(2ch + 0.12em + 2px);--sc-ww:min(180px, max(calc(4ch + 0.24em + 2px), calc(4ch + 16px)))")
 
     def test_cited_check_words_are_the_contract_words(self):
         quality = next(q for q in self.key["questions"] if q["topic"] == "quality")

@@ -46,7 +46,10 @@ CITE = re.compile(r"\s*\[(F\d{1,3})\]")
 # Layout for this page only. Everything else comes from the template's stylesheet and svgkit.CSS.
 # In the scorecard, a row with no picture gives its name the picture column too, so names stay on one line; the
 # figure column prints in one case, numerals and capitals, as /update does; and the answered questions fold into a
-# <details> whose rows keep the frame's columns (subgrid through ::details-content).
+# <details> whose rows keep the frame's columns (subgrid through ::details-content, only inside @supports: a browser
+# that does not know the pseudo-element drops any selector list that names it, so those rules stand alone, and the
+# fallback stacks each folded row, name and word on one line, the figure under it). The figure and word columns are
+# fixed to the widest text in the frame, folded rows included (column_widths), so opening the fold moves nothing.
 PAGE_CSS = """
 main.solo{margin-left:0}
 .solo .slide{min-height:0}
@@ -99,9 +102,12 @@ main.solo{margin-left:0}
 .stack td::before{content:attr(data-l);font:400 11px/20px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}}
 .scg .sc-l{text-transform:uppercase;letter-spacing:.06em}
 @container sc (min-width:800px){.scg .sc-r:has(>.sc-p:empty)>.sc-n{grid-column:1/3}.scg .sc-r:has(>.sc-p:empty)>.sc-p{display:none}}
-.scg .sc-d,.scg .sc-d::details-content{grid-column:1/-1;display:grid;grid-template-columns:subgrid}
-.scg .sc-d{margin:0;padding:0;border:0}.scg .sc-d>summary{margin:0;cursor:pointer}.scg .sc-d>summary:hover{color:var(--t1)}
-@container sc (max-width:799.98px){.scg .sc-d,.scg .sc-d::details-content{display:block}}
+.scg .sc-b{font-family:var(--mono);font-size:var(--sc-m);grid-template-columns:minmax(120px,.9fr) minmax(96px,1.3fr) var(--sc-fw,max-content) var(--sc-ww,fit-content(180px))}
+.scg .sc-d{grid-column:1/-1;display:grid;grid-template-columns:subgrid;margin:0;padding:0;border:0}
+.scg .sc-d>summary{margin:0;cursor:pointer}.scg .sc-d>summary:hover{color:var(--t1)}
+@container sc (max-width:799.98px){.scg .sc-d{display:block}}
+@supports selector(::details-content){.scg .sc-d::details-content{grid-column:1/-1;display:grid;grid-template-columns:subgrid}@container sc (max-width:799.98px){.scg .sc-d::details-content{display:block}}}
+@supports not selector(::details-content){.scg .sc-d .sc-r{grid-template-columns:minmax(0,1fr) max-content;grid-template-areas:'n s' 'l l';column-gap:16px;row-gap:6px}.scg .sc-d .sc-r>.sc-n,:is(.scg) .sc-d .sc-r:has(>.sc-p:empty)>.sc-n{grid-area:n}.scg .sc-d .sc-s{grid-area:s;align-self:start}.scg .sc-d .sc-l{grid-area:l;text-align:left;white-space:normal}.scg .sc-d .sc-p{display:none}}
 """
 
 WRITER_LABEL = {
@@ -299,6 +305,19 @@ def role_of(owner: str, team: str) -> str:
     return owner[: -len(", " + team)] if team and owner.endswith(", " + team) else owner
 
 
+MARK_PX = 14  # the person mark (8px) and its margin (6px) beside a role
+
+
+def column_widths(figures: list[str], words: list[str], roles: list[str]) -> str:
+    """The figure and word columns as fixed widths, so a folded row (laid out only when opened) cannot widen them and
+    move the rows above. Every label is Geist Mono 12px, so a character is 1ch, plus .06em of letter spacing on the
+    capitals (a role prints without it, beside its mark). 2px spare; the word column keeps its 180px cap."""
+    fig = max((len(t) for t in figures), default=0)
+    parts = [f"calc({len(w)}ch + {len(w) * 0.06:g}em + 2px)" for w in words] + [f"calc({len(r)}ch + {MARK_PX + 2}px)" for r in roles]
+    word = f"min(180px, max({', '.join(parts)}))" if parts else "fit-content(180px)"
+    return f"--sc-fw:calc({fig}ch + {fig * 0.06:g}em + 2px);--sc-ww:{word}"
+
+
 def rows(k: dict[str, Any]) -> str:
     """A share bar first (answered of all), then one row per question, open first: the question, its due date and
     its owner in brass; then the answered ones by topic, with the steps they read from. Check words are text, never
@@ -329,11 +348,15 @@ def rows(k: dict[str, Any]) -> str:
     legend = f"<span>{n['answered']} of {n['questions']} answered</span>"
     if team:
         legend += f'<span class="sc-k">{sk.person_mark()}{e(team)}</span>'
-    return sk.sc_frame(
+    head = ["Question", "", "Due · read from", "Check"]
+    figures = [head[2], f"{n['answered']} of {n['questions']}", *(str(q["due"]) for q in opens), *(source_line(q) for q in done)]
+    words = [head[3], f"{n['open']} open" if n["open"] else "none open", *(["open"] if opens else []), *(["answered"] if done else [])]
+    widths = column_widths(figures, words, [role_of(q["owner"], team) for q in opens])
+    frame = sk.sc_frame(
         out,
         label=answer_line(k),
         title="Likely board questions",
-        head=["Question", "", "Due · read from", "Check"],
+        head=head,
         legend=legend,
         caption=(
             f"One row per likely question, {n['questions']} in all: open first, each owner's role in brass"
@@ -342,6 +365,7 @@ def rows(k: dict[str, Any]) -> str:
         ),
         illustrative=bool(k.get("illustrative")),
     )
+    return frame.replace('<div class="sc-b">', f'<div class="sc-b" style="{widths}">', 1)
 
 
 # The rows
